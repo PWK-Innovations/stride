@@ -2,33 +2,39 @@
 
 ## Overview
 
-Stride is an AI-powered daily planner. Users add tasks and connect Google Calendar; "Plan my day" runs a scheduling engine that places tasks into today's free slots and shows a timeline. The app is delivered as a PWA (installable, own window/icon) and uses browser notifications for task reminders. MVP is today-only, no calendar cache, manual refresh. See `aiDocs/mvp.md` for scope and timeline.
+Stride is an AI-powered daily planner. Users add tasks and connect Google Calendar; "Plan my day" runs a scheduling engine that places tasks into today's free slots and shows a timeline. The app is delivered as a PWA (installable, own window/icon) and uses browser notifications for task reminders. **Backend and data are built on Supabase.** MVP is today-only, no calendar cache, manual refresh. See `aiDocs/mvp.md` for scope and timeline.
 
 ## High-Level Architecture
 
 - **Frontend**: Next.js app (React, TypeScript, Tailwind); task list, timeline view, "Plan my day" action; delivered as a PWA (installable to desktop/home screen).
-- **API**: Next.js API routes (or standalone Node server); endpoints for tasks, schedule, calendar OAuth callback, and "Plan my day" (trigger engine + persist blocks).
-- **Database**: Persist users (for OAuth identity), tasks, scheduled_blocks; no stored calendar events (fetch on demand).
+- **Backend: Supabase**
+  - **Auth**: Supabase Auth for user identity; link or store Google Calendar OAuth tokens per user (e.g. in user metadata or a `profiles`/`calendar_tokens` table).
+  - **Database**: Supabase (PostgreSQL). Tables: `users`/profiles, `tasks`, `scheduled_blocks`; no stored calendar events (fetch on demand).
+  - **Storage**: Supabase Storage for task attachments (e.g. photos); tasks reference file paths or public URLs.
+  - **API**: Next.js API routes call Supabase (client or service role as needed) for tasks, schedule, and calendar OAuth callback; "Plan my day" triggers the scheduling engine and persists blocks to Supabase.
 - **Google Calendar**: OAuth 2.0, read-only; fetch today's events when user hits "Plan my day."
-- **Scheduling engine**: Pure function or service: inputs = tasks (title, duration, "Do today" flag), today's busy windows, working hours; output = scheduled_blocks + overflow list; greedy placement, "Do today" then list order.
+- **Scheduling engine**: Pure function or service (in Next.js or Supabase Edge Function): inputs = tasks (title, duration, optional photo refs), today's busy windows, working hours; output = scheduled_blocks + overflow list; greedy placement.
 
 ```mermaid
 flowchart LR
   User --> Frontend
-  Frontend --> API
-  API --> Database
-  API --> GoogleCalendar
-  API --> SchedulingEngine
-  SchedulingEngine --> API
+  Frontend --> NextAPI
+  NextAPI --> Supabase
+  Supabase --> Database
+  Supabase --> Storage
+  Supabase --> Auth
+  NextAPI --> GoogleCalendar
+  NextAPI --> SchedulingEngine
+  SchedulingEngine --> NextAPI
 ```
 
 ## Data Flow: Plan my day
 
 1. User clicks "Plan my day."
-2. API fetches today's events from Google Calendar.
-3. Load tasks from DB.
+2. Next.js API (using Supabase) fetches today's events from Google Calendar.
+3. Load tasks from Supabase (and any attachment URLs from Storage).
 4. Run scheduling engine (free windows + working hours).
-5. Save scheduled_blocks; return timeline + overflow to frontend.
+5. Save scheduled_blocks to Supabase; return timeline + overflow to frontend.
 
 ## PWA and Notifications
 
@@ -37,8 +43,8 @@ flowchart LR
 
 ## Key Decisions
 
+- **Supabase** for auth, database (PostgreSQL), and file storage (task photos). Next.js talks to Supabase via client SDK or server-side with service role where needed.
 - Calendar fetched on demand (no cache).
 - Today only for MVP.
 - Single calendar provider (Google).
-- Auth is calendar OAuth only (no full auth system for MVP).
 - PWA for native-app feel (installable, ~1 day). Browser notifications for task reminders; client-only in MVP, no push server.

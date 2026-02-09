@@ -79,6 +79,10 @@ The system we are interested in is a daily planner. This includes how individual
 - **Risk:** Users find the initial setup too difficult or continue to manage schedules manually.  
   **Mitigation:** Automate the "best time" selection process to reduce the need for manual input.
 
+## Technical Foundation
+
+- **Backend / data:** Supabase (Auth, PostgreSQL, Storage for task photos). See `aiDocs/architecture.md` for details.
+
 ## 8. Timeline and Milestones
 
 - **Milestone 1 (P0 — Foundation & UI):** Next.js app layout, routing, auth, calendar view component, task input/management UI, and responsive design. Ship a working website users can open and navigate.

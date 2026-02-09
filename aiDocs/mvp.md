@@ -69,18 +69,17 @@ Goal: the plan in the app stays in sync with what the user actually did, without
 
 - **Frontend:** Next.js (React, TypeScript), responsive so it works on phones. Use a timeline/calendar component for the daily view.
 - **PWA:** Manifest + service worker so “Add to Home Screen” works on iOS/Android and the app feels like a native app.
-- **Tasks:** Support text (title, notes, duration) and photo attachments (upload + store URL or blob); show them in the task list and in the built schedule.
-- **Backend/API:** Next.js API routes (or small backend) for tasks, schedule, and calendar OAuth.
-- **Database:** Store users (for auth/calendar), tasks (with optional photo refs), and scheduled blocks. No need to cache calendar events for MVP (fetch when building the day is fine).
+- **Tasks:** Support text (title, notes, duration) and photo attachments (upload to Supabase Storage; store URLs on tasks); show them in the task list and in the built schedule.
+- **Backend: Supabase.** Auth (user identity), PostgreSQL (users/profiles, tasks, scheduled_blocks), Storage (task photos). Next.js API routes call Supabase for tasks, schedule, and calendar OAuth (store tokens per user in Supabase).
 - **Calendar:** One provider (e.g. Google Calendar) via OAuth; read-only; fetch today’s events when building the day.
-- **Scheduling:** Simple engine: inputs = tasks (+ optional photos as context) + today’s busy windows (+ working hours). Output = scheduled blocks for today + overflow list. Greedy placement is enough for MVP.
+- **Scheduling:** Simple engine: inputs = tasks (+ optional photo refs) + today’s busy windows (+ working hours). Output = scheduled blocks for today + overflow list. Greedy placement is enough for MVP.
 
 ### Architecture (simplified)
 
 ```
 User (phone or browser) → Next.js app (PWA)
-         → API: tasks, schedule, calendar OAuth
-         → DB: users, tasks, scheduled_blocks
+         → Next.js API routes
+         → Supabase: Auth, Database (users, tasks, scheduled_blocks), Storage (photos)
          → Google Calendar (today’s events)
          → Scheduling engine → daily calendar
 ```
