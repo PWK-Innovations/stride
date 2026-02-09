@@ -40,6 +40,8 @@
    - Timeline: calendar events + scheduled task blocks; clear visual distinction.
    - **Use a timeline library** (e.g. `react-calendar-timeline`); budget 1–2 days integrate + 2–3 days polish.
    - Single action: **"Plan my day"** (generates/refreshes schedule).
+   - **PWA**: App installable to desktop/home screen (manifest + service worker); own window and icon. Budget ~1 day (e.g. in Week 4 or 5).
+   - **Browser notifications**: At (or near) scheduled block start, show a browser notification for the task (e.g. "Time to: [Task title]"; optional body with duration). Request `Notification.requestPermission()` in-app; client uses today's scheduled_blocks to decide when to show. No push server.
 5. **Persistence**
    - Tasks and scheduled blocks in DB; schedule regenerated on each "Plan my day".
 
@@ -224,6 +226,7 @@ User → Frontend → Backend API → Database
 - Google Calendar OAuth; **today only**; **fetch on refresh** (no cache).
 - Scheduling engine: greedy, **today only**; simple "Couldn't schedule today" list.
 - Today view (timeline, library-based); **"Plan my day"** button.
+- PWA (installable, own window/icon). Browser notifications for task reminders (client-only, no push server).
 
 ### Out of scope (for MVP)
 
@@ -243,7 +246,7 @@ User → Frontend → Backend API → Database
 - **Week 1**: Data model + task CRUD (add, list, delete, mark done).
 - **Week 2**: Google Calendar OAuth + fetch/display **today's** events (plan for 1.5–2 weeks if OAuth/API quirks appear).
 - **Week 3**: Scheduling engine v1 (place tasks in free slots, today only; overflow = simple list).
-- **Week 4**: Timeline UI (library-based) + wire "Plan my day" to engine.
+- **Week 4**: Timeline UI (library-based) + wire "Plan my day" to engine. PWA installability (~1 day) and notification wiring can be done alongside timeline polish.
 - **Week 5**: Integration bugs + edge case fixes (calendar + scheduling).
 - **Week 6**: Internal dogfooding + critical fixes (no external beta yet).
 - **Week 7**: Beta with 5–10 users + rapid iteration.

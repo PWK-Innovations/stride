@@ -20,6 +20,8 @@ NOT For: Individuals who prefer manual scheduling or those whose daily routines 
 3. Goals and Success Metrics
 Goals:
 
+Deliver as an installable PWA with browser notifications for reminders (app-like window and icon; task reminders at scheduled start time where supported).
+
 Transition from a passive "container" for tasks to an active system that builds a realistic schedule.
 
 
