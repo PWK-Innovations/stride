@@ -3,29 +3,27 @@
 ## Critical Files to Review
 
 - **PRD**: `aiDocs/prd.md` — Product goals, users, P0/P1/P2, success metrics. Start here for what we're building and why.
-- **MVP**: `aiDocs/mvp.md` — Ruthless 7-week scope: minimal task model, today-only calendar, "Plan my day," validation plan. Source of truth for in/out of scope.
-- **Architecture**: `aiDocs/architecture.md` — System design: frontend/API/DB/calendar/scheduling, data flow, and key constraints.
+- **MVP**: `aiDocs/mvp.md` — Focused MVP: Next.js PWA (installable on phones), task input (text + photos), build daily calendar from tasks + Google Calendar. Goals and dynamic updates are secondary. Source of truth for in/out of scope.
+- **Architecture**: `aiDocs/architecture.md` — System design: Next.js, Supabase (Auth, DB, Storage), OpenAI API, Google Calendar; data flow and key constraints.
 - **Coding style**: `aiDocs/coding-style.md` — Code style and conventions for TypeScript, React, Next.js, Tailwind.
 - **Changelog**: `aiDocs/changelog.md` — High-level changes; update when you push.
 
 ## Tech Stack
 
 - **Frontend**: Next.js, React, TypeScript, Tailwind CSS.
-- **Backend / Data: Supabase** — Auth, PostgreSQL database, and Storage (for task photos). Next.js API routes use the Supabase client or service role for tasks, schedule, and auth.
-- **PWA**: Next.js app is installable (manifest + service worker); users can add to desktop/home screen, get own window and icon; ~1 day to add. Background notifications supported where the browser allows.
-- **Notifications**: Browser Notification API for task reminders (e.g. at scheduled block start); request permission in-app; works in Chrome, Firefox, Safari. No push server for MVP.
-- **Timeline**: Use a library (e.g. `react-calendar-timeline`); see MVP for budget.
-- **API**: Next.js API routes calling Supabase; REST for tasks and schedule; calendar OAuth handled via Next.js (tokens stored per user in Supabase).
-- **Database**: Supabase (PostgreSQL); tables: `users`/profiles, `tasks`, `scheduled_blocks`; no calendar cache.
-- **Calendar**: Google Calendar API (read-only, OAuth 2.0); fetch on each "Plan my day" (no caching).
+- **Backend / Data: Supabase** — Auth (user identity), PostgreSQL (profiles, tasks, scheduled_blocks), Storage (task photos). Google Calendar is **attached per user**: OAuth tokens stored in Supabase after user connects.
+- **AI: OpenAI API** — Used for schedule construction and smart placement. Called from Next.js API routes only; API key in env (never in client).
+- **PWA**: Next.js app is installable (manifest + service worker); add to desktop/home screen, own window and icon. Browser notifications for task reminders where supported.
+- **API**: Next.js API routes: Supabase for tasks/schedule/auth; OpenAI for AI scheduling; Google Calendar OAuth and fetch (tokens per user in Supabase).
+- **Calendar**: Google Calendar API (read-only, OAuth 2.0); fetch today's events when building the day (no caching for MVP).
 
 ## Important Notes
 
-- MVP scope is minimal: today only, no deadlines, no task edit, no calendar caching; see mvp.md before adding features.
-- We ship as a PWA for a native-app feel; use browser notifications for reminders.
-- Update **Current Focus** in this file regularly (e.g. each week or when switching work).
-- Never commit secrets or `.testEnvVars`; use env vars for Supabase (URL, anon key, service role) and Google OAuth.
+- MVP scope: today only, one calendar (Google), task input (text + photos), "Build my day" / "Plan my day" builds the schedule. See mvp.md before adding features.
+- We ship as a PWA so users can install on their phones; use browser notifications for reminders.
+- Update **Current Focus** in this file regularly when priorities change.
+- **Secrets**: Never commit API keys. Use env vars for Supabase (URL, anon key, service role), OpenAI API key, and Google OAuth client credentials.
 
 ## Current Focus
 
-- Week 1: Data model and task CRUD (add, list, delete, mark done).
+- Data model and task CRUD (add, list, delete, mark done); then calendar connect and "Build my day" with AI (OpenAI API).

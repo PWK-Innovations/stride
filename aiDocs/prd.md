@@ -81,7 +81,8 @@ The system we are interested in is a daily planner. This includes how individual
 
 ## Technical Foundation
 
-- **Backend / data:** Supabase (Auth, PostgreSQL, Storage for task photos). See `aiDocs/architecture.md` for details.
+- **Backend / data:** Supabase (Auth, PostgreSQL, Storage for task photos). Google Calendar attached per user (tokens in Supabase).
+- **AI:** OpenAI API for schedule construction and smart placement; called from Next.js API routes, key in env only. See `aiDocs/architecture.md` for details.
 
 ## 8. Timeline and Milestones
 

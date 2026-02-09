@@ -39,7 +39,7 @@
 
 ### Persistence
 
-- Tasks and the generated schedule are saved (DB or simple backend). Refreshing “Build my day” regenerates from current tasks and calendar.
+- Tasks and the generated schedule are saved in **Supabase**. Refreshing “Build my day” regenerates from current tasks and calendar.
 
 ---
 
@@ -70,18 +70,19 @@ Goal: the plan in the app stays in sync with what the user actually did, without
 - **Frontend:** Next.js (React, TypeScript), responsive so it works on phones. Use a timeline/calendar component for the daily view.
 - **PWA:** Manifest + service worker so “Add to Home Screen” works on iOS/Android and the app feels like a native app.
 - **Tasks:** Support text (title, notes, duration) and photo attachments (upload to Supabase Storage; store URLs on tasks); show them in the task list and in the built schedule.
-- **Backend: Supabase.** Auth (user identity), PostgreSQL (users/profiles, tasks, scheduled_blocks), Storage (task photos). Next.js API routes call Supabase for tasks, schedule, and calendar OAuth (store tokens per user in Supabase).
+- **Backend: Supabase.** Auth (user identity), PostgreSQL (users/profiles, tasks, scheduled_blocks), Storage (task photos). Google Calendar **attached per user** (OAuth tokens stored in Supabase). Next.js API routes call Supabase for tasks, schedule, and calendar.
+- **AI: OpenAI API.** Used to build the daily schedule (smart placement, priorities). Called from Next.js API routes only; API key in env.
 - **Calendar:** One provider (e.g. Google Calendar) via OAuth; read-only; fetch today’s events when building the day.
-- **Scheduling:** Simple engine: inputs = tasks (+ optional photo refs) + today’s busy windows (+ working hours). Output = scheduled blocks for today + overflow list. Greedy placement is enough for MVP.
+- **Scheduling:** Engine uses OpenAI API for AI-powered placement; inputs = tasks (+ optional photo refs) + today's busy windows (+ working hours). Output = scheduled blocks for today + overflow list.
 
 ### Architecture (simplified)
 
 ```
 User (phone or browser) → Next.js app (PWA)
          → Next.js API routes
-         → Supabase: Auth, Database (users, tasks, scheduled_blocks), Storage (photos)
-         → Google Calendar (today’s events)
-         → Scheduling engine → daily calendar
+         → Supabase: Auth, Database, Storage (photos)
+         → Google Calendar (per user, tokens in Supabase)
+         → OpenAI API (schedule construction) → daily calendar
 ```
 
 ### Deployment

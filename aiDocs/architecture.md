@@ -12,8 +12,9 @@ Stride is an AI-powered daily planner. Users add tasks and connect Google Calend
   - **Database**: Supabase (PostgreSQL). Tables: `users`/profiles, `tasks`, `scheduled_blocks`; no stored calendar events (fetch on demand).
   - **Storage**: Supabase Storage for task attachments (e.g. photos); tasks reference file paths or public URLs.
   - **API**: Next.js API routes call Supabase (client or service role as needed) for tasks, schedule, and calendar OAuth callback; "Plan my day" triggers the scheduling engine and persists blocks to Supabase.
-- **Google Calendar**: OAuth 2.0, read-only; fetch today's events when user hits "Plan my day."
-- **Scheduling engine**: Pure function or service (in Next.js or Supabase Edge Function): inputs = tasks (title, duration, optional photo refs), today's busy windows, working hours; output = scheduled_blocks + overflow list; greedy placement.
+- **Google Calendar**: OAuth 2.0, read-only; fetch today's events when user hits "Plan my day." **Attached per user** (tokens stored in Supabase after user connects).
+- **AI: OpenAI API** — Used for schedule construction and smart placement (e.g. priorities, context from task text/photos). Next.js API routes call OpenAI; keep API key server-side only (env var).
+- **Scheduling engine**: Uses OpenAI API where helpful; inputs = tasks (title, duration, optional photo refs), today's busy windows, working hours; output = scheduled_blocks + overflow list. Can combine rule-based placement with AI for ordering or time suggestions.
 
 ```mermaid
 flowchart LR
@@ -24,6 +25,7 @@ flowchart LR
   Supabase --> Storage
   Supabase --> Auth
   NextAPI --> GoogleCalendar
+  NextAPI --> OpenAI
   NextAPI --> SchedulingEngine
   SchedulingEngine --> NextAPI
 ```
@@ -33,7 +35,7 @@ flowchart LR
 1. User clicks "Plan my day."
 2. Next.js API (using Supabase) fetches today's events from Google Calendar.
 3. Load tasks from Supabase (and any attachment URLs from Storage).
-4. Run scheduling engine (free windows + working hours).
+4. Run scheduling engine (optionally using OpenAI API for placement); inputs = free windows + working hours + tasks.
 5. Save scheduled_blocks to Supabase; return timeline + overflow to frontend.
 
 ## PWA and Notifications
@@ -43,7 +45,8 @@ flowchart LR
 
 ## Key Decisions
 
-- **Supabase** for auth, database (PostgreSQL), and file storage (task photos). Next.js talks to Supabase via client SDK or server-side with service role where needed.
+- **Supabase** for auth, database (PostgreSQL), and file storage (task photos). Next.js talks to Supabase via client SDK or server-side with service role where needed. Users sign in with Supabase Auth; **Google Calendar is attached to that user** (OAuth tokens stored per user in Supabase).
+- **OpenAI API** for AI-powered scheduling (schedule construction, placement, priorities). API key in env only; all calls from Next.js API routes.
 - Calendar fetched on demand (no cache).
 - Today only for MVP.
 - Single calendar provider (Google).
