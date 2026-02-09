@@ -2,267 +2,133 @@
 
 ## Context
 
-- **Timeline**: 7 weeks (1.75 months)
-- **Team**: 3 members
-- **Note**: AI-assisted development (e.g. Cursor) may speed implementation; calendar OAuth and scheduling edge cases still often take 1.5–2x longer than planned. Scope below is kept minimal to hit 7 weeks.
-- **PRD Reference**: [aiDocs/prd.md](../../aiDocs/prd.md)
+- **PRD Reference:** `prd.md` (same folder)
+- **Core idea:** A working Next.js app you can install on your phone. You add your tasks (text, photos, etc.), and the app builds your daily calendar for you.
 
 ---
 
-## 1. The ONE Core Problem to Solve
+## 1. The ONE Core Thing
 
-**Problem**: People spend ~10% of work hours manually organizing their time. They struggle with fragmented to-dos and can't estimate durations, leaving them feeling overwhelmed and unable to focus.
+**What we're building:** A Next.js app that is downloadable on phones (PWA). Users input what they need to do—tasks, photos, text, etc.—and the app builds out their daily calendar.
 
-**Core solution**: Automate daily schedule construction by reading the user's calendar and placing tasks into available time slots—moving from a passive "container" to an active scheduler that builds a realistic plan.
-
-**Why this matters**: The value is in automation. If users still plan manually, we've failed. The MVP must prove that automated scheduling reduces planning time and creates realistic, actionable schedules.
+**Why it matters:** One place to dump your day; the app figures out when things go. No manual slotting.
 
 ---
 
-## 2. Minimum Feature Set (MVP)
+## 2. Must-Have (MVP Core)
 
-### Must-have (P0 for MVP)
+### Working Next.js app + installable on phones
 
-1. **Task management (minimal)**
-   - **Add/list/delete** tasks: **title + duration only**. No edit (delete + re-add for beta).
-   - Optional: binary "Do today" vs "Backlog" (no high/medium/low).
-   - **Mark done** (required for validation).
-2. **Calendar integration (single provider, read-only)**
-   - Connect Google Calendar via OAuth.
-   - Fetch events for **today only** (no "tomorrow").
-   - Display busy blocks on timeline.
-   - **Fetch on each "Plan my day" / refresh** — no caching (avoids invalidation; ~2s fetch acceptable for beta).
-3. **Scheduling engine (v1)**
-   - Input: tasks (title + duration) + today's calendar busy windows + **default working hours** (e.g. 9–5; optional single setting if time permits).
-   - Output: planned blocks in free slots; **order**: by "Do today" then list order (no deadline logic).
-   - **Overflow**: do not schedule tasks that don't fit; show a simple **"Couldn't schedule today: [Task A, Task B]"** list (no rich overflow UX).
-4. **Today view**
-   - Timeline: calendar events + scheduled task blocks; clear visual distinction.
-   - **Use a timeline library** (e.g. `react-calendar-timeline`); budget 1–2 days integrate + 2–3 days polish.
-   - Single action: **"Plan my day"** (generates/refreshes schedule).
-   - **PWA**: App installable to desktop/home screen (manifest + service worker); own window and icon. Budget ~1 day (e.g. in Week 4 or 5).
-   - **Browser notifications**: At (or near) scheduled block start, show a browser notification for the task (e.g. "Time to: [Task title]"; optional body with duration). Request `Notification.requestPermission()` in-app; client uses today's scheduled_blocks to decide when to show. No push server.
-5. **Persistence**
-   - Tasks and scheduled blocks in DB; schedule regenerated on each "Plan my day".
+- **Next.js** app: routing, layout, and UI that work on web and mobile.
+- **PWA:** Installable on phones (and desktop). Add to home screen, own icon and window. Web app manifest + minimal service worker.
 
-### Cut for MVP (defer to post-MVP)
+### Task input
 
-- **Deadlines** (add post-MVP).
-- **Tomorrow view / fetch**.
-- **Three-level priority** (use binary or order only).
-- **Task edit** (delete + re-add only).
-- **Calendar event caching**.
-- **Fancy overflow handling**.
-- **Dynamic re-scheduling**: Manual refresh is acceptable for MVP
-- **Feedback loops/learning**: No duration learning; use user-provided estimates
-- **Goals (P1)**: Not needed to validate core automation value
-- **Break preservation (P1)**: Users can manually add "break" tasks if needed
-- **Task prompts (P1)**: Can validate without "what to do now" prompts
-- **Priority adjustment (P2)**: Basic priority is sufficient
-- **Multi-calendar providers**: Google Calendar only
-- **Real-time sync**: Polling/manual refresh is fine
-- **Locked blocks**: Not needed for MVP
-- **All-day events**: Can handle but not prioritize edge cases
-- **Recurring events**: Basic expansion only
+- Users can add **tasks** in whatever form we support for MVP:
+  - **Text:** title, optional notes, duration (or default).
+  - **Photos:** attach images to tasks (e.g. photo of a whiteboard, receipt, handout). Stored and shown with the task; used when building the day (e.g. “tasks with photos” or “today’s items”).
+- **Add, list, delete** tasks. Optional: mark done (needed for dynamic updates later).
+- No need for full task edit in MVP (delete + re-add is fine).
+
+### Build the daily calendar
+
+- **Single main action:** e.g. “Build my day” or “Plan my day.”
+- App takes **today’s tasks** (and any calendar data we use) and **builds the daily schedule**—places tasks into time slots and shows a clear daily calendar/timeline.
+- **Calendar integration (MVP):** Connect one calendar (e.g. Google) so we know busy vs free. Fetch today’s events when building the day. Display busy blocks and scheduled tasks on one timeline.
+- **Output:** A daily view with tasks placed in time (and overflow or “couldn’t fit” if needed).
+
+### Persistence
+
+- Tasks and the generated schedule are saved (DB or simple backend). Refreshing “Build my day” regenerates from current tasks and calendar.
 
 ---
 
-## 3. What Feels Important But Isn't (for MVP)
+## 3. Secondary Features (After Core Works)
 
-### Deadlines (feels important, but isn't for MVP)
+These are important but not required for “we have a working app that builds my day.”
 
-- **Why it feels important**: "Realistic" plans often imply due dates.
-- **Why it's not MVP**: Deadlines add edge cases (e.g. deadline in 2h, task 3h). Use order/priority only; add deadlines post-MVP.
+### Goals
 
-### Tomorrow / multi-day (feels important, but isn't for MVP)
+- Let users **add goals** (e.g. professional, academic, social).
+- When building the day, take goals into account so the daily calendar helps move toward them (e.g. slot goal-related tasks, or show goal progress).
 
-- **Why it feels important**: Users think about the week.
-- **Why it's not MVP**: One day (today) is enough to validate automation; simplifies logic and calendar handling.
+### Dynamic calendar from user input
 
-### Calendar caching (feels important, but isn't for MVP)
+- When the **user says they finished a task** (or marks it done), the **calendar updates**:
+  - Remove or complete that block.
+  - Re-place remaining tasks into new slots so the rest of the day stays accurate.
+- Optional: user says “I’m running late” or “skip this” and we re-run placement for the rest of the day.
 
-- **Why it feels important**: Faster UX, fewer API calls.
-- **Why it's not MVP**: Fetch-on-refresh is simpler and avoids staleness/invalidation; beta can tolerate a short fetch.
-
-### Dynamic re-scheduling (feels critical, but isn't for MVP)
-
-- **Why it feels important**: PRD calls it P0; users want "automatic adjustment"
-- **Why it's not MVP**: Manual refresh proves the core value (automated scheduling). Real-time re-scheduling adds significant complexity (change detection, debouncing, conflict resolution) and can be validated later.
-- **MVP alternative**: "Refresh Schedule" button that re-runs the engine
-
-### Duration learning/feedback loops (feels important, but isn't for MVP)
-
-- **Why it feels important**: PRD mentions "challenging to estimate durations" and "feedback loops"
-- **Why it's not MVP**: Users can provide estimates manually. Learning requires data collection over time and adds ML/complexity. MVP can validate if automated scheduling works with manual estimates.
-- **MVP alternative**: User-provided duration estimates; no learning
-
-### Goals (feels important, but isn't for MVP)
-
-- **Why it feels important**: PRD mentions "goal-oriented individuals" and goal incorporation
-- **Why it's not MVP**: Core value is automation, not goal tracking. Goals add data model complexity and scheduling logic changes. Can validate automation without goals.
-- **MVP alternative**: Users can add goal-related tasks manually
-
-### Break preservation (feels important, but isn't for MVP)
-
-- **Why it feels important**: PRD says "schedule preserves time for breaks" and "realistic and achievable"
-- **Why it's not MVP**: Users can add break tasks manually. Automatic break insertion adds scheduling complexity. MVP can validate if the schedule is realistic without auto-breaks.
-- **MVP alternative**: Users manually add "Break" tasks
-
-### Task prompts / "What to do now" (feels important, but isn't for MVP)
-
-- **Why it feels important**: PRD mentions "reduce decision fatigue" and "guidance on what to work on next"
-- **Why it's not MVP**: The schedule itself provides guidance. Prompts add UI complexity and can be validated post-MVP.
-- **MVP alternative**: Users look at the timeline to see what's next
+Goal: the plan in the app stays in sync with what the user actually did, without them manually moving everything.
 
 ---
 
-## 4. Simplest Technical Approach
+## 4. Technical Approach
 
-### Stack (recommended)
+### Stack
 
-- **Frontend**: React/Next.js (or Vue/SvelteKit)
-  - Timeline via library (e.g. `react-calendar-timeline`); 1–2 days integrate + 2–3 days polish
-  - Task list/form components
-- **Backend**: Node.js/Express (or Python/FastAPI, Go, etc.)
-  - REST API for tasks and schedule
-  - OAuth flow for Google Calendar
-- **Database**: PostgreSQL (or SQLite for ultra-simple MVP)
-  - Tables: `users`, `tasks`, `scheduled_blocks`; fetch calendar on demand (no cache table)
-- **Calendar**: Google Calendar API (single provider)
-  - OAuth 2.0
-  - Read-only scope: `https://www.googleapis.com/auth/calendar.readonly`
-  - Fetch events for **today** on each "Plan my day"
-- **Scheduling algorithm**: Simple greedy placement
-  - Sort by "Do today" then list order (no deadline-first)
-  - For each task, find earliest free slot that fits
-  - If no slot fits, add to simple overflow list (task titles only)
+- **Frontend:** Next.js (React, TypeScript), responsive so it works on phones. Use a timeline/calendar component for the daily view.
+- **PWA:** Manifest + service worker so “Add to Home Screen” works on iOS/Android and the app feels like a native app.
+- **Tasks:** Support text (title, notes, duration) and photo attachments (upload + store URL or blob); show them in the task list and in the built schedule.
+- **Backend/API:** Next.js API routes (or small backend) for tasks, schedule, and calendar OAuth.
+- **Database:** Store users (for auth/calendar), tasks (with optional photo refs), and scheduled blocks. No need to cache calendar events for MVP (fetch when building the day is fine).
+- **Calendar:** One provider (e.g. Google Calendar) via OAuth; read-only; fetch today’s events when building the day.
+- **Scheduling:** Simple engine: inputs = tasks (+ optional photos as context) + today’s busy windows (+ working hours). Output = scheduled blocks for today + overflow list. Greedy placement is enough for MVP.
 
 ### Architecture (simplified)
 
 ```
-User → Frontend → Backend API → Database
-                ↓
-         Google Calendar API (OAuth)
-                ↓
-         Scheduling Engine (simple greedy)
-                ↓
-         Store scheduled blocks → Return to Frontend
+User (phone or browser) → Next.js app (PWA)
+         → API: tasks, schedule, calendar OAuth
+         → DB: users, tasks, scheduled_blocks
+         → Google Calendar (today’s events)
+         → Scheduling engine → daily calendar
 ```
 
-### Deployment (MVP)
+### Deployment
 
-- **Frontend**: Vercel/Netlify (or similar)
-- **Backend**: Railway/Render/Fly.io (or similar)
-- **Database**: Managed PostgreSQL (or SQLite file for ultra-simple)
-
-### Simplifications
-
-- **No deadlines**
-- **No calendar caching** (fetch on refresh)
-- **No task edit** (delete + re-add)
-- **Today only** (no tomorrow / multi-day)
-- **No real-time**: Manual refresh only
-- **No webhooks**: Poll calendar on refresh
-- **No complex scheduling**: Greedy algorithm, no optimization
-- **No learning**: User-provided durations only
-- **Single user**: No multi-user features (auth for calendar only)
+- Host the Next.js app so it’s HTTPS (required for PWA). e.g. Vercel, Netlify. Ensure manifest and service worker are served correctly so “Add to Home Screen” works on phones.
 
 ---
 
-## 5. How to Validate with Users
+## 5. What We’re Not Doing in MVP
 
-### Success metrics (from PRD, adapted for MVP)
-
-1. **Automation adoption**
-   - Measure: Time spent planning (self-reported or via usage logs)
-   - Target: Users spend <5% of work hours planning (down from 10%)
-   - Validation: Survey before/after, or track "refresh schedule" usage frequency
-2. **Retention**
-   - Measure: Daily active users (DAU) or "users who refresh schedule daily"
-   - Target: 60%+ of users return daily for first week
-   - Validation: Analytics on schedule refresh events
-3. **Reliability**
-   - Measure: Schedule accuracy (tasks fit, no overlaps, realistic)
-   - Target: 80%+ of scheduled tasks fit without conflicts
-   - Validation: Manual review of schedules, user feedback
-
-### Validation approach
-
-- **Week 1–4**: Build (see revised timeline below); internal smoke test as each slice lands.
-- **Week 5–6**: Internal dogfooding (team uses daily) + critical fixes (no external beta yet).
-- **Week 7**: Beta with **5–10 users** + rapid iteration. Post-MVP or if time: broader open beta (20–30 users).
-
-### Key validation questions
-
-1. **Does automated scheduling reduce planning time?**
-   - Ask users: "How long did you spend planning today?" (before/after)
-   - Track: time from task creation to schedule generation
-2. **Is the schedule realistic and helpful?**
-   - Ask: "Did you follow the schedule?" "Was it realistic?"
-   - Track: completion rate of scheduled tasks
-3. **Would users use this daily?**
-   - Track: daily active usage
-   - Ask: "Would you use this instead of [current tool]?"
-4. **What breaks?**
-   - Track: errors, edge cases (all-day events, time zones, overloaded days)
-   - Ask: "What didn't work?"
-
-### MVP validation checklist
-
-- [ ] Users can connect Google Calendar in <2 minutes
-- [ ] Users can add tasks (no edit) and generate a schedule in <5 minutes
-- [ ] Schedule shows tasks in free time slots (no overlaps with calendar)
-- [ ] Schedule is realistic (tasks fit, reasonable ordering)
-- [ ] Users refresh schedule at least once per day (retention)
-- [ ] Users report reduced planning time (qualitative)
+- Multiple calendar providers (one is enough).
+- Full task edit (delete + re-add).
+- Tomorrow or multi-day view (today only).
+- Calendar event caching (fetch when building the day).
+- Complex scheduling (no optimization, no learning).
+- Goals and dynamic “task finished” updates are **secondary**—we add them once the core flow works.
 
 ---
 
-## MVP Scope Summary
+## 6. Validation
 
-### In scope
+### Success = we can use it every day
 
-- Tasks: **add, list, delete, mark done**; **title + duration**; optional binary "Do today" vs "Backlog".
-- Google Calendar OAuth; **today only**; **fetch on refresh** (no cache).
-- Scheduling engine: greedy, **today only**; simple "Couldn't schedule today" list.
-- Today view (timeline, library-based); **"Plan my day"** button.
-- PWA (installable, own window/icon). Browser notifications for task reminders (client-only, no push server).
+- **Working app:** Next.js app loads on web and installs on phone; no crashes.
+- **Task input:** We can add tasks (text and photos) and see them in a list.
+- **Build my day:** One action builds a daily calendar; we see tasks in time slots and calendar busy blocks.
+- **Usable on phone:** Layout and “Build my day” work on a phone; we’d actually use it.
 
-### Out of scope (for MVP)
+### Checklist
 
-- Deadlines, tomorrow view, task edit, calendar caching, three-level priority, fancy overflow UX.
-- Dynamic re-scheduling (manual refresh only)
-- Duration learning/feedback loops
-- Goals
-- Break preservation
-- Task prompts
-- Multi-calendar providers
-- Real-time sync/webhooks
-- Locked blocks
-- Complex scheduling optimization
-
-### Timeline estimate (7 weeks, 3 people)
-
-- **Week 1**: Data model + task CRUD (add, list, delete, mark done).
-- **Week 2**: Google Calendar OAuth + fetch/display **today's** events (plan for 1.5–2 weeks if OAuth/API quirks appear).
-- **Week 3**: Scheduling engine v1 (place tasks in free slots, today only; overflow = simple list).
-- **Week 4**: Timeline UI (library-based) + wire "Plan my day" to engine. PWA installability (~1 day) and notification wiring can be done alongside timeline polish.
-- **Week 5**: Integration bugs + edge case fixes (calendar + scheduling).
-- **Week 6**: Internal dogfooding + critical fixes (no external beta yet).
-- **Week 7**: Beta with 5–10 users + rapid iteration.
-
-**Risks and buffers**: Calendar OAuth and scheduling edge cases often take longer than estimated; scope assumes some AI-assisted velocity but keep buffer for sickness or blockers.
+- [ ] Next.js app runs and is responsive on mobile.
+- [ ] PWA installable on at least one phone (e.g. iPhone or Android).
+- [ ] Users can add tasks (text; photos if in scope for first release).
+- [ ] “Build my day” (or equivalent) generates a daily schedule from tasks (+ calendar).
+- [ ] Daily view shows the built schedule clearly.
+- [ ] (Secondary) User can mark a task done and see the calendar update.
 
 ---
 
-## Next Steps (Post-MVP)
+## 7. Summary
 
-If MVP validates core value, prioritize:
+| Layer | MVP | Secondary |
+|-------|-----|-----------|
+| **App** | Working Next.js app, installable on phones (PWA) | — |
+| **Input** | Tasks (text, photos, etc.); add / list / delete | — |
+| **Output** | App builds daily calendar from tasks + calendar | — |
+| **Extra** | — | Goals; dynamic calendar when user says “finished” (or marks done) |
 
-1. Deadlines, tomorrow view, task edit, calendar caching (optional), richer overflow UX
-2. Dynamic re-scheduling (automatic refresh on calendar changes)
-3. Duration learning (feedback loops)
-4. Break preservation
-5. Task prompts ("what to do now")
-6. Goals
-7. Multi-calendar providers
+**In one line:** We have a Next.js app you can download on your phone where you input tasks (and photos/text), and it builds your daily calendar; secondary features are goals and the calendar updating when you finish a task.

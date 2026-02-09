@@ -1,6 +1,6 @@
 # AI-Powered Daily Planner — Concise Roadmap (2026-02-09)
 
-Concise, execution-ready roadmap derived from [`ai/prd.md`](/Users/alexfankhauser/Desktop/stride/ai/prd.md) and the detailed roadmap at [`ai/roadmaps/2025-02-09-ai-daily-planner-roadmap.md`](/Users/alexfankhauser/Desktop/stride/ai/roadmaps/2025-02-09-ai-daily-planner-roadmap.md).
+Concise, execution-ready roadmap derived from `aiDocs/prd.md` and the detailed roadmap at `ai/roadmaps/2026-02-09-ai-daily-planner-roadmap.md`.
 
 ## Definitions (short)
 

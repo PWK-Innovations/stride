@@ -1,6 +1,6 @@
-# AI-Powered Daily Planner — Implementation Roadmap (2025-02-09)
+# AI-Powered Daily Planner — Implementation Roadmap (2026-02-09)
 
-This roadmap translates the product requirements in [`ai/prd.md`] into an actionable engineering plan. The goal is to build an **active daily planning system** that constructs a realistic schedule, reduces decision fatigue, and dynamically adapts when the day changes.
+This roadmap translates the product requirements in `aiDocs/prd.md` into an actionable engineering plan. The goal is to build an **active daily planning system** that constructs a realistic schedule, reduces decision fatigue, and dynamically adapts when the day changes.
 
 ## Scope and guiding principles
 
