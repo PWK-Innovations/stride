@@ -20,30 +20,24 @@ Goals:
 
 Deliver as an installable PWA with browser notifications for reminders (app-like window and icon; task reminders at scheduled start time where supported).
 
-Transition from a passive "container" for tasks to an active system that builds a realistic schedule.
+Use AI to build and maintain a realistic daily schedule: AI constructs the schedule from priorities, deadlines, calendar availability, and (where applicable) goals; the system is active, not a passive container.
 
+Use AI to reduce decision fatigue: AI provides clear guidance on what to work on next (and optionally why), so users don't have to constantly decide.
 
-Reduce decision fatigue by providing clear guidance on what to work on next.
-
-
-
-
-Dynamically adjust schedules in real-time when plans change.
+Use AI to dynamically adjust schedules when plans change: When meetings shift, tasks overrun, or new items appear, AI re-schedules and updates the plan in real time so the system embodies the ongoing feedback loops from the problem statement.
 
 
 
 
 Success Metrics:
 
+Automation Adoption: Significant reduction in manual planning time vs. the 10% baseline; users rely on AI-generated schedules and AI-driven updates rather than manual slotting.
 
-Automation Adoption: Significant reduction in manual planning time compared to the current 10% baseline.
-
-
-
-Retention: Users return regularly to plan their days rather than abandoning the tool.
-
+Retention: Users return regularly to plan their days rather than abandoning the tool, with the implication that they trust and use the AI-built schedule and updates.
 
 Reliability: Technical accuracy in calendar syncing and task scheduling duration.
+
+AI Effectiveness: Schedules and re-schedules produced by AI are perceived as realistic and actionable (e.g., via survey or usage signals: few manual overrides, tasks placed in feasible slots, re-schedules that reflect actual changes). This directly ties to "realistic schedule" and "feedback loops" in the problem statement.
 
 4. Key Features (P0, P1, P2)
 P0: Core Automation
