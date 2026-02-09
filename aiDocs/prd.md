@@ -3,14 +3,12 @@ Product Requirements Document: AI-Powered Daily Planner
 The current manual process of managing a schedule is a significant burden, with people spending up to 10% of their work hours just organizing their time. Users struggle with fragmented to-dos across various apps or in their heads, leading to high stress and difficulty focusing. Furthermore, it is challenging to accurately estimate task durations, often leaving users feeling like they lack enough time to achieve their goals.
 
 
-
-
 2. Target Users
 
 Primary Users: Busy college students balancing school and part-time jobs, and professional workers with high-density meeting schedules.
 
 
-Secondary Users: Individuals looking to integrate personal, academic, or social goals into their daily lives more effectively.
+Secondary Users: Softare engineers for startup companies trying to manage their daily tasks
 
 
 
