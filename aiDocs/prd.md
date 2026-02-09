@@ -1,6 +1,6 @@
 Product Requirements Document: AI-Powered Daily Planner
 1. Problem Statement
-The current manual process of managing a schedule is a significant burden, with people spending up to 10% of their work hours just organizing their time. Users struggle with fragmented to-dos across various apps or in their heads, leading to high stress and difficulty focusing. Furthermore, it is challenging to accurately estimate task durations, often leaving users feeling like they lack enough time to achieve their goals.
+The system we are interested in is a daily planner. This includes how individuals organize their daily responsibilities by coordinating tasks, deadlines, meetings, and personal goals across multiple tools such as calendars, to do lists, and reminders. As part of this process, users constantly evaluate priorities, estimate time requirements, and make tradeoffs between work, school, and personal activities. They also engage in ongoing feedback loops by adjusting schedules when plans change, responsibilities take longer than expected, or new tasks arise. In summary, our daily planning system represents how people plan their day, manage competing responsibilities, and change their schedules to stay productive and organized.
 
 
 2. Target Users
