@@ -2,6 +2,8 @@
 
 Single source of truth for code style. Run format/lint before commit.
 
+**Template reference:** Use the **oatmeal-olive-instrument** template in `reference/oatmeal-olive-instrument/`. Follow its layout, components, and patterns for all app UI. Design system: olive color palette (e.g. `olive-50`–`olive-950`), **Instrument Serif** for display, **Inter** for sans; Tailwind theme and structure as in that folder. This file covers general conventions (naming, formatting, TypeScript).
+
 ## General
 
 - Prefer clarity over cleverness; small, focused functions and components.
@@ -35,6 +37,7 @@ Single source of truth for code style. Run format/lint before commit.
 
 ## Tailwind
 
+- Use the oatmeal-olive-instrument theme: olive palette (`olive-*`), `font-display` (Instrument Serif), `font-sans` (Inter). Mirror `reference/oatmeal-olive-instrument/tailwind.css` in the app.
 - Use utility classes; avoid inline styles for layout/spacing.
 - Order classes in a consistent way (e.g. layout → spacing → typography → colors → states); use a plugin or convention.
 - Prefer `className` composition over long single strings; extract repeated patterns into components or shared class strings.

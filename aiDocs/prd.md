@@ -40,10 +40,10 @@ The system we are interested in is a daily planner. This includes how individual
 
 **P1: Core Automation & AI**
 
-- Calendar integration (Google Calendar, Outlook, Apple Calendar)
+- Calendar integration (Google Calendar for MVP)
 - AI-powered schedule construction algorithm
 - Automated time slot allocation based on priorities and deadlines
-- Dynamic re-scheduling when plans change
+- Dynamic re-scheduling when plans change (with user approval to avoid "random reshuffling" stress)
 - Goal incorporation into scheduling logic
 
 **P2: Enhanced User Experience**
@@ -62,13 +62,28 @@ The system we are interested in is a daily planner. This includes how individual
 - As a busy worker, I want to be prompted on which task to start next so I can move smoothly between tasks without decision fatigue.
 - As an overwhelmed user, I want my schedule to include breaks automatically so the plan remains realistic and achievable.
 
-## 6. Out of Scope
+## 6. Competitive Landscape
+
+**Primary Competitors:**
+
+- **Motion** ($19-49/mo): Aggressive AI scheduler with project management. Strengths: comprehensive automation. Weaknesses: high price, glitchy mobile app, unpredictable reshuffling creates stress.
+- **Reclaim.ai** ($10-22/mo): Adaptive habit defense within Google Calendar. Strengths: protects focus time, affordable. Weaknesses: basic task management, no native mobile app (mobile web only).
+- **Akiflow** ($19/mo): Fast, keyboard-driven task aggregator. Strengths: integration hub (Jira, Slack, Gmail). Weaknesses: expensive, no mobile app.
+
+**Stride's Differentiators:**
+
+- **Photo-to-task input**: Scan whiteboards, syllabi, handwritten notes → instant tasks (competitors don't have this).
+- **PWA-first**: Installable on phones with app-like feel; faster updates than native apps; no app store friction.
+- **Price positioning**: $12-15/mo target (between Reclaim and Motion); more features than Reclaim, more affordable than Motion.
+- **Active AI scheduling**: Automated daily schedule construction (not just habit defense or suggestions).
+
+## 7. Out of Scope
 
 - Manual-only planning tools that rely heavily on users to prioritize work manually.
 - Basic "container" apps (like simple Notes apps) that act only as storage for information.
 - Physical/analog planning coordination.
 
-## 7. Risks and Mitigations
+## 8. Risks and Mitigations
 
 - **Risk:** The system creates unrealistic daily plans or overloads the user.  
   **Mitigation:** Incorporate ongoing feedback loops and adjust schedules when tasks take longer than expected.
@@ -84,7 +99,19 @@ The system we are interested in is a daily planner. This includes how individual
 - **Backend / data:** Supabase (Auth, PostgreSQL, Storage for task photos). Google Calendar attached per user (tokens in Supabase).
 - **AI:** OpenAI API for schedule construction and smart placement; called from Next.js API routes, key in env only. See `aiDocs/architecture.md` for details.
 
-## 8. Timeline and Milestones
+## 9. Pricing and Go-to-Market (High-Level)
+
+**Pricing Strategy:**
+- **Free tier:** Limited AI scheduling (e.g., 10 schedules/month) for acquisition.
+- **Professional:** $12-15/mo (unlimited AI scheduling, photo-to-task, full features). Target: professionals and engineers.
+- **Student discount:** 50% off (standard in productivity tools; critical for student adoption).
+
+**Go-to-Market:**
+- **Launch:** Product Hunt (premier platform for AI tools).
+- **Communities:** Reddit (r/productivity, r/ADHD, r/college, r/cscareerquestions), referral loops ("invite a peer" for extended trial).
+- **Positioning:** "Cognitive Orthotic" for students (OCR for syllabi/notes); "Deep Work Defense" for engineers (focus time protection); "Digital Executive Assistant" for professionals (time savings).
+
+## 10. Timeline and Milestones
 
 - **Milestone 1 (P0 — Foundation & UI):** Next.js app layout, routing, auth, calendar view component, task input/management UI, and responsive design. Ship a working website users can open and navigate.
 - **Milestone 2 (P1 — Core Automation & AI):** Calendar integration (Google Calendar and/or others), AI-powered schedule construction, automated time slot allocation, dynamic re-scheduling, and goal incorporation. Users get an AI-built daily schedule tied to their real calendar.

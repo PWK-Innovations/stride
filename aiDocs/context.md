@@ -6,6 +6,7 @@
 - **MVP**: `aiDocs/mvp.md` — Focused MVP: Next.js PWA (installable on phones), task input (text + photos), build daily calendar from tasks + Google Calendar. Goals and dynamic updates are secondary. Source of truth for in/out of scope.
 - **Architecture**: `aiDocs/architecture.md` — System design: Next.js, Supabase (Auth, DB, Storage), OpenAI API, Google Calendar; data flow and key constraints.
 - **Coding style**: `aiDocs/coding-style.md` — Code style and conventions for TypeScript, React, Next.js, Tailwind.
+- **Template reference**: `reference/oatmeal-olive-instrument/` — Oatmeal-olive-instrument template (olive palette, Instrument Serif, Inter; components and layout patterns). Base all app UI and structure on this folder.
 - **Changelog**: `aiDocs/changelog.md` — High-level changes; update when you push.
 
 ## Tech Stack
