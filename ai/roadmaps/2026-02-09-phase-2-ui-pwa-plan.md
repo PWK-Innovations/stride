@@ -157,6 +157,14 @@ Body: "Scheduled for 30 minutes"
 
 ---
 
+## 2.5 Landing & Marketing Pages
+
+- Home, pricing, and about pages aligned with reference (oatmeal-olive-instrument)
+- About: hero with photo, team section (real team + local photos), “Why we built Stride” with image on left (e.g. running.png), typography and layout match reference
+- See roadmap for completed checklist
+
+---
+
 ## Deliverable
 
 Installable PWA that works on phones. Users can add tasks, build their day, and see a timeline with calendar events and scheduled tasks. Notifications for task start times.

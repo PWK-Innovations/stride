@@ -64,6 +64,21 @@
 - [ ] Verify notifications appear at correct times
 - [ ] Verify clicking notification opens app
 
+### 2.5 Landing & Marketing Pages
+
+- [x] Home page aligned with reference (HeroWithDemoOnBackground, features, testimonial)
+- [x] Pricing page aligned with reference template
+- [x] About page aligned with reference (about-02 structure)
+- [x] Typography: Heading (Instrument Serif), Subheading (section titles), Text (body)
+- [x] Hero images: reference-style assets, hero photo fills column (match reference)
+- [x] About hero: two-column with photo, image sized like reference (min-height for photo column)
+- [x] About team section: TeamThreeColumnGrid with real team (Parker Watts, Alex Fankhauser, Caleb Gooch)
+- [x] Team photos: local images (parker.png, alex.png, caleb.png) with object-view-box zoom/crop
+- [x] About “Why we built Stride”: two-column section, image on left
+- [x] “Why we built Stride” image: local running.png (vertical), aspect 4/5
+- [x] Placeholder/feature images from reference or Unsplash where appropriate
+- [x] Testimonial (e.g. Jordan Rogers) and footer links
+
 ---
 
 ## Deliverable

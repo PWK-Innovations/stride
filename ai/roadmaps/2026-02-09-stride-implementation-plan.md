@@ -110,6 +110,18 @@
 
 ---
 
+## Auth: Login & Signup (future)
+
+**Goal:** Add login and signup behind the app using Supabase Auth so only signed-in users can access the planner.
+
+- Login page and signup page (Supabase Auth: email/password and/or magic link)
+- Protect `/app` routes; redirect unauthenticated users to login
+- Optional: password reset flow
+
+**Roadmap:** `2026-02-09-phase-auth-login-signup-roadmap.md`
+
+---
+
 ## Phase 3: Photo-to-Task (Week 4)
 
 **Goal:** Enable users to add tasks by uploading photos (whiteboards, syllabi, handwritten notes).
