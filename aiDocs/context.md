@@ -9,6 +9,16 @@
 - **Template reference**: `reference/oatmeal-olive-instrument/` — Oatmeal-olive-instrument template (olive palette, Instrument Serif, Inter; components and layout patterns). Base all app UI and structure on this folder.
 - **Changelog**: `aiDocs/changelog.md` — High-level changes; update when you push.
 
+## Guides & Roadmaps
+
+- **Guides**: `ai/guides/` — API references for implementation: `openai-api-reference.md`, `google-calendar-api-reference.md`. Use these when building the scheduling engine and calendar integration.
+- **Implementation plan**: `ai/roadmaps/2026-02-09-stride-implementation-plan.md` — High-level phases (0–7). Each phase has a detailed plan and roadmap in `ai/roadmaps/` (e.g. `2026-02-09-phase-1-core-data-flow-plan.md` and `-roadmap.md`).
+
+## Behavior
+
+- Whenever creating plan docs and roadmap docs, always save them in ai/roadmaps. Prefix the name with the date. Add a note that we need to avoid over-engineering, cruft, and legacy-compatibility features in this clean code project. Make sure they reference each other.
+- Whenever finishing with implementing a plan / roadmap doc pair, make sure the roadmap is up to date (tasks checked off, etc). Then move the docs to ai/roadmaps/complete. Then update aiDocs/changelog.md accordingly.
+
 ## Tech Stack
 
 - **Frontend**: Next.js, React, TypeScript, Tailwind CSS.
@@ -27,4 +37,4 @@
 
 ## Current Focus
 
-- Data model and task CRUD (add, list, delete, mark done); then calendar connect and "Build my day" with AI (OpenAI API).
+- Data model and task CRUD (add, list, delete); then calendar connect and "Build my day" with AI (OpenAI API). "Mark done" and dynamic updates are Phase 6 (secondary features).

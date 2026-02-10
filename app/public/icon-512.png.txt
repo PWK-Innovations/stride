@@ -1,0 +1,3 @@
+# Placeholder for 512x512 app icon
+# Generate actual icons at: https://realfavicongenerator.net/
+# Or use any design tool to create olive-themed icons
