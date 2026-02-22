@@ -4,7 +4,7 @@
 **Phase:** 3 - Photo-to-Task (Week 4)  
 **Status:** Not started  
 **Plan:** `2026-02-09-phase-3-photo-to-task-plan.md`  
-**Previous Phase:** `2026-02-09-phase-2-ui-pwa-roadmap.md`
+**Previous Phase:** `2026-02-09-phase-2-core-data-flow-roadmap.md`
 
 ---
 

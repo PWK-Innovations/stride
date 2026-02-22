@@ -1,10 +1,10 @@
-# Phase 0: Foundation - Roadmap
+# Phase 0: Foundation & Auth - Roadmap
 
-**Date:** 2026-02-09  
-**Phase:** 0 - Foundation (Week 1)  
-**Status:** Complete  
-**Plan:** `2026-02-09-phase-0-foundation-plan.md`  
-**Parent:** `2026-02-09-stride-implementation-plan.md`
+**Date:** 2026-02-09
+**Phase:** 0 - Foundation & Auth
+**Status:** In progress
+**Plan:** `2026-02-09-phase-0-foundation-plan.md`
+**Parent:** `2026-02-08-stride-high-level-plan.md`
 
 ---
 
@@ -49,14 +49,40 @@
 - [ ] Create test page: `app/(auth)/test-google/page.tsx`
 - [ ] Test: Complete OAuth flow, verify tokens in `profiles` table
 
+### 0.4 Auth Setup
+
+- [ ] Enable Supabase Auth (email/password) in dashboard
+- [ ] Configure email templates (confirmation, reset) if needed
+- [ ] Create auth client helpers: `lib/supabase/auth.ts`
+- [ ] Implement signUp, signIn, signOut, onAuthStateChange, getSession
+- [ ] Set up middleware or layout check for `/app` routes
+- [ ] Redirect unauthenticated users to `/login`
+- [ ] Ensure `profiles.id` references `auth.users.id`
+- [ ] Create trigger/hook to auto-create profile on signup
+- [ ] Test: signup → login → access /app → sign out → blocked from /app
+
+### 0.5 PWA Setup
+
+- [x] Create `public/manifest.json` (name, icons, theme, display: standalone)
+- [x] Create app icons (192x192, 512x512) or use placeholders
+- [x] Link manifest in `app/layout.tsx`
+- [x] Create `public/sw.js` (minimal service worker, cache static assets)
+- [x] Register service worker in `app/layout.tsx`
+- [ ] Test on iOS: Add to Home Screen
+- [ ] Test on Android: Install app
+- [ ] Verify standalone mode (no browser chrome)
+- [ ] Verify icon and name are correct
+
 ---
 
 ## Deliverable
 
-Empty Next.js app with:
+Next.js app with:
 - Tailwind configured (oatmeal-olive-instrument theme)
 - Supabase tables and RLS policies
 - Working API routes for Supabase, OpenAI, and Google Calendar OAuth
+- Auth infrastructure (Supabase Auth, helpers, route protection)
+- PWA installable (manifest, service worker, icons)
 
 ---
 
@@ -68,6 +94,10 @@ Empty Next.js app with:
 - [ ] All three integration tests pass (requires credentials)
 - [x] Google OAuth flow stores tokens in Supabase
 - [x] All secrets in `.env.local` (not in git)
+- [ ] Auth helpers work (signUp, signIn, signOut)
+- [ ] `/app` routes protected; unauthenticated users redirected
+- [x] PWA manifest and service worker registered
+- [ ] App installable on at least one device
 
 ---
 

@@ -5,7 +5,7 @@
 **Status:** Not started  
 **Parent Plan:** `2026-02-09-stride-implementation-plan.md`  
 **Roadmap:** `2026-02-09-phase-3-photo-to-task-roadmap.md`  
-**Previous Phase:** `2026-02-09-phase-2-ui-pwa-plan.md`
+**Previous Phase:** `2026-02-09-phase-2-core-data-flow-plan.md`
 
 ---
 
@@ -23,7 +23,7 @@ Enable users to add tasks by uploading photos (whiteboards, syllabi, handwritten
 
 ## Prerequisites
 
-- Phase 2 complete (timeline view, PWA, responsive design)
+- Phase 2 complete (task CRUD, calendar integration, AI scheduling, timeline view)
 
 ---
 
@@ -111,16 +111,16 @@ Users can take a photo of a whiteboard or syllabus, the app extracts tasks from 
 
 ## Acceptance Criteria
 
-- [ ] User can upload photo via file input or camera
-- [ ] Photo is uploaded to Supabase Storage
-- [ ] OpenAI extracts tasks from photo (title, duration)
-- [ ] Extracted tasks are shown to user for confirmation
-- [ ] User can edit extracted tasks before saving
-- [ ] Tasks are saved with `photo_url` attached
-- [ ] Task list shows photo thumbnails
-- [ ] Clicking thumbnail opens full-size photo
-- [ ] Photo-to-task flow works on mobile (camera input)
-- [ ] Errors are handled (no tasks found, upload failed, OpenAI error)
+-User can upload photo via file input or camera
+-Photo is uploaded to Supabase Storage
+-OpenAI extracts tasks from photo (title, duration)
+-Extracted tasks are shown to user for confirmation
+-User can edit extracted tasks before saving
+-Tasks are saved with `photo_url` attached
+-Task list shows photo thumbnails
+-Clicking thumbnail opens full-size photo
+-Photo-to-task flow works on mobile (camera input)
+-Errors are handled (no tasks found, upload failed, OpenAI error)
 
 ---
 

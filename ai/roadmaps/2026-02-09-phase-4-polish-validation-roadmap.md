@@ -63,11 +63,24 @@
 - [ ] Repeat for second week if needed
 - [ ] Document lessons learned
 
+### 4.5 Browser Notifications
+
+- [x] Check `Notification.permission` on app load
+- [x] Show notification prompt after first "Build my day" (if permission is "default")
+- [x] Implement `Notification.requestPermission()`
+- [x] After schedule is built, calculate time until each task starts
+- [x] Use `setTimeout` to show notification at start time
+- [x] Notification content: title = task title, body = duration
+- [ ] Test on desktop (Chrome, Firefox, Safari)
+- [ ] Test on mobile (iOS Safari, Android Chrome)
+- [ ] Verify notifications appear at correct times
+- [ ] Verify clicking notification opens app
+
 ---
 
 ## Deliverable
 
-Polished MVP ready for external beta. Core flow is smooth and reliable.
+Polished MVP ready for external beta. Core flow is smooth and reliable. Notifications for task start times.
 
 ---
 

@@ -1,9 +1,9 @@
-# Phase 0: Foundation - Implementation Plan
+# Phase 0: Foundation & Auth - Implementation Plan
 
-**Date:** 2026-02-09  
-**Phase:** 0 - Foundation (Week 1)  
-**Status:** Not started  
-**Parent Plan:** `2026-02-09-stride-implementation-plan.md`  
+**Date:** 2026-02-09
+**Phase:** 0 - Foundation & Auth
+**Status:** In progress
+**Parent Plan:** `2026-02-08-stride-high-level-plan.md`
 **Roadmap:** `2026-02-09-phase-0-foundation-roadmap.md`
 
 ---
@@ -16,7 +16,7 @@
 
 ## Goal
 
-Set up the project infrastructure and verify all integrations work. By the end of this phase, we have an empty Next.js app that can connect to Supabase, OpenAI, and Google Calendar.
+Set up the project infrastructure, verify all integrations, configure authentication, and set up PWA. By the end of this phase, we have a Next.js app that connects to Supabase, OpenAI, and Google Calendar, with auth infrastructure and PWA support in place.
 
 ---
 
@@ -25,7 +25,7 @@ Set up the project infrastructure and verify all integrations work. By the end o
 - Supabase account (free tier is fine for MVP)
 - OpenAI API key
 - Google Cloud project with Calendar API enabled
-- Domain name (optional for Phase 0; needed for Phase 2 PWA)
+- Domain name (optional for Phase 0; useful for PWA)
 
 ---
 
@@ -172,28 +172,100 @@ Test: Click button, complete OAuth flow, verify tokens are stored in `profiles` 
 
 ---
 
+## 0.4 Auth Setup
+
+### Enable Supabase Auth
+
+- Enable email/password auth in Supabase dashboard
+- Configure email templates if needed (confirmation, reset)
+
+### Create Auth Client Helpers
+
+Create `lib/supabase/auth.ts`:
+- `signUp(email, password)` — create account via Supabase Auth
+- `signIn(email, password)` — sign in via Supabase Auth
+- `signOut()` — sign out
+- `onAuthStateChange(callback)` — listen for auth state changes
+- `getSession()` — get current session
+
+### Protect App Routes
+
+- Set up middleware or layout check for `/app` routes
+- Redirect unauthenticated users to `/login`
+- Allow public access to marketing pages (home, pricing, about)
+
+### Link Profiles to Auth
+
+- Ensure `profiles.id` references `auth.users.id`
+- Create trigger or hook to auto-create profile on signup
+- Link tasks and scheduled_blocks to `auth.uid()`
+
+---
+
+## 0.5 PWA Setup
+
+### Create Web App Manifest
+
+Create `public/manifest.json`:
+- `name`: "Stride"
+- `short_name`: "Stride"
+- `description`: "AI-powered daily planner"
+- `start_url`: "/"
+- `display`: "standalone"
+- `theme_color`: olive-600 (from theme)
+- `background_color`: olive-100 (from theme)
+- `icons`: 192x192 and 512x512
+
+Link in `app/layout.tsx`:
+```
+<link rel="manifest" href="/manifest.json" />
+```
+
+### Set up Service Worker
+
+Create minimal service worker: `public/sw.js`
+- Cache static assets (JS, CSS, fonts)
+- Network-first strategy for API calls
+- No offline-first requirement for MVP (just basic caching)
+
+Register service worker in `app/layout.tsx` (client-side script)
+
+### Test "Add to Home Screen"
+
+- Test on iOS: Safari → Share → Add to Home Screen
+- Test on Android: Chrome → Menu → Install app
+- Verify app opens in standalone mode (no browser chrome)
+- Verify icon and name are correct
+
+---
+
 ## Deliverable
 
 - Next.js app runs locally on `http://localhost:3000`
 - Tailwind configured with oatmeal-olive-instrument theme (olive colors, Instrument Serif, Inter)
 - Supabase tables created with RLS policies
 - API routes for Supabase, OpenAI, and Google Calendar OAuth all return success
-- No UI yet (except test pages); just infrastructure
+- Auth infrastructure in place (Supabase Auth, helpers, route protection)
+- PWA installable (manifest, service worker, icons)
 
 ---
 
 ## Acceptance Criteria
 
-- [ ] Next.js app runs without errors
-- [ ] Tailwind theme matches oatmeal-olive-instrument (olive palette, fonts)
-- [ ] Supabase tables exist with correct schema and RLS policies
-- [ ] `/api/test/supabase` returns success
-- [ ] `/api/test/openai` returns "test successful" from OpenAI
-- [ ] Google OAuth flow completes and stores tokens in `profiles` table
-- [ ] All secrets in `.env.local` (not committed to git)
+- Next.js app runs without errors
+- Tailwind theme matches oatmeal-olive-instrument (olive palette, fonts)
+- Supabase tables exist with correct schema and RLS policies
+- `/api/test/supabase` returns success
+- `/api/test/openai` returns "test successful" from OpenAI
+- Google OAuth flow completes and stores tokens in `profiles` table
+- All secrets in `.env.local` (not committed to git)
+- Auth helpers work (signUp, signIn, signOut)
+- `/app` routes are protected; unauthenticated users redirected to `/login`
+- PWA manifest and service worker are registered
+- App installable on at least one device
 
 ---
 
 ## Next Phase
 
-**Phase 1:** Core Data Flow (`2026-02-09-phase-1-core-data-flow-plan.md`)
+**Phase 1:** Frontend Layout (`2026-02-09-phase-1-frontend-layout-plan.md`)

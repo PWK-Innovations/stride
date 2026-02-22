@@ -23,7 +23,7 @@ Refine the core experience and validate with real users (internal dogfooding). B
 
 ## Prerequisites
 
-- Phase 3 complete (photo-to-task, timeline view, PWA)
+- Phase 3 complete (photo-to-task)
 
 ---
 
@@ -136,24 +136,56 @@ Fix top 5-10 issues:
 
 ---
 
+## 4.5 Browser Notifications
+
+### Request Notification Permission
+
+Add to app (e.g., after first "Build my day"):
+- Check if `Notification.permission` is "default"
+- If so, show prompt: "Enable notifications to get reminders for your tasks?"
+- On user approval: call `Notification.requestPermission()`
+
+### Schedule Notifications for Task Start Times
+
+After schedule is built:
+- For each scheduled block, calculate time until start
+- Use `setTimeout` to show notification at start time
+- Notification content: title = task title, body = duration
+
+Example notification:
+```
+Title: "Time to: Review Q3 report"
+Body: "Scheduled for 30 minutes"
+```
+
+### Test Notifications
+
+- Test on desktop (Chrome, Firefox, Safari)
+- Test on mobile (iOS Safari, Android Chrome)
+- Verify notifications appear at correct times
+- Verify clicking notification opens app
+
+---
+
 ## Deliverable
 
-Polished MVP ready for external beta. Core flow is smooth, errors are handled gracefully, and the app feels reliable.
+Polished MVP ready for external beta. Core flow is smooth, errors are handled gracefully, and the app feels reliable. Notifications for task start times.
 
 ---
 
 ## Acceptance Criteria
 
-- [ ] All API errors are handled with user-friendly messages
-- [ ] All edge cases are handled (no tasks, no free time, all overflow)
-- [ ] Loading states are shown for all async operations
-- [ ] Empty states guide users to next action
-- [ ] Confirmation dialogs prevent accidental deletions
-- [ ] Keyboard shortcuts work
-- [ ] Timeline renders smoothly (no jank)
-- [ ] OpenAI API calls are minimized (only on "Build my day")
-- [ ] Team has used app daily for 1-2 weeks
-- [ ] Top friction points are fixed
+-All API errors are handled with user-friendly messages
+-All edge cases are handled (no tasks, no free time, all overflow)
+-Loading states are shown for all async operations
+-Empty states guide users to next action
+-Confirmation dialogs prevent accidental deletions
+-Keyboard shortcuts work
+-Timeline renders smoothly (no jank)
+-OpenAI API calls are minimized (only on "Build my day")
+-Team has used app daily for 1-2 weeks
+-Top friction points are fixed
+-Notifications appear at task start times (desktop and mobile)
 
 ---
 
