@@ -37,6 +37,12 @@
 - [ ] Verify icon and name are correct
 - [ ] Verify theme color is applied
 
+### 2.4 CLI Testing & Logging
+
+- [ ] Structured logging implemented (not just `console.log("here")`)
+- [ ] CLI test scripts exist and work
+- [ ] Evidence of test-log-fix loop in git history
+
 ---
 
 ## Deliverable

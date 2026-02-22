@@ -97,6 +97,27 @@ Register service worker in `app/layout.tsx` (client-side script)
 
 ---
 
+## 2.4 CLI Testing & Logging
+
+### Structured Logging
+
+- Replace ad-hoc `console.log` calls with structured logging (context, level, timestamps)
+- Ensure API routes and integration helpers use consistent log format
+
+### CLI Test Scripts
+
+- Create CLI test scripts for key integrations (Supabase, OpenAI, Google Calendar)
+- Scripts should be runnable via `npm run test:*` or similar
+- Each script reports pass/fail with meaningful output
+
+### Test-Log-Fix Loop
+
+- Use structured logs to identify failures
+- Fix issues and commit with clear messages showing the test → log → fix cycle
+- Evidence of this loop should be visible in git history
+
+---
+
 ## Deliverable
 
 - App deployed to Vercel with HTTPS
