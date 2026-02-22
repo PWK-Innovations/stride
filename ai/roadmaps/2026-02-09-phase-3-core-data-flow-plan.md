@@ -1,11 +1,11 @@
-# Phase 2: Core Data Flow - Implementation Plan
+# Phase 3: Core Data Flow - Implementation Plan
 
 **Date:** 2026-02-09
-**Phase:** 2 - Core Data Flow
+**Phase:** 3 - Core Data Flow
 **Status:** Mostly complete
 **Parent Plan:** `2026-02-08-stride-high-level-plan.md`
-**Roadmap:** `2026-02-09-phase-2-core-data-flow-roadmap.md`
-**Previous Phase:** `2026-02-09-phase-1-frontend-layout-plan.md`
+**Roadmap:** `2026-02-09-phase-3-core-data-flow-roadmap.md`
+**Previous Phase:** `2026-02-09-phase-2-pwa-hosting-plan.md`
 
 ---
 
@@ -23,11 +23,11 @@ Build the "happy path" from task input to AI-generated schedule display with a t
 
 ## Prerequisites
 
-- Phase 1 complete (sign up/in pages, dashboard layout, responsive design)
+- Phase 2 complete (app deployed to Vercel, PWA setup and tested)
 
 ---
 
-## 2.1 Task Management (CRUD)
+## 3.1 Task Management (CRUD)
 
 ### Task Data Model
 
@@ -57,7 +57,7 @@ Each route:
 Create basic task list component:
 - Form: title input, duration input (number), notes textarea, submit button
 - List: show all tasks with title, duration, delete button
-- No photos yet (Phase 3)
+- No photos yet (Phase 4)
 - Use oatmeal-olive-instrument styling (olive colors, Instrument Serif for headings)
 
 ### Persist to Supabase
@@ -68,7 +68,7 @@ Create basic task list component:
 
 ---
 
-## 2.2 Calendar Integration
+## 3.2 Calendar Integration
 
 ### Google Calendar OAuth Flow (Full Implementation)
 
@@ -99,7 +99,7 @@ Create helper function: `lib/google/parseBusyWindows.ts`
 
 ---
 
-## 2.3 AI Scheduling Engine (v1)
+## 3.3 AI Scheduling Engine (v1)
 
 ### Build Prompt for OpenAI
 
@@ -146,7 +146,7 @@ If tasks don't fit:
 
 ---
 
-## 2.4 "Build My Day" Flow
+## 3.4 "Build My Day" Flow
 
 ### API Route: Build Schedule
 
@@ -170,7 +170,7 @@ Add to dashboard page:
 
 ---
 
-## 2.5 Timeline View
+## 3.5 Timeline View
 
 ### Choose Timeline Library
 
@@ -235,4 +235,4 @@ No photos, no goals, no dynamic updates yet. Just the core flow with a timeline 
 
 ## Next Phase
 
-**Phase 3:** Photo-to-Task (`2026-02-09-phase-3-photo-to-task-plan.md`)
+**Phase 4:** Photo-to-Task (`2026-02-09-phase-4-photo-to-task-plan.md`)

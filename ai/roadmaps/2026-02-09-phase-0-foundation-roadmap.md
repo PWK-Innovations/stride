@@ -61,18 +61,6 @@
 - [ ] Create trigger/hook to auto-create profile on signup
 - [ ] Test: signup → login → access /app → sign out → blocked from /app
 
-### 0.5 PWA Setup
-
-- [x] Create `public/manifest.json` (name, icons, theme, display: standalone)
-- [x] Create app icons (192x192, 512x512) or use placeholders
-- [x] Link manifest in `app/layout.tsx`
-- [x] Create `public/sw.js` (minimal service worker, cache static assets)
-- [x] Register service worker in `app/layout.tsx`
-- [ ] Test on iOS: Add to Home Screen
-- [ ] Test on Android: Install app
-- [ ] Verify standalone mode (no browser chrome)
-- [ ] Verify icon and name are correct
-
 ---
 
 ## Deliverable
@@ -82,7 +70,6 @@ Next.js app with:
 - Supabase tables and RLS policies
 - Working API routes for Supabase, OpenAI, and Google Calendar OAuth
 - Auth infrastructure (Supabase Auth, helpers, route protection)
-- PWA installable (manifest, service worker, icons)
 
 ---
 
@@ -96,8 +83,6 @@ Next.js app with:
 - [x] All secrets in `.env.local` (not in git)
 - [ ] Auth helpers work (signUp, signIn, signOut)
 - [ ] `/app` routes protected; unauthenticated users redirected
-- [x] PWA manifest and service worker registered
-- [ ] App installable on at least one device
 
 ---
 

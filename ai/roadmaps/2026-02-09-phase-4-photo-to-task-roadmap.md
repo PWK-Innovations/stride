@@ -1,16 +1,16 @@
-# Phase 3: Photo-to-Task - Roadmap
+# Phase 4: Photo-to-Task - Roadmap
 
-**Date:** 2026-02-09  
-**Phase:** 3 - Photo-to-Task (Week 4)  
-**Status:** Not started  
-**Plan:** `2026-02-09-phase-3-photo-to-task-plan.md`  
-**Previous Phase:** `2026-02-09-phase-2-core-data-flow-roadmap.md`
+**Date:** 2026-02-09
+**Phase:** 4 - Photo-to-Task
+**Status:** Not started
+**Plan:** `2026-02-09-phase-4-photo-to-task-plan.md`
+**Previous Phase:** `2026-02-09-phase-3-core-data-flow-roadmap.md`
 
 ---
 
 ## Tasks
 
-### 3.1 Photo Upload
+### 4.1 Photo Upload
 
 - [ ] Add file input to task form (`<input type="file" accept="image/*" capture="environment">`)
 - [ ] Show photo preview after selection
@@ -23,7 +23,7 @@
 - [ ] On task creation with photo: upload photo first, then save task with `photo_url`
 - [ ] Test: create task with photo, verify `photo_url` is saved
 
-### 3.2 Photo-to-Task with OpenAI
+### 4.2 Photo-to-Task with OpenAI
 
 - [ ] Define JSON schema for photo-to-task response (tasks array)
 - [ ] Create helper: `lib/openai/extractTasksFromPhoto.ts`
@@ -38,7 +38,7 @@
 - [ ] On confirm: create tasks in Supabase (with `photo_url`)
 - [ ] Test full flow: upload photo → extract tasks → edit → confirm → see tasks in list
 
-### 3.3 Photo Display
+### 4.3 Photo Display
 
 - [ ] Update task list component to show photo thumbnails (64x64px)
 - [ ] Add click handler to thumbnail (open full-size photo)
@@ -71,4 +71,4 @@ Users can upload photos, extract tasks, and see photos attached to tasks.
 
 ## Next Phase
 
-**Phase 4:** Polish & Validation (`2026-02-09-phase-4-polish-validation-roadmap.md`)
+**Phase 5:** Polish & Validation (`2026-02-09-phase-5-polish-validation-roadmap.md`)

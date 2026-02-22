@@ -1,11 +1,11 @@
-# Phase 6: Secondary Features - Implementation Plan
+# Phase 7: Secondary Features - Implementation Plan
 
-**Date:** 2026-02-09  
-**Phase:** 6 - Secondary Features (Post-MVP)  
-**Status:** Not started  
-**Parent Plan:** `2026-02-09-stride-implementation-plan.md`  
-**Roadmap:** `2026-02-09-phase-6-secondary-features-roadmap.md`  
-**Previous Phase:** `2026-02-09-phase-5-beta-launch-plan.md`
+**Date:** 2026-02-09
+**Phase:** 7 - Secondary Features (Post-MVP)
+**Status:** Not started
+**Parent Plan:** `2026-02-08-stride-high-level-plan.md`
+**Roadmap:** `2026-02-09-phase-7-secondary-features-roadmap.md`
+**Previous Phase:** `2026-02-09-phase-6-beta-launch-plan.md`
 
 ---
 
@@ -23,12 +23,12 @@ Add P1 features from the MVP doc: goals and dynamic calendar updates. By the end
 
 ## Prerequisites
 
-- Phase 5 complete (beta launched, feedback collected, P1 priorities decided)
+- Phase 6 complete (beta launched, feedback collected, P1 priorities decided)
 - Beta feedback should drive whether goals and/or dynamic updates are built first
 
 ---
 
-## 6.1 Goals
+## 7.1 Goals
 
 ### Goal Data Model
 
@@ -49,7 +49,7 @@ Add P1 features from the MVP doc: goals and dynamic calendar updates. By the end
 
 ---
 
-## 6.2 Dynamic Calendar Updates
+## 7.2 Dynamic Calendar Updates
 
 ### Mark Task Done
 
@@ -69,7 +69,7 @@ Add P1 features from the MVP doc: goals and dynamic calendar updates. By the end
 
 ---
 
-## 6.3 Refinements (If Validated)
+## 7.3 Refinements (If Validated)
 
 - **Multi-day view:** Tomorrow, this week — only if beta users ask for it
 - **Task edit:** In-place edit (title, duration, notes) if "delete + re-add" is a major pain point
@@ -87,15 +87,15 @@ Goals and dynamic updates shipped. Users can set goals, link tasks to goals, mar
 
 ## Acceptance Criteria
 
--Users can add and manage goals (professional, academic, social)
--Tasks can be linked to a goal
--AI scheduling considers goals (e.g. prioritizes goal-linked tasks)
--"Mark task done" updates task and schedule
--Re-scheduling runs for remaining tasks (with user approval where appropriate)
--Refinements (multi-day, task edit, caching) only if validated by users
+- Users can add and manage goals (professional, academic, social)
+- Tasks can be linked to a goal
+- AI scheduling considers goals (e.g. prioritizes goal-linked tasks)
+- "Mark task done" updates task and schedule
+- Re-scheduling runs for remaining tasks (with user approval where appropriate)
+- Refinements (multi-day, task edit, caching) only if validated by users
 
 ---
 
 ## Next Phase
 
-**Phase 7:** Scale & Monetization (`2026-02-09-phase-7-scale-monetization-plan.md`)
+**Phase 8:** Scale & Monetization (`2026-02-09-phase-8-scale-monetization-plan.md`)

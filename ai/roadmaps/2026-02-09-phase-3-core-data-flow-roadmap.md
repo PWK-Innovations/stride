@@ -1,16 +1,16 @@
-# Phase 2: Core Data Flow - Roadmap
+# Phase 3: Core Data Flow - Roadmap
 
 **Date:** 2026-02-09
-**Phase:** 2 - Core Data Flow
+**Phase:** 3 - Core Data Flow
 **Status:** Mostly complete
-**Plan:** `2026-02-09-phase-2-core-data-flow-plan.md`
-**Previous Phase:** `2026-02-09-phase-1-frontend-layout-roadmap.md`
+**Plan:** `2026-02-09-phase-3-core-data-flow-plan.md`
+**Previous Phase:** `2026-02-09-phase-2-pwa-hosting-roadmap.md`
 
 ---
 
 ## Tasks
 
-### 2.1 Task Management (CRUD)
+### 3.1 Task Management (CRUD)
 
 - [x] Define Task TypeScript interface (`types/database.ts`)
 - [x] Create API route: `POST /api/tasks` (create task)
@@ -25,7 +25,7 @@
 - [x] Style with oatmeal-olive-instrument (olive colors, Instrument Serif)
 - [ ] Test: add task, see it in list, delete it
 
-### 2.2 Calendar Integration
+### 3.2 Calendar Integration
 
 - [x] Update `app/api/auth/google/route.ts` (redirect with `calendar.readonly` scope)
 - [x] Update `app/api/auth/google/callback/route.ts` (store tokens in `profiles`)
@@ -37,7 +37,7 @@
 - [ ] Add "Connect Google Calendar" button to UI
 - [ ] Test: complete OAuth flow, verify tokens stored, fetch events works
 
-### 2.3 AI Scheduling Engine (v1)
+### 3.3 AI Scheduling Engine (v1)
 
 - [x] Define JSON schema for schedule response (scheduled_blocks, overflow)
 - [x] Create helper: `lib/openai/buildSchedulePrompt.ts` (tasks + busy windows → prompt)
@@ -48,7 +48,7 @@
 - [x] Handle edge cases: no tasks, no free time, all tasks overflow
 - [x] Create API helper: save scheduled_blocks to Supabase (delete old, insert new)
 
-### 2.4 "Build My Day" Flow
+### 3.4 "Build My Day" Flow
 
 - [x] Create API route: `POST /api/schedule/build`
 - [x] Implement: authenticate user, fetch tasks, fetch calendar, call AI, save schedule
@@ -60,7 +60,7 @@
 - [x] Add error handling (show error message if API fails)
 - [ ] Test full flow: add tasks → connect calendar → build day → see schedule
 
-### 2.5 Timeline View
+### 3.5 Timeline View
 
 - [x] Evaluate timeline libraries (react-calendar-timeline, react-big-calendar)
 - [x] Choose library (recommendation: react-calendar-timeline)
@@ -86,7 +86,7 @@ User can add tasks, click "Build my day", and see a schedule on a visual timelin
 
 ## Acceptance Criteria
 
-- [x] All implementation tasks complete (2.1–2.5)
+- [x] All implementation tasks complete (3.1–3.5)
 - [x] User can add/delete tasks
 - [ ] User can connect Google Calendar (requires credentials to test)
 - [x] "Build my day" generates schedule (tasks in free slots)
@@ -98,4 +98,4 @@ User can add tasks, click "Build my day", and see a schedule on a visual timelin
 
 ## Next Phase
 
-**Phase 3:** Photo-to-Task (`2026-02-09-phase-3-photo-to-task-roadmap.md`)
+**Phase 4:** Photo-to-Task (`2026-02-09-phase-4-photo-to-task-roadmap.md`)

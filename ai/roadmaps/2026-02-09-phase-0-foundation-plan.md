@@ -16,7 +16,7 @@
 
 ## Goal
 
-Set up the project infrastructure, verify all integrations, configure authentication, and set up PWA. By the end of this phase, we have a Next.js app that connects to Supabase, OpenAI, and Google Calendar, with auth infrastructure and PWA support in place.
+Set up the project infrastructure, verify all integrations, and configure authentication. By the end of this phase, we have a Next.js app that connects to Supabase, OpenAI, and Google Calendar, with auth infrastructure in place.
 
 ---
 
@@ -25,7 +25,6 @@ Set up the project infrastructure, verify all integrations, configure authentica
 - Supabase account (free tier is fine for MVP)
 - OpenAI API key
 - Google Cloud project with Calendar API enabled
-- Domain name (optional for Phase 0; useful for PWA)
 
 ---
 
@@ -108,7 +107,7 @@ stride/
 - `title` (text, not null)
 - `notes` (text, nullable)
 - `duration_minutes` (integer, default 30)
-- `photo_url` (text, nullable) — for Phase 3
+- `photo_url` (text, nullable) — for Phase 4
 - `created_at` (timestamp)
 - `updated_at` (timestamp)
 
@@ -202,43 +201,6 @@ Create `lib/supabase/auth.ts`:
 
 ---
 
-## 0.5 PWA Setup
-
-### Create Web App Manifest
-
-Create `public/manifest.json`:
-- `name`: "Stride"
-- `short_name`: "Stride"
-- `description`: "AI-powered daily planner"
-- `start_url`: "/"
-- `display`: "standalone"
-- `theme_color`: olive-600 (from theme)
-- `background_color`: olive-100 (from theme)
-- `icons`: 192x192 and 512x512
-
-Link in `app/layout.tsx`:
-```
-<link rel="manifest" href="/manifest.json" />
-```
-
-### Set up Service Worker
-
-Create minimal service worker: `public/sw.js`
-- Cache static assets (JS, CSS, fonts)
-- Network-first strategy for API calls
-- No offline-first requirement for MVP (just basic caching)
-
-Register service worker in `app/layout.tsx` (client-side script)
-
-### Test "Add to Home Screen"
-
-- Test on iOS: Safari → Share → Add to Home Screen
-- Test on Android: Chrome → Menu → Install app
-- Verify app opens in standalone mode (no browser chrome)
-- Verify icon and name are correct
-
----
-
 ## Deliverable
 
 - Next.js app runs locally on `http://localhost:3000`
@@ -246,7 +208,6 @@ Register service worker in `app/layout.tsx` (client-side script)
 - Supabase tables created with RLS policies
 - API routes for Supabase, OpenAI, and Google Calendar OAuth all return success
 - Auth infrastructure in place (Supabase Auth, helpers, route protection)
-- PWA installable (manifest, service worker, icons)
 
 ---
 
@@ -261,8 +222,6 @@ Register service worker in `app/layout.tsx` (client-side script)
 - All secrets in `.env.local` (not committed to git)
 - Auth helpers work (signUp, signIn, signOut)
 - `/app` routes are protected; unauthenticated users redirected to `/login`
-- PWA manifest and service worker are registered
-- App installable on at least one device
 
 ---
 

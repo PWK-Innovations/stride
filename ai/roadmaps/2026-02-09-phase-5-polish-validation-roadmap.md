@@ -1,16 +1,16 @@
-# Phase 4: Polish & Validation - Roadmap
+# Phase 5: Polish & Validation - Roadmap
 
-**Date:** 2026-02-09  
-**Phase:** 4 - Polish & Validation (Week 5)  
-**Status:** Not started  
-**Plan:** `2026-02-09-phase-4-polish-validation-plan.md`  
-**Previous Phase:** `2026-02-09-phase-3-photo-to-task-roadmap.md`
+**Date:** 2026-02-09
+**Phase:** 5 - Polish & Validation
+**Status:** Not started
+**Plan:** `2026-02-09-phase-5-polish-validation-plan.md`
+**Previous Phase:** `2026-02-09-phase-4-photo-to-task-roadmap.md`
 
 ---
 
 ## Tasks
 
-### 4.1 Error Handling & Edge Cases
+### 5.1 Error Handling & Edge Cases
 
 - [ ] Handle OpenAI rate limit (429): show message, implement backoff
 - [ ] Handle OpenAI timeout: show message, retry
@@ -25,7 +25,7 @@
 - [ ] Ensure all times are in user's local time zone
 - [ ] Test all error scenarios
 
-### 4.2 UX Improvements
+### 5.2 UX Improvements
 
 - [ ] Add loading spinner for task list
 - [ ] Add loading state for "Build my day" (spinner + message)
@@ -41,7 +41,7 @@
 - [ ] Implement keyboard shortcut: `Escape` (close modals)
 - [ ] Test all loading states, empty states, confirmations, shortcuts
 
-### 4.3 Performance Optimization
+### 5.3 Performance Optimization
 
 - [ ] Parallelize: fetch tasks and calendar events at same time
 - [ ] Review OpenAI prompts: move to reusable prompts in dashboard if possible
@@ -52,7 +52,7 @@
 - [ ] Lazy load photo thumbnails (only load when visible)
 - [ ] Test: measure "Build my day" latency, optimize if >5 seconds
 
-### 4.4 Internal Dogfooding
+### 5.4 Internal Dogfooding
 
 - [ ] Team uses app daily for 1 week (minimum)
 - [ ] Track friction points and bugs in shared doc or issue tracker
@@ -63,7 +63,7 @@
 - [ ] Repeat for second week if needed
 - [ ] Document lessons learned
 
-### 4.5 Browser Notifications
+### 5.5 Browser Notifications
 
 - [x] Check `Notification.permission` on app load
 - [x] Show notification prompt after first "Build my day" (if permission is "default")
@@ -98,4 +98,4 @@ Polished MVP ready for external beta. Core flow is smooth and reliable. Notifica
 
 ## Next Phase
 
-**Phase 5:** Beta Launch (`2026-02-09-phase-5-beta-launch-roadmap.md`)
+**Phase 6:** Beta Launch (`2026-02-09-phase-6-beta-launch-roadmap.md`)

@@ -2,7 +2,7 @@
 
 **Date:** 2026-02-09
 **Phase:** 1 - Frontend Layout
-**Status:** Not started
+**Status:** In progress
 **Plan:** `2026-02-09-phase-1-frontend-layout-plan.md`
 **Previous Phase:** `2026-02-09-phase-0-foundation-roadmap.md`
 
@@ -33,13 +33,13 @@
 - [ ] Add app name ("Stride") to header
 - [ ] Add user email/avatar to header
 - [ ] Add sign out button to header
-- [ ] Create `app/app/page.tsx` (dashboard)
-- [ ] Add task list placeholder area
-- [ ] Add "Build my day" button placeholder area
-- [ ] Add timeline/schedule placeholder area
-- [ ] Add empty states ("Add tasks to get started", "Connect Google Calendar")
+- [x] Create `app/app/page.tsx` (dashboard)
+- [x] Add task list placeholder area
+- [x] Add "Build my day" button placeholder area
+- [x] Add timeline/schedule placeholder area
+- [x] Add empty states ("Add tasks to get started", "Connect Google Calendar")
 - [ ] Wire up sign out button (signOut → redirect to /login)
-- [ ] Style with olive theme
+- [x] Style with olive theme
 
 ### 1.3 Responsive Design
 
@@ -90,4 +90,4 @@ Sign up/in pages, dashboard layout, responsive design, and marketing pages.
 
 ## Next Phase
 
-**Phase 2:** Core Data Flow (`2026-02-09-phase-2-core-data-flow-roadmap.md`)
+**Phase 2:** PWA & Hosting (`2026-02-09-phase-2-pwa-hosting-roadmap.md`)

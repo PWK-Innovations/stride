@@ -2,7 +2,7 @@
 
 **Date:** 2026-02-09
 **Phase:** 1 - Frontend Layout
-**Status:** Not started
+**Status:** In progress
 **Parent Plan:** `2026-02-08-stride-high-level-plan.md`
 **Roadmap:** `2026-02-09-phase-1-frontend-layout-roadmap.md`
 **Previous Phase:** `2026-02-09-phase-0-foundation-plan.md`
@@ -23,7 +23,7 @@ Build the user-facing page structure: sign up/in pages, dashboard layout, and re
 
 ## Prerequisites
 
-- Phase 0 complete (Next.js app, Supabase tables, integrations verified, auth infrastructure, PWA setup)
+- Phase 0 complete (Next.js app, Supabase tables, integrations verified, auth infrastructure)
 
 ---
 
@@ -70,10 +70,12 @@ Create `app/app/layout.tsx`:
 ### Dashboard Page
 
 Create `app/app/page.tsx` (or `app/app/dashboard/page.tsx`):
-- Task list area (placeholder — tasks UI built in Phase 2)
-- "Build my day" button area (placeholder — wired up in Phase 2)
-- Timeline/schedule area (placeholder — timeline built in Phase 2)
+- Task list area (placeholder — tasks UI built in Phase 3)
+- "Build my day" button area (placeholder — wired up in Phase 3)
+- Timeline/schedule area (placeholder — timeline built in Phase 3)
 - Empty states: "Add tasks to get started", "Connect Google Calendar"
+
+> **Note:** Dashboard content areas were built alongside Phase 3 (Core Data Flow) work. Task CRUD, "Build my day" flow, and DailyTimeline component are already functional.
 
 ### Sign Out
 
@@ -139,4 +141,4 @@ Home, pricing, and about pages are already complete from prior work. No changes 
 
 ## Next Phase
 
-**Phase 2:** Core Data Flow (`2026-02-09-phase-2-core-data-flow-plan.md`)
+**Phase 2:** PWA & Hosting (`2026-02-09-phase-2-pwa-hosting-plan.md`)

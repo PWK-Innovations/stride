@@ -1,11 +1,11 @@
-# Phase 3: Photo-to-Task - Implementation Plan
+# Phase 4: Photo-to-Task - Implementation Plan
 
-**Date:** 2026-02-09  
-**Phase:** 3 - Photo-to-Task (Week 4)  
-**Status:** Not started  
-**Parent Plan:** `2026-02-09-stride-implementation-plan.md`  
-**Roadmap:** `2026-02-09-phase-3-photo-to-task-roadmap.md`  
-**Previous Phase:** `2026-02-09-phase-2-core-data-flow-plan.md`
+**Date:** 2026-02-09
+**Phase:** 4 - Photo-to-Task
+**Status:** Not started
+**Parent Plan:** `2026-02-08-stride-high-level-plan.md`
+**Roadmap:** `2026-02-09-phase-4-photo-to-task-roadmap.md`
+**Previous Phase:** `2026-02-09-phase-3-core-data-flow-plan.md`
 
 ---
 
@@ -23,11 +23,11 @@ Enable users to add tasks by uploading photos (whiteboards, syllabi, handwritten
 
 ## Prerequisites
 
-- Phase 2 complete (task CRUD, calendar integration, AI scheduling, timeline view)
+- Phase 3 complete (task CRUD, calendar integration, AI scheduling, timeline view)
 
 ---
 
-## 3.1 Photo Upload
+## 4.1 Photo Upload
 
 ### Add Photo Upload UI
 
@@ -57,7 +57,7 @@ Update `tasks` table (already has `photo_url` column from Phase 0):
 
 ---
 
-## 3.2 Photo-to-Task with OpenAI
+## 4.2 Photo-to-Task with OpenAI
 
 ### Send Photo to OpenAI API
 
@@ -86,7 +86,7 @@ After extraction:
 
 ---
 
-## 3.3 Photo Display
+## 4.3 Photo Display
 
 ### Show Photo Thumbnails on Tasks
 
@@ -111,19 +111,19 @@ Users can take a photo of a whiteboard or syllabus, the app extracts tasks from 
 
 ## Acceptance Criteria
 
--User can upload photo via file input or camera
--Photo is uploaded to Supabase Storage
--OpenAI extracts tasks from photo (title, duration)
--Extracted tasks are shown to user for confirmation
--User can edit extracted tasks before saving
--Tasks are saved with `photo_url` attached
--Task list shows photo thumbnails
--Clicking thumbnail opens full-size photo
--Photo-to-task flow works on mobile (camera input)
--Errors are handled (no tasks found, upload failed, OpenAI error)
+- User can upload photo via file input or camera
+- Photo is uploaded to Supabase Storage
+- OpenAI extracts tasks from photo (title, duration)
+- Extracted tasks are shown to user for confirmation
+- User can edit extracted tasks before saving
+- Tasks are saved with `photo_url` attached
+- Task list shows photo thumbnails
+- Clicking thumbnail opens full-size photo
+- Photo-to-task flow works on mobile (camera input)
+- Errors are handled (no tasks found, upload failed, OpenAI error)
 
 ---
 
 ## Next Phase
 
-**Phase 4:** Polish & Validation (`2026-02-09-phase-4-polish-validation-plan.md`)
+**Phase 5:** Polish & Validation (`2026-02-09-phase-5-polish-validation-plan.md`)

@@ -1,11 +1,11 @@
-# Phase 4: Polish & Validation - Implementation Plan
+# Phase 5: Polish & Validation - Implementation Plan
 
-**Date:** 2026-02-09  
-**Phase:** 4 - Polish & Validation (Week 5)  
-**Status:** Not started  
-**Parent Plan:** `2026-02-09-stride-implementation-plan.md`  
-**Roadmap:** `2026-02-09-phase-4-polish-validation-roadmap.md`  
-**Previous Phase:** `2026-02-09-phase-3-photo-to-task-plan.md`
+**Date:** 2026-02-09
+**Phase:** 5 - Polish & Validation
+**Status:** Not started
+**Parent Plan:** `2026-02-08-stride-high-level-plan.md`
+**Roadmap:** `2026-02-09-phase-5-polish-validation-roadmap.md`
+**Previous Phase:** `2026-02-09-phase-4-photo-to-task-plan.md`
 
 ---
 
@@ -23,11 +23,11 @@ Refine the core experience and validate with real users (internal dogfooding). B
 
 ## Prerequisites
 
-- Phase 3 complete (photo-to-task)
+- Phase 4 complete (photo-to-task)
 
 ---
 
-## 4.1 Error Handling & Edge Cases
+## 5.1 Error Handling & Edge Cases
 
 ### OpenAI API Errors
 
@@ -55,7 +55,7 @@ Handle common errors:
 
 ---
 
-## 4.2 UX Improvements
+## 5.2 UX Improvements
 
 ### Loading States
 
@@ -87,7 +87,7 @@ Add shortcuts for power users:
 
 ---
 
-## 4.3 Performance Optimization
+## 5.3 Performance Optimization
 
 ### Optimize API Routes
 
@@ -109,7 +109,7 @@ Add shortcuts for power users:
 
 ---
 
-## 4.4 Internal Dogfooding
+## 5.4 Internal Dogfooding
 
 ### Use the App Daily
 
@@ -136,7 +136,7 @@ Fix top 5-10 issues:
 
 ---
 
-## 4.5 Browser Notifications
+## 5.5 Browser Notifications
 
 ### Request Notification Permission
 
@@ -175,20 +175,20 @@ Polished MVP ready for external beta. Core flow is smooth, errors are handled gr
 
 ## Acceptance Criteria
 
--All API errors are handled with user-friendly messages
--All edge cases are handled (no tasks, no free time, all overflow)
--Loading states are shown for all async operations
--Empty states guide users to next action
--Confirmation dialogs prevent accidental deletions
--Keyboard shortcuts work
--Timeline renders smoothly (no jank)
--OpenAI API calls are minimized (only on "Build my day")
--Team has used app daily for 1-2 weeks
--Top friction points are fixed
--Notifications appear at task start times (desktop and mobile)
+- All API errors are handled with user-friendly messages
+- All edge cases are handled (no tasks, no free time, all overflow)
+- Loading states are shown for all async operations
+- Empty states guide users to next action
+- Confirmation dialogs prevent accidental deletions
+- Keyboard shortcuts work
+- Timeline renders smoothly (no jank)
+- OpenAI API calls are minimized (only on "Build my day")
+- Team has used app daily for 1-2 weeks
+- Top friction points are fixed
+- Notifications appear at task start times (desktop and mobile)
 
 ---
 
 ## Next Phase
 
-**Phase 5:** Beta Launch (`2026-02-09-phase-5-beta-launch-plan.md`)
+**Phase 6:** Beta Launch (`2026-02-09-phase-6-beta-launch-plan.md`)

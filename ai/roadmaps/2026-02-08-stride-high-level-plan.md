@@ -26,7 +26,7 @@
 
 ## Phase 0: Foundation & Auth
 
-**Goal:** Set up the project infrastructure, verify all integrations, configure auth, and set up PWA.
+**Goal:** Set up the project infrastructure, verify all integrations, and configure auth.
 
 ### 0.1 Project Setup
 - Initialize Next.js project (App Router, TypeScript, Tailwind)
@@ -52,13 +52,7 @@
 - Redirect unauthenticated users to /login
 - Link profiles table to auth.users
 
-### 0.5 PWA Setup
-- Create web app manifest (name, icons, theme color)
-- Set up service worker (minimal; cache static assets)
-- Test "Add to Home Screen" on iOS and Android
-- Verify standalone mode (own window, no browser chrome)
-
-**Deliverable:** Next.js app with Supabase, OpenAI, and Google Calendar integrations verified. Auth infrastructure in place. PWA installable.
+**Deliverable:** Next.js app with Supabase, OpenAI, and Google Calendar integrations verified. Auth infrastructure in place.
 
 ---
 
@@ -85,34 +79,53 @@
 
 ---
 
-## Phase 2: Core Data Flow
+## Phase 2: PWA & Hosting
+
+**Goal:** Deploy the app to Vercel for HTTPS hosting, set up PWA support, and test on real devices.
+
+### 2.1 Vercel Deployment
+- Connect repo to Vercel, configure env vars, deploy, verify HTTPS
+
+### 2.2 PWA Setup
+- Create web app manifest (name, icons, theme color)
+- Set up service worker (minimal; cache static assets)
+
+### 2.3 PWA Testing
+- Test "Add to Home Screen" on iOS and Android
+- Verify standalone mode (own window, no browser chrome)
+
+**Deliverable:** App deployed to Vercel with HTTPS. PWA installable and tested on real devices.
+
+---
+
+## Phase 3: Core Data Flow
 
 **Goal:** Build the "happy path" from task input to AI-generated schedule display.
 
-### 2.1 Task Management (CRUD)
+### 3.1 Task Management (CRUD)
 - Task data model (title, notes, duration, created_at)
 - API routes: create task, list tasks, delete task
 - Basic task list UI (no photos yet; text only)
 - Persist tasks to Supabase
 
-### 2.2 Calendar Integration
+### 3.2 Calendar Integration
 - Google Calendar OAuth flow (full implementation)
 - Store OAuth tokens per user in Supabase
 - Fetch today's events from Google Calendar
 - Parse events into "busy windows" (start/end times)
 
-### 2.3 AI Scheduling Engine (v1)
+### 3.3 AI Scheduling Engine (v1)
 - Build prompt for OpenAI: tasks + busy windows + working hours → scheduled blocks
 - Use Structured Outputs to ensure valid JSON response
 - Parse AI response into scheduled blocks
 - Handle overflow (tasks that don't fit)
 - Persist scheduled blocks to Supabase
 
-### 2.4 "Build My Day" Flow
+### 3.4 "Build My Day" Flow
 - API route: `/api/schedule/build` (fetches calendar, calls AI, saves schedule)
 - Wire up task list → "Build my day" button → API call → display schedule
 
-### 2.5 Timeline View
+### 3.5 Timeline View
 - Choose and integrate timeline library
 - Display today's calendar: busy blocks + scheduled tasks
 - Visual distinction between calendar events and scheduled tasks
@@ -122,22 +135,22 @@
 
 ---
 
-## Phase 3: Photo-to-Task
+## Phase 4: Photo-to-Task
 
 **Goal:** Enable users to add tasks by uploading photos (whiteboards, syllabi, handwritten notes).
 
-### 3.1 Photo Upload
+### 4.1 Photo Upload
 - Add photo upload UI (camera or file picker)
 - Upload photos to Supabase Storage
 - Store photo URLs on tasks
 
-### 3.2 Photo-to-Task with OpenAI
+### 4.2 Photo-to-Task with OpenAI
 - Send photo to OpenAI API (multi-modal input)
 - Extract tasks from photo (title, duration, optional deadline)
 - Parse AI response and create tasks in database
 - Show extracted tasks to user (allow edit/confirm before saving)
 
-### 3.3 Photo Display
+### 4.3 Photo Display
 - Show photo thumbnails on tasks
 - Allow users to view full-size photos
 
@@ -145,33 +158,33 @@
 
 ---
 
-## Phase 4: Polish & Validation
+## Phase 5: Polish & Validation
 
 **Goal:** Refine the core experience and validate with real users.
 
-### 4.1 Error Handling & Edge Cases
+### 5.1 Error Handling & Edge Cases
 - Handle OpenAI API errors (rate limits, timeouts, invalid responses)
 - Handle Google Calendar API errors (token refresh, rate limits, no events)
 - Handle edge cases: no tasks, no free time, all-day events, time zones
 - Show user-friendly error messages
 
-### 4.2 UX Improvements
+### 5.2 UX Improvements
 - Loading states (spinners, skeletons)
 - Empty states (no tasks, no schedule, no calendar connected)
 - Confirmation dialogs (delete task, disconnect calendar)
 - Keyboard shortcuts (add task, build day)
 
-### 4.3 Performance Optimization
+### 5.3 Performance Optimization
 - Optimize API routes (parallel fetches where possible)
 - Optimize timeline rendering (virtualization if needed)
 - Minimize OpenAI API calls (cache prompts, use reusable prompts)
 
-### 4.4 Internal Dogfooding
+### 5.4 Internal Dogfooding
 - Use the app daily for 1-2 weeks
 - Identify friction points and bugs
 - Iterate on UX based on team feedback
 
-### 4.5 Browser Notifications
+### 5.5 Browser Notifications
 - Request notification permission in-app
 - Schedule notifications for task start times (client-side, derived from scheduled_blocks)
 - Test notifications on desktop and mobile
@@ -180,22 +193,22 @@
 
 ---
 
-## Phase 5: Beta Launch
+## Phase 6: Beta Launch
 
 **Goal:** Launch to 5-10 external users and gather feedback.
 
-### 5.1 Beta Preparation
+### 6.1 Beta Preparation
 - Set up analytics (track "Build my day" usage, task creation, photo uploads)
 - Set up error logging (Sentry or similar)
 - Create onboarding flow (connect calendar, add first task, build first day)
 - Write beta invite email and feedback survey
 
-### 5.2 Beta Launch
+### 6.2 Beta Launch
 - Invite 5-10 users (mix of students, professionals, engineers)
 - Monitor usage and errors daily
 - Collect feedback via survey and direct conversations
 
-### 5.3 Rapid Iteration
+### 6.3 Rapid Iteration
 - Fix critical bugs within 24 hours
 - Implement quick wins (small UX improvements, error messages)
 - Prioritize P1 features based on feedback
@@ -204,23 +217,23 @@
 
 ---
 
-## Phase 6: Secondary Features (Post-MVP)
+## Phase 7: Secondary Features (Post-MVP)
 
 **Goal:** Add goals and dynamic calendar updates (P1 from MVP doc).
 
-### 6.1 Goals
+### 7.1 Goals
 - Goal data model (professional, academic, social)
 - UI to add/edit goals
 - Link tasks to goals
 - AI scheduling: incorporate goals into placement logic (prioritize goal-related tasks)
 
-### 6.2 Dynamic Calendar Updates
+### 7.2 Dynamic Calendar Updates
 - "Mark task done" UI (checkbox or button)
 - When task is marked done: remove from schedule, re-run AI placement for remaining tasks
 - Show updated schedule in real-time
 - Handle "running late" or "skip task" scenarios
 
-### 6.3 Refinements
+### 7.3 Refinements
 - Multi-day view (tomorrow, this week) - if validated by users
 - Task edit (if delete + re-add is too cumbersome)
 - Calendar event caching (if fetch-on-demand is too slow)
@@ -229,27 +242,27 @@
 
 ---
 
-## Phase 7: Scale & Monetization (Future)
+## Phase 8: Scale & Monetization (Future)
 
 **Goal:** Prepare for broader launch and implement pricing.
 
-### 7.1 Pricing & Billing
+### 8.1 Pricing & Billing
 - Implement free tier (limited AI schedules per month)
 - Implement professional tier ($12-15/mo via Stripe)
 - Implement student discount (50% off with .edu email)
 - Payment flow and subscription management
 
-### 7.2 Multi-Calendar Support (P1)
+### 8.2 Multi-Calendar Support (P1)
 - Add Outlook and Apple Calendar integrations
 - Allow users to connect multiple calendars
 - Merge events from all calendars into one timeline
 
-### 7.3 Integrations for Engineers (P1)
+### 8.3 Integrations for Engineers (P1)
 - Jira, Linear, GitHub integration (import tasks)
 - Focus Time / Deep Work blocking (protect large time blocks)
 - Task chunking (break large tasks into smaller blocks)
 
-### 7.4 Go-to-Market
+### 8.4 Go-to-Market
 - Product Hunt launch
 - Reddit community outreach (r/productivity, r/ADHD, r/college)
 - Referral program (invite a peer for extended trial)
@@ -262,16 +275,16 @@
 ## Dependencies & Critical Path
 
 **Critical path (must happen in order):**
-1. Phase 0 (Foundation & Auth) → Phase 1 (Frontend Layout) → Phase 2 (Core Data Flow)
-2. Phase 3 (Photo-to-Task) can happen in parallel with Phase 2 if needed
-3. Phase 4 (Polish) → Phase 5 (Beta) must be sequential
-4. Phase 6+ (Secondary Features) can be prioritized based on beta feedback
+1. Phase 0 (Foundation & Auth) → Phase 1 (Frontend Layout) → Phase 2 (PWA & Hosting) → Phase 3 (Core Data Flow)
+2. Phase 4 (Photo-to-Task) can happen in parallel with Phase 3 if needed
+3. Phase 5 (Polish) → Phase 6 (Beta) must be sequential
+4. Phase 7+ (Secondary Features) can be prioritized based on beta feedback
 
 **External dependencies:**
 - Supabase project setup (can be done in Phase 0)
 - Google Cloud project + OAuth credentials (can be done in Phase 0)
 - OpenAI API key (can be done in Phase 0)
-- Domain name + hosting (Vercel/Netlify; can be done in Phase 0 for PWA)
+- Domain name + hosting (Vercel; done in Phase 2)
 
 ---
 
@@ -307,7 +320,7 @@ These can be added in P1/P2 if validated by users.
 ## Next Steps
 
 1. **Review this plan** with the team
-2. **Use phase plan/roadmap docs** in `ai/roadmaps/`: each phase (0–7) has a plan and roadmap pair
+2. **Use phase plan/roadmap docs** in `ai/roadmaps/`: each phase (0–8) has a plan and roadmap pair
 3. **Complete Phase 0** (Foundation & Auth) — finish auth setup
 4. **Start Phase 1** (Frontend Layout) and build the auth UI + dashboard
 
