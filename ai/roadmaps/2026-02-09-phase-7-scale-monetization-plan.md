@@ -74,12 +74,12 @@ Stride is live, monetized, and growing. Pricing and key P1 integrations (per fee
 
 ## Acceptance Criteria
 
-- [ ] Free tier and professional tier implemented and enforced
-- [ ] Student discount available and verified
-- [ ] Stripe (or chosen provider) integrated; webhooks update Supabase
-- [ ] At least one additional calendar or engineer integration shipped (if prioritized)
-- [ ] Product Hunt launch and community outreach started
-- [ ] Positioning and messaging aligned with PRD
+-Free tier and professional tier implemented and enforced
+-Student discount available and verified
+-Stripe (or chosen provider) integrated; webhooks update Supabase
+-At least one additional calendar or engineer integration shipped (if prioritized)
+-Product Hunt launch and community outreach started
+-Positioning and messaging aligned with PRD
 
 ---
 

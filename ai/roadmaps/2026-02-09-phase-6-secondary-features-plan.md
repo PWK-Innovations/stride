@@ -87,12 +87,12 @@ Goals and dynamic updates shipped. Users can set goals, link tasks to goals, mar
 
 ## Acceptance Criteria
 
-- [ ] Users can add and manage goals (professional, academic, social)
-- [ ] Tasks can be linked to a goal
-- [ ] AI scheduling considers goals (e.g. prioritizes goal-linked tasks)
-- [ ] "Mark task done" updates task and schedule
-- [ ] Re-scheduling runs for remaining tasks (with user approval where appropriate)
-- [ ] Refinements (multi-day, task edit, caching) only if validated by users
+-Users can add and manage goals (professional, academic, social)
+-Tasks can be linked to a goal
+-AI scheduling considers goals (e.g. prioritizes goal-linked tasks)
+-"Mark task done" updates task and schedule
+-Re-scheduling runs for remaining tasks (with user approval where appropriate)
+-Refinements (multi-day, task edit, caching) only if validated by users
 
 ---
 

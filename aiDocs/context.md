@@ -1,22 +1,39 @@
 # Project Context
 
+## Quick Overview
+
+Stride is an AI-powered daily planner that builds your schedule for you. Give it your tasks (text or photos) and your Google Calendar — hit "Plan my day" and the AI does the rest. No manual time-blocking, no drag-and-drop, no configuration rituals. Just a clean daily view of what to do and when.
+
+Built as a Next.js PWA so it works on any device.
+
+## Differentiator
+
+Drop in tasks however you want (quick text, a photo of a syllabus, a voice note), connect your calendar, and tap one button. The AI figures out durations, priorities, and placement. Zero configuration tax. The less the user has to think about the tool, the more they actually use it.
+
+Key differentiators:
+- **Zero-config scheduling** — no manual durations, priority sliders, or project setup required
+- **Multi-modal input** — text, photos (OCR), keeping input friction as low as possible
+- **PWA-first** — installable on any phone, no app store gatekeeping, instant updates
+- **Today-focused** — one day at a time, not an overwhelming weekly/monthly planner
+
 ## Critical Files to Review
 
 - **PRD**: `aiDocs/prd.md` — Product goals, users, P0/P1/P2, success metrics. Start here for what we're building and why.
 - **MVP**: `aiDocs/mvp.md` — Focused MVP: Next.js PWA (installable on phones), task input (text + photos), build daily calendar from tasks + Google Calendar. Goals and dynamic updates are secondary. Source of truth for in/out of scope.
 - **Architecture**: `aiDocs/architecture.md` — System design: Next.js, Supabase (Auth, DB, Storage), OpenAI API, Google Calendar; data flow and key constraints.
 - **Coding style**: `aiDocs/coding-style.md` — Code style and conventions for TypeScript, React, Next.js, Tailwind.
-- **Template reference**: `reference/oatmeal-olive-instrument/` — Oatmeal-olive-instrument template (olive palette, Instrument Serif, Inter; components and layout patterns). Base all app UI and structure on this folder.
+- **Template reference**: `ai/guides/reference/oatmeal-olive-instrument/` — Oatmeal-olive-instrument template (olive palette, Instrument Serif, Inter; components and layout patterns). Base all app UI and structure on this folder.
 - **Changelog**: `aiDocs/changelog.md` — High-level changes; update when you push.
 
 ## Guides & Roadmaps
 
-- **Guides**: `ai/guides/` — API references for implementation: `openai-api-reference.md`, `google-calendar-api-reference.md`. Use these when building the scheduling engine and calendar integration.
+- **Guides**: `ai/guides/` — API references for implementation: `openai-api-reference.md`, `google-calendar-api-reference.md`, `supabase-api-reference.md`. Use these when building the scheduling engine, calendar integration, and backend services.
 - **Implementation plan**: `ai/roadmaps/2026-02-09-stride-implementation-plan.md` — High-level phases (0–7). Each phase has a detailed plan and roadmap in `ai/roadmaps/` (e.g. `2026-02-09-phase-1-core-data-flow-plan.md` and `-roadmap.md`).
 
 ## Behavior
 
 - Whenever creating plan docs and roadmap docs, always save them in ai/roadmaps. Prefix the name with the date. Add a note that we need to avoid over-engineering, cruft, and legacy-compatibility features in this clean code project. Make sure they reference each other.
+- Plans can have items and to-do lists but should NOT use checkboxes (`- [ ]`). Roadmaps built from plans should have checkboxes for tracking progress.
 - Whenever finishing with implementing a plan / roadmap doc pair, make sure the roadmap is up to date (tasks checked off, etc). Then move the docs to ai/roadmaps/complete. Then update aiDocs/changelog.md accordingly.
 
 ## Tech Stack
@@ -37,4 +54,4 @@
 
 ## Current Focus
 
-- Data model and task CRUD (add, list, delete); then calendar connect and "Build my day" with AI (OpenAI API). "Mark done" and dynamic updates are Phase 6 (secondary features).
+- Initial MVP development. Setting up frontend and backend services.

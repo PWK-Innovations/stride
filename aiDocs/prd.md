@@ -6,9 +6,9 @@ The system we are interested in is a daily planner. This includes how individual
 
 ## 2. Target Users
 
-**Primary Users:** Busy college students balancing school and part-time jobs, and professional workers with high-density meeting schedules.
+**Primary Users:** Software engineers for startup companies trying to manage their daily tasks, and professional workers with high-density meeting schedules.
 
-**Secondary Users:** Software engineers for startup companies trying to manage their daily tasks.
+**Secondary Users:** Busy college students balancing school and part-time jobs.
 
 **NOT For:** Individuals who prefer manual scheduling or those whose daily routines do not require frequent adjustments or digital coordination.
 
@@ -76,12 +76,16 @@ The system we are interested in is a daily planner. This includes how individual
 - **PWA-first**: Installable on phones with app-like feel; faster updates than native apps; no app store friction.
 - **Price positioning**: $12-15/mo target (between Reclaim and Motion); more features than Reclaim, more affordable than Motion.
 - **Active AI scheduling**: Automated daily schedule construction (not just habit defense or suggestions).
+- **Dynamic rescheduling with AI**: When plans change or tasks run over, the AI rebuilds the rest of the day automatically.
 
 ## 7. Out of Scope
 
 - Manual-only planning tools that rely heavily on users to prioritize work manually.
 - Basic "container" apps (like simple Notes apps) that act only as storage for information.
 - Physical/analog planning coordination.
+- Team/shared calendars — single user only, no team scheduling.
+- Multiple calendar providers — Google Calendar only for MVP.
+- Native mobile apps — PWA only.
 
 ## 8. Risks and Mitigations
 
@@ -93,11 +97,6 @@ The system we are interested in is a daily planner. This includes how individual
 
 - **Risk:** Users find the initial setup too difficult or continue to manage schedules manually.  
   **Mitigation:** Automate the "best time" selection process to reduce the need for manual input.
-
-## Technical Foundation
-
-- **Backend / data:** Supabase (Auth, PostgreSQL, Storage for task photos). Google Calendar attached per user (tokens in Supabase).
-- **AI:** OpenAI API for schedule construction and smart placement; called from Next.js API routes, key in env only. See `aiDocs/architecture.md` for details.
 
 ## 9. Pricing and Go-to-Market (High-Level)
 

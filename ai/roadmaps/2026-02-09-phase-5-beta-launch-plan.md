@@ -137,24 +137,24 @@ MVP validated with real users. Clear signal on what works, what doesn't, and wha
 
 ## Acceptance Criteria
 
-- [ ] Analytics and error logging are set up
-- [ ] Onboarding flow is implemented
-- [ ] 5-10 beta users have been recruited
-- [ ] Beta users have used the app for 3-5 days
-- [ ] Feedback survey completed by at least 50% of users
-- [ ] 1-on-1 calls completed with 2-3 users
-- [ ] Critical bugs fixed within 24 hours
-- [ ] Top UX issues addressed
-- [ ] Decision made on P1 feature priorities
+-Analytics and error logging are set up
+-Onboarding flow is implemented
+-5-10 beta users have been recruited
+-Beta users have used the app for 3-5 days
+-Feedback survey completed by at least 50% of users
+-1-on-1 calls completed with 2-3 users
+-Critical bugs fixed within 24 hours
+-Top UX issues addressed
+-Decision made on P1 feature priorities
 
 ---
 
 ## Success Metrics (from MVP doc)
 
-- [ ] Users can add tasks and build their day in <5 minutes
-- [ ] Schedule is realistic (no overlaps, tasks fit in free time)
-- [ ] Users would use this daily (60%+ retention target)
-- [ ] Users report reduced planning time (qualitative)
+-Users can add tasks and build their day in <5 minutes
+-Schedule is realistic (no overlaps, tasks fit in free time)
+-Users would use this daily (60%+ retention target)
+-Users report reduced planning time (qualitative)
 
 ---
 
