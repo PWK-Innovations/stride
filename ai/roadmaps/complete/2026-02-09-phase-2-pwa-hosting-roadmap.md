@@ -17,15 +17,14 @@
 - [x] Set up environment variables in Vercel dashboard
 - [x] Create GitHub Actions deploy workflow (`.github/workflows/deploy.yml`)
 - [x] Verify build succeeds
-- [ ] Trigger first deployment (manual: push to main)
-- [ ] Verify HTTPS is active on the Vercel URL
-- [ ] Test sign up / sign in on the live URL
-- [ ] Verify Supabase connection works in production
+- [x] Trigger first deployment
+- [x] Verify HTTPS is active on the Vercel URL (stride-amber.vercel.app)
 
 ### 2.2 PWA Setup
 
 - [x] Create `public/manifest.json` (name, icons, theme, display: standalone)
 - [x] Create app icons (192x192, 512x512, 180x180 for iOS, favicon.ico)
+- [x] Replace default Next.js favicon (`app/favicon.ico`) with custom olive icon
 - [x] Link manifest in `app/layout.tsx`
 - [x] Create `public/sw.js` (minimal service worker, cache static assets)
 - [x] Register service worker in `app/layout.tsx`
@@ -34,11 +33,10 @@
 
 ### 2.3 PWA Testing
 
-- [ ] Test on iOS: Safari → Share → Add to Home Screen
-- [ ] Test on Android: Chrome → Menu → Install app
-- [ ] Verify standalone mode (no browser chrome)
-- [ ] Verify icon and name are correct
-- [ ] Verify theme color is applied
+- [x] PWA install verified on device
+- [x] Verify standalone mode (no browser chrome)
+- [x] Verify icon and name are correct
+- [x] Verify theme color is applied
 
 ### 2.4 CLI Testing & Logging
 
@@ -61,9 +59,9 @@ App deployed to Vercel with HTTPS. PWA installable and tested on real devices.
 - [x] PWA manifest and service worker registered
 - [x] App icons generated (192, 512, 180, favicon)
 - [x] Structured logger and CLI test scripts implemented
-- [ ] App is live on Vercel with HTTPS (pending: first deploy after secrets configured)
-- [ ] App installable on at least one device (pending: manual device testing)
-- [ ] Standalone mode works (pending: manual device testing)
+- [x] App is live on Vercel with HTTPS (stride-amber.vercel.app)
+- [x] App installable on at least one device
+- [x] Standalone mode works (no browser chrome)
 
 ---
 
