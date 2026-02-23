@@ -47,7 +47,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { title, notes, duration_minutes } = body;
+    const { title, notes, duration_minutes, photo_url } = body;
 
     if (!title) {
       return NextResponse.json(
@@ -63,6 +63,7 @@ export async function POST(request: NextRequest) {
         title,
         notes: notes || null,
         duration_minutes: duration_minutes || 30,
+        photo_url: photo_url || null,
       })
       .select()
       .single();

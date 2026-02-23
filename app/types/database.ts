@@ -19,6 +19,12 @@ export interface Task {
   updated_at: string;
 }
 
+export interface ExtractedTask {
+  title: string;
+  duration_minutes: number;
+  notes: string | null;
+}
+
 export interface ScheduledBlock {
   id: string;
   user_id: string;

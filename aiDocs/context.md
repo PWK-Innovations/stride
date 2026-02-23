@@ -55,4 +55,5 @@ Key differentiators:
 ## Current Focus
 
 - Phase 3 complete (Core Data Flow). Task CRUD, Google Calendar integration, AI scheduling, "Build my day" flow, and timeline view all working. Google Calendar connect button wired into dashboard.
-- Next up: Phase 4 (Photo-to-Task with AI vision).
+- Phase 4a complete (Photo-to-Task). Photo capture → OpenAI Vision extraction → review/edit → save tasks with photo URL. Supabase Storage bucket for task photos.
+- Next up: Phase 4b (Audio-to-Task) or Phase 5 (Polish).
