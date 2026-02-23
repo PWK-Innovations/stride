@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Inter, Instrument_Serif } from "next/font/google";
 import "./globals.css";
 
@@ -13,11 +13,14 @@ const instrumentSerif = Instrument_Serif({
   weight: ["400"],
 });
 
+export const viewport: Viewport = {
+  themeColor: "#757d4a",
+};
+
 export const metadata: Metadata = {
   title: "Stride",
   description: "AI-powered daily planner",
   manifest: "/manifest.json",
-  themeColor: "#757d4a",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
@@ -33,9 +36,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <link rel="manifest" href="/manifest.json" />
-        <meta name="theme-color" content="#757d4a" />
-        <link rel="apple-touch-icon" href="/icon-192.png" />
+        <link rel="apple-touch-icon" sizes="180x180" href="/icon-180.png" />
       </head>
       <body
         className={`${inter.variable} ${instrumentSerif.variable} font-sans antialiased`}

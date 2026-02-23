@@ -40,3 +40,16 @@ High-level changes; add a line or two here when you commit and push.
 - **Dependencies:** Installed `@supabase/ssr`, `@headlessui/react`, `@heroicons/react`.
 - **Supabase MCP:** Configured Supabase MCP server for direct database access from Claude Code.
 - **Roadmaps:** Moved Phase 0 and Phase 1 roadmaps to `ai/roadmaps/complete/`.
+
+## 2026-02-23
+
+- **Phase 2: PWA & Hosting (code complete).**
+- **Structured Logger:** Created `lib/logger.ts` — `createLogger(context)` factory with info/warn/error levels. JSON output in production, readable format in dev. Integrated into schedule build route, Google refresh/calendar, OpenAI engine, and notifications.
+- **PWA Icons:** Generated olive-themed "S" lettermark icons (192px, 512px, 180px for iOS, 32px favicon). Removed placeholder `.txt` files.
+- **iOS PWA Fix:** Added 180x180 `apple-touch-icon` for proper iOS home screen display.
+- **themeColor Fix:** Moved `themeColor` from deprecated `metadata` export to `viewport` export per Next.js 16 API.
+- **CLI Test Scripts:** Created `scripts/test-supabase.ts`, `test-openai.ts`, `test-google.ts`. Added `npm run test:supabase`, `test:openai`, `test:google`, `test:all` scripts. Dev dependencies: `tsx`, `dotenv`.
+- **GitHub Actions Deploy:** Created `.github/workflows/deploy.yml` — triggers on push to main, builds and deploys to Vercel via CLI. Requires repo secrets: `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID`.
+- **Build Fixes:** Fixed pre-existing TypeScript errors: `FeaturesThreeColumn` children→features prop in about page, `DailyTimeline` Moment→number type for timeline bounds.
+- **Dependencies:** Installed `@headlessui/react`, `@heroicons/react`, `@supabase/ssr` (missing from node_modules). Added `sharp`, `tsx`, `dotenv` as dev dependencies.
+- **Roadmaps:** Updated Phase 2 roadmap (tasks checked off) and moved plan + roadmap to `ai/roadmaps/complete/`.

@@ -89,8 +89,8 @@ export function DailyTimeline({ scheduledBlocks, busyWindows = [] }: DailyTimeli
       <Timeline
         groups={groups}
         items={items}
-        defaultTimeStart={startOfDay}
-        defaultTimeEnd={endOfDay}
+        defaultTimeStart={startOfDay.valueOf()}
+        defaultTimeEnd={endOfDay.valueOf()}
         canMove={false}
         canResize={false}
         canChangeGroup={false}

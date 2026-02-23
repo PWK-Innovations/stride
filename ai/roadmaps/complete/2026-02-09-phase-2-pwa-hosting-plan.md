@@ -2,7 +2,7 @@
 
 **Date:** 2026-02-09
 **Phase:** 2 - PWA & Hosting
-**Status:** Not started
+**Status:** Complete
 **Parent Plan:** `2026-02-08-stride-high-level-plan.md`
 **Roadmap:** `2026-02-09-phase-2-pwa-hosting-roadmap.md`
 **Previous Phase:** `2026-02-09-phase-1-frontend-layout-plan.md`
@@ -33,15 +33,15 @@ Deploy the app to Vercel for HTTPS hosting, set up PWA support (manifest, servic
 
 ### Connect Repository
 
-- Connect the Stride GitHub repo to Vercel
+- Connect the Stride GitHub repo to Vercel via GitHub Actions + Vercel CLI (org owner permission issue prevents native Vercel GitHub App)
 - Configure framework preset (Next.js)
 - Set up environment variables in Vercel dashboard (Supabase, OpenAI, Google OAuth)
 
 ### Deploy
 
-- Trigger first deployment
-- Verify build succeeds
-- Verify HTTPS is active on the Vercel URL
+- GitHub Actions workflow at `.github/workflows/deploy.yml` triggers on push to main
+- Uses `vercel build --prod` and `vercel deploy --prebuilt --prod`
+- Deployment status checks visible in GitHub (pending/success/failed)
 
 ### Verify Production
 
@@ -56,20 +56,21 @@ Deploy the app to Vercel for HTTPS hosting, set up PWA support (manifest, servic
 ### Create Web App Manifest
 
 Create `public/manifest.json`:
-- `name`: "Stride"
+- `name`: "Stride - AI Daily Planner"
 - `short_name`: "Stride"
-- `description`: "AI-powered daily planner"
+- `description`: "AI-powered daily planner that builds your schedule automatically"
 - `start_url`: "/"
 - `display`: "standalone"
-- `theme_color`: olive-600 (from theme)
-- `background_color`: olive-100 (from theme)
-- `icons`: 192x192 and 512x512
+- `theme_color`: #757d4a (olive-600)
+- `background_color`: #f3f4ed (olive-100)
+- `icons`: 192x192 and 512x512 (purpose: any maskable)
 
-Link in `app/layout.tsx`:
+Link in `app/layout.tsx` via metadata export.
 
-```html
-<link rel="manifest" href="/manifest.json" />
-```
+### App Icons
+
+- Generated olive-themed "S" lettermark icons at 192px, 512px, 180px (iOS), and 32px (favicon)
+- Olive-600 (#6b7040) text on olive-50 (#fafaf5) background with rounded corners
 
 ### Set up Service Worker
 
@@ -101,20 +102,19 @@ Register service worker in `app/layout.tsx` (client-side script)
 
 ### Structured Logging
 
-- Replace ad-hoc `console.log` calls with structured logging (context, level, timestamps)
-- Ensure API routes and integration helpers use consistent log format
+- Created `lib/logger.ts` with `createLogger(context)` factory
+- Log levels: info, warn, error
+- Structured output: `{ timestamp, level, context, message, data? }`
+- JSON format in production, readable format in development
+- Integrated into: schedule build route, Google refresh/calendar, OpenAI engine, notifications
 
 ### CLI Test Scripts
 
-- Create CLI test scripts for key integrations (Supabase, OpenAI, Google Calendar)
-- Scripts should be runnable via `npm run test:*` or similar
-- Each script reports pass/fail with meaningful output
-
-### Test-Log-Fix Loop
-
-- Use structured logs to identify failures
-- Fix issues and commit with clear messages showing the test → log → fix cycle
-- Evidence of this loop should be visible in git history
+- `scripts/test-supabase.ts` — Tests Supabase connectivity (profiles + tasks tables)
+- `scripts/test-openai.ts` — Tests OpenAI API (simple completion call)
+- `scripts/test-google.ts` — Tests Google token refresh (if tokens exist)
+- All runnable via `npm run test:supabase`, `test:openai`, `test:google`, `test:all`
+- Dev dependencies added: `tsx`, `dotenv`
 
 ---
 

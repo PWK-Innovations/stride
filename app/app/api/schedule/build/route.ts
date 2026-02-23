@@ -5,6 +5,9 @@ import { parseBusyWindows } from '@/lib/google/parseBusyWindows';
 import { buildSchedulePrompt } from '@/lib/openai/buildSchedulePrompt';
 import { callSchedulingEngine } from '@/lib/openai/callSchedulingEngine';
 import { refreshAccessToken } from '@/lib/google/refreshAccessToken';
+import { createLogger } from '@/lib/logger';
+
+const logger = createLogger("api:schedule");
 
 export async function POST() {
   try {
@@ -132,7 +135,7 @@ export async function POST() {
       busy_windows: busyWindows,
     });
   } catch (error: any) {
-    console.error('Build schedule error:', error);
+    logger.error("Build schedule failed", { error: error.message || String(error) });
     return NextResponse.json(
       { error: error.message || 'Internal server error' },
       { status: 500 }
