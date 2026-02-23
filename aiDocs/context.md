@@ -2,7 +2,7 @@
 
 ## Quick Overview
 
-Stride is an AI-powered daily planner that builds your schedule for you. Give it your tasks (text or photos) and your Google Calendar — hit "Plan my day" and the AI does the rest. No manual time-blocking, no drag-and-drop, no configuration rituals. Just a clean daily view of what to do and when.
+Stride is an AI-powered daily planner that builds your schedule for you. Give it your tasks (text, photos, or voice memos) and your Google Calendar — hit "Plan my day" and the AI does the rest. No manual time-blocking, no drag-and-drop, no configuration rituals. Just a clean daily view of what to do and when.
 
 Built as a Next.js PWA so it works on any device.
 
@@ -12,7 +12,7 @@ Drop in tasks however you want (quick text, a photo of a syllabus, a voice note)
 
 Key differentiators:
 - **Zero-config scheduling** — no manual durations, priority sliders, or project setup required
-- **Multi-modal input** — text, photos (OCR), keeping input friction as low as possible
+- **Multi-modal input** — text, photos (OCR), voice memos (Whisper transcription), keeping input friction as low as possible
 - **PWA-first** — installable on any phone, no app store gatekeeping, instant updates
 - **Today-focused** — one day at a time, not an overwhelming weekly/monthly planner
 
@@ -47,7 +47,7 @@ Key differentiators:
 
 ## Important Notes
 
-- MVP scope: today only, one calendar (Google), task input (text + photos), "Build my day" / "Plan my day" builds the schedule. See mvp.md before adding features.
+- MVP scope: today only, one calendar (Google), task input (text + photos + voice), "Build my day" / "Plan my day" builds the schedule. See mvp.md before adding features.
 - We ship as a PWA so users can install on their phones; use browser notifications for reminders.
 - Update **Current Focus** in this file regularly when priorities change.
 - **Secrets**: Never commit API keys. Use env vars for Supabase (URL, anon key, service role), OpenAI API key, and Google OAuth client credentials.
@@ -55,5 +55,5 @@ Key differentiators:
 ## Current Focus
 
 - Phase 3 complete (Core Data Flow). Task CRUD, Google Calendar integration, AI scheduling, "Build my day" flow, and timeline view all working. Google Calendar connect button wired into dashboard.
-- Phase 4a complete (Photo-to-Task). Photo capture → OpenAI Vision extraction → review/edit → save tasks with photo URL. Supabase Storage bucket for task photos.
-- Next up: Phase 4b (Audio-to-Task) or Phase 5 (Polish).
+- Phase 4 complete (Photo & Audio to Task). Photo capture → OpenAI Vision extraction → review/edit → save tasks with photo URL. Voice recording/audio upload → OpenAI Whisper transcription → GPT-4o-mini task extraction → review/edit → save. Supabase Storage bucket for task photos.
+- Next up: Phase 5 (Polish & Validation).

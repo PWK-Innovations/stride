@@ -76,3 +76,11 @@ High-level changes; add a line or two here when you commit and push.
 - **Tasks API Update:** Updated `POST /api/tasks` to accept and store `photo_url` field.
 - **Dashboard Update:** Updated `app/app/page.tsx` — "Snap tasks" button with camera icon triggers photo capture, extraction review UI, photo upload on confirm, task thumbnails in list, click thumbnail opens PhotoModal.
 - **Next.js Config:** Added Supabase Storage hostname to `images.remotePatterns` for task photo display.
+- **Phase 4b: Audio-to-Task.**
+- **Whisper Transcription:** Created `lib/openai/transcribeAudio.ts` — sends audio File to OpenAI Whisper API (`whisper-1`), returns transcription text.
+- **Text Extraction:** Created `lib/openai/extractTasksFromText.ts` — sends transcription text to GPT-4o-mini with structured JSON output, same schema as photo extraction.
+- **Audio Recorder Hook:** Created `lib/audio/useAudioRecorder.ts` — React hook wrapping MediaRecorder API. Prefers `audio/webm;codecs=opus`, falls back to `audio/mp4` (Safari). Returns `isRecording`, `duration`, `audioBlob`, `audioUrl`, `error`, `start`, `stop`, `reset`. Handles mic permission denied.
+- **Extract Audio API:** Created `POST /api/tasks/extract-audio` — accepts FormData with audio file, validates type (WebM/MP4/MP3/WAV/OGG/M4A with codec suffix support) and size (25 MB), transcribes via Whisper, extracts tasks, returns `{ tasks, transcription }`.
+- **ExtractedTasksReview Update:** Added optional `loadingMessage` and `emptyMessage` props for audio-specific messaging, backward-compatible defaults.
+- **Dashboard Update:** Added "Voice tasks" button with live recording indicator, audio file upload, audio preview bar with playback/extract/discard controls, collapsible transcription display. Shared extraction flow with photo via `extractionSource` state.
+- **Roadmaps:** Updated Phase 4 roadmap (all tasks checked off), moved plan + roadmap to `ai/roadmaps/complete/`. Phase 4 complete.
