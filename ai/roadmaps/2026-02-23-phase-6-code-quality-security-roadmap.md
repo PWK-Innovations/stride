@@ -2,7 +2,7 @@
 
 **Date:** 2026-02-23
 **Phase:** 6 - Code Quality & Security
-**Status:** Not started
+**Status:** In progress
 **Plan:** `2026-02-23-phase-6-code-quality-security-plan.md`
 **Previous Phase:** `2026-02-09-phase-5-polish-validation-roadmap.md`
 
@@ -12,19 +12,19 @@
 
 ### 6.1 CLI Testing Infrastructure
 
-- [ ] Create `scripts/` directory at app root
-- [ ] Create `scripts/build.sh` — compile/build the app (set -e, --help flag, exit codes)
-- [ ] Create `scripts/run.sh` — run the app (set -e, --help flag, exit codes)
-- [ ] Create `scripts/test.sh` — run test suite with JSON output (set -e, --help flag, source .testEnvVars, exit codes)
-- [ ] Create `scripts/lint.sh` — run linting (set -e, --help flag, exit codes)
-- [ ] Create `scripts/dev.sh` — start dev server (set -e, --help flag, exit codes)
-- [ ] Ensure all scripts are executable (`chmod +x`)
-- [ ] Verify JSON output from test scripts is parseable
-- [ ] Verify data goes to stdout, errors/diagnostics to stderr
-- [ ] Verify all exit codes are correct (0, 1, 2, 126, 127, 130)
-- [ ] **Explore phase:** Run dev server, have AI explore all endpoints with valid/invalid inputs, edge cases, missing auth, and log inspection
-- [ ] **Codify phase:** Based on exploration findings, create `scripts/test-integration.sh` with repeatable tests (happy path, edge cases, failure modes, JSON output, exit codes)
-- [ ] Verify test-integration.sh runs unattended and produces parseable results
+- [x] Create `scripts/` directory at app root
+- [x] Create `scripts/build.sh` — compile/build the app (set -e, --help flag, exit codes)
+- [x] Create `scripts/run.sh` — run the app (set -e, --help flag, exit codes)
+- [x] Create `scripts/test.sh` — run test suite with JSON output (set -e, --help flag, source .testEnvVars, exit codes)
+- [x] Create `scripts/lint.sh` — run linting (set -e, --help flag, exit codes)
+- [x] Create `scripts/dev.sh` — start dev server (set -e, --help flag, exit codes)
+- [x] Ensure all scripts are executable (`chmod +x`)
+- [x] Verify JSON output from test scripts is parseable
+- [x] Verify data goes to stdout, errors/diagnostics to stderr
+- [x] Verify all exit codes are correct (0, 1, 2, 126, 127, 130)
+- [x] **Explore phase:** Run dev server, have AI explore all endpoints with valid/invalid inputs, edge cases, missing auth, and log inspection
+- [x] **Codify phase:** Based on exploration findings, create `scripts/test-integration.sh` with repeatable tests (happy path, edge cases, failure modes, JSON output, exit codes)
+- [x] Verify test-integration.sh runs unattended and produces parseable results
 
 ### 6.2 Structured Logging
 

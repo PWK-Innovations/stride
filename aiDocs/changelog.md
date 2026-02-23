@@ -101,3 +101,9 @@ High-level changes; add a line or two here when you commit and push.
 - **Build Route Update:** `POST /api/schedule/build` now accepts `timezone` and `retry` from request body. On retry, loads existing blocks as context for the AI.
 - **Scheduling Spread Rule:** Added Rule 5 ("SPREAD TASKS OUT") to AI scheduling prompt — instructs GPT-4o-mini to distribute tasks across the full working window instead of clustering them in the morning. Renumbered subsequent rules.
 - **Remove Debug Override:** Removed hardcoded 8 AM `currentTime` override from dashboard; scheduler now uses real browser time as the effective start.
+- **Phase 6.1: CLI Testing Infrastructure.**
+- **Shell Scripts:** Created 5 standard shell scripts in `app/scripts/` (`build.sh`, `run.sh`, `test.sh`, `lint.sh`, `dev.sh`) — all with `set -e`, `--help` flag, JSON stdout, stderr diagnostics, standard exit codes.
+- **Auth Helper:** Created `scripts/auth-helper.sh` — signs up/signs in a test user via Supabase REST API, constructs `@supabase/ssr`-compatible session cookie, saves to `scripts/.test-cookies` for curl-based testing.
+- **Explore Phase:** 3 parallel agents curled the running dev server testing public endpoints, task CRUD, and schedule/profile routes. Discovered 3 bugs: malformed JSON body → 500 (should be 400), delete nonexistent UUID → 200 (should be 404), delete invalid UUID → 500 leaking raw Postgres error.
+- **Integration Tests:** Created `scripts/test-integration.sh` — 18 automated tests covering smoke tests, auth guards, profile, task CRUD (create/validate/list/delete/verify), and schedule endpoints. Outputs structured JSON results. All 18 pass.
+- **Gitignore:** Added `scripts/.test-cookies` to `.gitignore`.
