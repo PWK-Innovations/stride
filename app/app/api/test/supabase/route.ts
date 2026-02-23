@@ -1,8 +1,10 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase/client';
+import { createClient } from '@/lib/supabase/server';
 
 export async function GET() {
   try {
+    const supabase = await createClient();
+
     // Test connection by querying the tasks table
     const { data, error } = await supabase
       .from('tasks')

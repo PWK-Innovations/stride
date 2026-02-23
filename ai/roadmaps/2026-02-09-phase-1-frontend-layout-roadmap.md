@@ -12,33 +12,33 @@
 
 ### 1.1 Sign Up & Sign In Pages
 
-- [ ] Create `app/login/page.tsx` (email/password form)
-- [ ] Implement sign in with Supabase Auth (signInWithPassword)
-- [ ] Add link to signup page
-- [ ] On success: redirect to `/app`
-- [ ] Show error messages for invalid credentials
-- [ ] Style with olive theme (Instrument Serif heading, Inter body)
-- [ ] Create `app/signup/page.tsx` (email/password form)
-- [ ] Implement sign up with Supabase Auth (signUp)
-- [ ] Add link to login page
-- [ ] On success: redirect to `/app` or show confirmation
-- [ ] Show error messages for invalid input
-- [ ] Style with olive theme
-- [ ] Handle email confirmation flow if enabled
-- [ ] Test: signup → login → access app → sign out → blocked from app
+- [x] Create `app/login/page.tsx` (email/password form)
+- [x] Implement sign in with Supabase Auth (signInWithPassword)
+- [x] Add link to signup page
+- [x] On success: redirect to `/app`
+- [x] Show error messages for invalid credentials
+- [x] Style with olive theme (Instrument Serif heading, Inter body)
+- [x] Create `app/signup/page.tsx` (email/password form)
+- [x] Implement sign up with Supabase Auth (signUp)
+- [x] Add link to login page
+- [x] On success: redirect to `/app` or show confirmation
+- [x] Show error messages for invalid input
+- [x] Style with olive theme
+- [x] Handle email confirmation flow if enabled
+- [x] Test: signup → login → access app → sign out → blocked from app
 
 ### 1.2 Dashboard Layout
 
-- [ ] Create `app/app/layout.tsx` (header, nav, main content area)
-- [ ] Add app name ("Stride") to header
-- [ ] Add user email/avatar to header
-- [ ] Add sign out button to header
+- [x] Create `app/app/layout.tsx` (header, nav, main content area)
+- [x] Add app name ("Stride") to header
+- [x] Add user email/avatar to header
+- [x] Add sign out button to header
 - [x] Create `app/app/page.tsx` (dashboard)
 - [x] Add task list placeholder area
 - [x] Add "Build my day" button placeholder area
 - [x] Add timeline/schedule placeholder area
 - [x] Add empty states ("Add tasks to get started", "Connect Google Calendar")
-- [ ] Wire up sign out button (signOut → redirect to /login)
+- [x] Wire up sign out button (signOut → redirect to /login)
 - [x] Style with olive theme
 
 ### 1.3 Responsive Design
@@ -78,13 +78,23 @@ Sign up/in pages, dashboard layout, responsive design, and marketing pages.
 
 ## Acceptance Criteria
 
-- [ ] All 1.1 and 1.2 tasks checked off
-- [ ] Sign up and sign in work with Supabase Auth
-- [ ] Dashboard layout is functional (header, nav, content areas)
-- [ ] Unauthenticated users redirected to /login
+- [x] All 1.1 and 1.2 tasks checked off
+- [x] Sign up and sign in work with Supabase Auth
+- [x] Dashboard layout is functional (header, nav, content areas)
+- [x] Unauthenticated users redirected to /login
 - [x] Responsive design works on mobile
 - [x] Marketing pages are complete and unaffected
-- [ ] Olive theme applied consistently
+- [x] Olive theme applied consistently
+
+---
+
+## Notes
+
+- Login page includes "Remember me" checkbox, "Forgot password?" link, and "Or continue with Google" button
+- Signup page includes "Or continue with Google" button
+- Dashboard uses sidebar layout adapted from Tailwind reference (sideBarLayout.tsx) with olive theme
+- DashboardShell component at `components/features/DashboardShell.tsx` — mobile drawer + desktop fixed sidebar
+- Google OAuth button is placeholder (`href="#"`) — wire to Supabase OAuth later
 
 ---
 
