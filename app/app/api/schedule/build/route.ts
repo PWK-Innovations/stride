@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase/client';
+import { createClient } from '@/lib/supabase/server';
 import { fetchTodaysEvents } from '@/lib/google/fetchTodaysEvents';
 import { parseBusyWindows } from '@/lib/google/parseBusyWindows';
 import { buildSchedulePrompt } from '@/lib/openai/buildSchedulePrompt';
@@ -8,6 +8,8 @@ import { refreshAccessToken } from '@/lib/google/refreshAccessToken';
 
 export async function POST() {
   try {
+    const supabase = await createClient();
+
     // 1. Authenticate user
     const {
       data: { user },

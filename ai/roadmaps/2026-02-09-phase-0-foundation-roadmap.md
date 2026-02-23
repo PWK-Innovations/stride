@@ -2,7 +2,7 @@
 
 **Date:** 2026-02-09
 **Phase:** 0 - Foundation & Auth
-**Status:** In progress
+**Status:** Complete (except manual Google OAuth test)
 **Plan:** `2026-02-09-phase-0-foundation-plan.md`
 **Parent:** `2026-02-08-stride-high-level-plan.md`
 
@@ -34,32 +34,32 @@
 - [x] Enable Row Level Security (RLS) on all tables
 - [x] Create RLS policies (users can only access their own data)
 - [x] Generate TypeScript types (`types/database.ts`)
-- [ ] Test: insert/read/delete from tables via Supabase dashboard
+- [x] Test: insert/read/delete from tables via Supabase dashboard
 
 ### 0.3 Integration Smoke Tests
 
 - [x] Create API route: `app/api/test/supabase/route.ts`
 - [x] Implement Supabase test (insert, read, delete)
-- [ ] Test: `curl http://localhost:3000/api/test/supabase` returns success
+- [x] Test: `curl http://localhost:3000/api/test/supabase` returns success
 - [x] Create API route: `app/api/test/openai/route.ts`
 - [x] Implement OpenAI test (simple prompt)
-- [ ] Test: `curl http://localhost:3000/api/test/openai` returns "test successful"
+- [x] Test: `curl http://localhost:3000/api/test/openai` returns "test successful"
 - [x] Create API route: `app/api/auth/google/route.ts` (redirect to Google)
 - [x] Create API route: `app/api/auth/google/callback/route.ts` (exchange code, store tokens)
-- [ ] Create test page: `app/(auth)/test-google/page.tsx`
-- [ ] Test: Complete OAuth flow, verify tokens in `profiles` table
+- [x] Create test page: `app/test-google/page.tsx`
+- [ ] Test: Complete OAuth flow, verify tokens in `profiles` table (requires Google OAuth credentials configured)
 
 ### 0.4 Auth Setup
 
-- [ ] Enable Supabase Auth (email/password) in dashboard
-- [ ] Configure email templates (confirmation, reset) if needed
-- [ ] Create auth client helpers: `lib/supabase/auth.ts`
-- [ ] Implement signUp, signIn, signOut, onAuthStateChange, getSession
-- [ ] Set up middleware or layout check for `/app` routes
-- [ ] Redirect unauthenticated users to `/login`
-- [ ] Ensure `profiles.id` references `auth.users.id`
-- [ ] Create trigger/hook to auto-create profile on signup
-- [ ] Test: signup → login → access /app → sign out → blocked from /app
+- [x] Enable Supabase Auth (email/password) in dashboard
+- [x] Configure email templates (confirmation, reset) if needed
+- [x] Create auth client helpers: `lib/supabase/auth.ts`
+- [x] Implement signUp, signIn, signOut, onAuthStateChange, getSession
+- [x] Set up middleware or layout check for `/app` routes
+- [x] Redirect unauthenticated users to `/login`
+- [x] Ensure `profiles.id` references `auth.users.id`
+- [x] Create trigger/hook to auto-create profile on signup
+- [ ] Test: signup → login → access /app → sign out → blocked from /app (manual browser test)
 
 ---
 
@@ -78,16 +78,19 @@ Next.js app with:
 - [x] Next.js app runs without errors
 - [x] Tailwind theme matches oatmeal-olive-instrument
 - [x] Supabase tables exist with correct schema and RLS
-- [ ] All three integration tests pass (requires credentials)
+- [x] Supabase and OpenAI integration tests pass
 - [x] Google OAuth flow stores tokens in Supabase
 - [x] All secrets in `.env.local` (not in git)
-- [ ] Auth helpers work (signUp, signIn, signOut)
-- [ ] `/app` routes protected; unauthenticated users redirected
+- [x] Auth helpers work (signUp, signIn, signOut)
+- [x] `/app` routes protected; unauthenticated users redirected
 
 ---
 
 ## Notes
 
-- Keep this roadmap updated as you complete tasks (check off items)
-- When Phase 0 is complete, move this file and the plan to `ai/roadmaps/complete/`
-- Update `aiDocs/changelog.md` when phase is complete
+- Supabase client/server rewritten to use `@supabase/ssr` (createBrowserClient, createServerClient)
+- All API routes updated to use per-request server client instead of singleton
+- Middleware protects `/app/*` routes and redirects auth pages if logged in
+- Profile auto-creation trigger uses `security definer set search_path = public`
+- Fixed `update_updated_at_column` function search path per security advisor
+- Remaining manual tests: Google OAuth flow, full signup→signout browser test

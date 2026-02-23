@@ -88,183 +88,171 @@ export default function AppPage() {
   };
 
   return (
-    <div className="min-h-screen bg-olive-50 dark:bg-olive-950">
-      <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-12 lg:px-8">
-        {/* Header */}
-        <div className="mb-6 sm:mb-8">
-          <h1 className="text-3xl sm:text-4xl font-display font-bold text-olive-900 dark:text-olive-50">
-            Stride
-          </h1>
-          <p className="mt-2 text-sm sm:text-base text-olive-600 dark:text-olive-400">
-            Add your tasks and build your day with AI
-          </p>
-        </div>
-
-        {/* Add Task Form */}
-        <div className="mb-8 rounded-lg border border-olive-200 bg-white p-6 shadow-sm dark:border-olive-800 dark:bg-olive-900">
-          <h2 className="mb-4 text-xl font-display font-semibold text-olive-900 dark:text-olive-50">
-            Add a task
-          </h2>
-          <form onSubmit={addTask} className="space-y-4">
-            <div>
-              <label
-                htmlFor="title"
-                className="block text-sm font-medium text-olive-700 dark:text-olive-300"
-              >
-                Title
-              </label>
-              <input
-                type="text"
-                id="title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                className="mt-1 block w-full rounded-md border border-olive-300 bg-white px-3 py-2 text-olive-900 placeholder-olive-400 focus:border-olive-500 focus:outline-none focus:ring-1 focus:ring-olive-500 dark:border-olive-700 dark:bg-olive-800 dark:text-olive-100"
-                placeholder="Review Q3 report"
-                required
-              />
-            </div>
-
-            <div>
-              <label
-                htmlFor="notes"
-                className="block text-sm font-medium text-olive-700 dark:text-olive-300"
-              >
-                Notes (optional)
-              </label>
-              <textarea
-                id="notes"
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                rows={2}
-                className="mt-1 block w-full rounded-md border border-olive-300 bg-white px-3 py-2 text-olive-900 placeholder-olive-400 focus:border-olive-500 focus:outline-none focus:ring-1 focus:ring-olive-500 dark:border-olive-700 dark:bg-olive-800 dark:text-olive-100"
-                placeholder="Check metrics and prepare summary"
-              />
-            </div>
-
-            <div>
-              <label
-                htmlFor="duration"
-                className="block text-sm font-medium text-olive-700 dark:text-olive-300"
-              >
-                Duration (minutes)
-              </label>
-              <input
-                type="number"
-                id="duration"
-                value={duration}
-                onChange={(e) => setDuration(parseInt(e.target.value))}
-                min="5"
-                step="5"
-                className="mt-1 block w-32 rounded-md border border-olive-300 bg-white px-3 py-2 text-olive-900 focus:border-olive-500 focus:outline-none focus:ring-1 focus:ring-olive-500 dark:border-olive-700 dark:bg-olive-800 dark:text-olive-100"
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="inline-flex items-center gap-2 rounded-md bg-olive-600 px-4 py-2 text-sm font-medium text-white hover:bg-olive-700 focus:outline-none focus:ring-2 focus:ring-olive-500 focus:ring-offset-2 disabled:opacity-50 dark:bg-olive-500 dark:hover:bg-olive-600"
+    <>
+      {/* Add Task Form */}
+      <div className="mb-8 rounded-lg border border-olive-200 bg-white p-6 shadow-sm dark:border-olive-800 dark:bg-olive-900">
+        <h2 className="mb-4 text-xl font-display font-semibold text-olive-900 dark:text-olive-50">
+          Add a task
+        </h2>
+        <form onSubmit={addTask} className="space-y-4">
+          <div>
+            <label
+              htmlFor="title"
+              className="block text-sm font-medium text-olive-700 dark:text-olive-300"
             >
-              <PlusIcon className="h-4 w-4" />
-              Add task
-            </button>
-          </form>
-        </div>
-
-        {/* Task List */}
-        <div className="mb-8 rounded-lg border border-olive-200 bg-white p-6 shadow-sm dark:border-olive-800 dark:bg-olive-900">
-          <h2 className="mb-4 text-xl font-display font-semibold text-olive-900 dark:text-olive-50">
-            Your tasks ({tasks.length})
-          </h2>
-
-          {tasks.length === 0 ? (
-            <p className="text-center text-olive-500 dark:text-olive-400">
-              No tasks yet. Add your first task above.
-            </p>
-          ) : (
-            <div className="space-y-3">
-              {tasks.map((task) => (
-                <div
-                  key={task.id}
-                  className="flex items-start justify-between rounded-md border border-olive-200 bg-olive-50 p-4 dark:border-olive-700 dark:bg-olive-800"
-                >
-                  <div className="flex-1">
-                    <h3 className="font-medium text-olive-900 dark:text-olive-50">
-                      {task.title}
-                    </h3>
-                    {task.notes && (
-                      <p className="mt-1 text-sm text-olive-600 dark:text-olive-400">
-                        {task.notes}
-                      </p>
-                    )}
-                    <p className="mt-1 text-xs text-olive-500 dark:text-olive-500">
-                      {task.duration_minutes} minutes
-                    </p>
-                  </div>
-                  <button
-                    onClick={() => deleteTask(task.id)}
-                    className="ml-4 text-olive-400 hover:text-red-600 dark:text-olive-500 dark:hover:text-red-500"
-                  >
-                    <TrashIcon className="h-5 w-5" />
-                  </button>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Build My Day Button */}
-        {tasks.length > 0 && (
-          <div className="text-center">
-            <button
-              onClick={buildMyDay}
-              disabled={buildingSchedule}
-              className="inline-flex items-center gap-2 rounded-lg bg-olive-600 px-8 py-4 text-lg font-semibold text-white shadow-lg hover:bg-olive-700 focus:outline-none focus:ring-2 focus:ring-olive-500 focus:ring-offset-2 disabled:opacity-50 dark:bg-olive-500 dark:hover:bg-olive-600"
-            >
-              <SparklesIcon className="h-6 w-6" />
-              {buildingSchedule ? 'Building your day...' : 'Build my day'}
-            </button>
-            <p className="mt-3 text-sm text-olive-600 dark:text-olive-400">
-              Connect Google Calendar first (Phase 2)
-            </p>
-          </div>
-        )}
-
-        {/* Timeline View */}
-        {schedule.length > 0 && (
-          <div className="mt-8">
-            <h2 className="mb-4 text-xl font-display font-semibold text-olive-900 dark:text-olive-50">
-              Your schedule for today
-            </h2>
-            <DailyTimeline
-              scheduledBlocks={schedule.map((block) => {
-                const task = tasks.find((t) => t.id === block.task_id);
-                return {
-                  task_id: block.task_id,
-                  start_time: block.start_time,
-                  end_time: block.end_time,
-                  title: task?.title || 'Unknown task',
-                };
-              })}
+              Title
+            </label>
+            <input
+              type="text"
+              id="title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              className="mt-1 block w-full rounded-md border border-olive-300 bg-white px-3 py-2 text-olive-900 placeholder-olive-400 focus:border-olive-500 focus:outline-none focus:ring-1 focus:ring-olive-500 dark:border-olive-700 dark:bg-olive-800 dark:text-olive-100"
+              placeholder="Review Q3 report"
+              required
             />
           </div>
-        )}
 
-        {/* Overflow */}
-        {overflow.length > 0 && (
-          <div className="mt-4 rounded-lg border border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-800 dark:bg-yellow-900">
-            <p className="font-medium text-yellow-900 dark:text-yellow-100">
-              Couldn't schedule today:
-            </p>
-            <ul className="mt-2 list-disc pl-5 text-sm text-yellow-700 dark:text-yellow-300">
-              {overflow.map((taskId) => {
-                const task = tasks.find((t) => t.id === taskId);
-                return <li key={taskId}>{task?.title || 'Unknown task'}</li>;
-              })}
-            </ul>
+          <div>
+            <label
+              htmlFor="notes"
+              className="block text-sm font-medium text-olive-700 dark:text-olive-300"
+            >
+              Notes (optional)
+            </label>
+            <textarea
+              id="notes"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+              rows={2}
+              className="mt-1 block w-full rounded-md border border-olive-300 bg-white px-3 py-2 text-olive-900 placeholder-olive-400 focus:border-olive-500 focus:outline-none focus:ring-1 focus:ring-olive-500 dark:border-olive-700 dark:bg-olive-800 dark:text-olive-100"
+              placeholder="Check metrics and prepare summary"
+            />
+          </div>
+
+          <div>
+            <label
+              htmlFor="duration"
+              className="block text-sm font-medium text-olive-700 dark:text-olive-300"
+            >
+              Duration (minutes)
+            </label>
+            <input
+              type="number"
+              id="duration"
+              value={duration}
+              onChange={(e) => setDuration(parseInt(e.target.value))}
+              min="5"
+              step="5"
+              className="mt-1 block w-32 rounded-md border border-olive-300 bg-white px-3 py-2 text-olive-900 focus:border-olive-500 focus:outline-none focus:ring-1 focus:ring-olive-500 dark:border-olive-700 dark:bg-olive-800 dark:text-olive-100"
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            className="inline-flex items-center gap-2 rounded-md bg-olive-600 px-4 py-2 text-sm font-medium text-white hover:bg-olive-700 focus:outline-none focus:ring-2 focus:ring-olive-500 focus:ring-offset-2 disabled:opacity-50 dark:bg-olive-500 dark:hover:bg-olive-600"
+          >
+            <PlusIcon className="h-4 w-4" />
+            Add task
+          </button>
+        </form>
+      </div>
+
+      {/* Task List */}
+      <div className="mb-8 rounded-lg border border-olive-200 bg-white p-6 shadow-sm dark:border-olive-800 dark:bg-olive-900">
+        <h2 className="mb-4 text-xl font-display font-semibold text-olive-900 dark:text-olive-50">
+          Your tasks ({tasks.length})
+        </h2>
+
+        {tasks.length === 0 ? (
+          <p className="text-center text-olive-500 dark:text-olive-400">
+            No tasks yet. Add your first task above.
+          </p>
+        ) : (
+          <div className="space-y-3">
+            {tasks.map((task) => (
+              <div
+                key={task.id}
+                className="flex items-start justify-between rounded-md border border-olive-200 bg-olive-50 p-4 dark:border-olive-700 dark:bg-olive-800"
+              >
+                <div className="flex-1">
+                  <h3 className="font-medium text-olive-900 dark:text-olive-50">
+                    {task.title}
+                  </h3>
+                  {task.notes && (
+                    <p className="mt-1 text-sm text-olive-600 dark:text-olive-400">
+                      {task.notes}
+                    </p>
+                  )}
+                  <p className="mt-1 text-xs text-olive-500 dark:text-olive-500">
+                    {task.duration_minutes} minutes
+                  </p>
+                </div>
+                <button
+                  onClick={() => deleteTask(task.id)}
+                  className="ml-4 text-olive-400 hover:text-red-600 dark:text-olive-500 dark:hover:text-red-500"
+                >
+                  <TrashIcon className="h-5 w-5" />
+                </button>
+              </div>
+            ))}
           </div>
         )}
       </div>
-    </div>
+
+      {/* Build My Day Button */}
+      {tasks.length > 0 && (
+        <div className="text-center">
+          <button
+            onClick={buildMyDay}
+            disabled={buildingSchedule}
+            className="inline-flex items-center gap-2 rounded-lg bg-olive-600 px-8 py-4 text-lg font-semibold text-white shadow-lg hover:bg-olive-700 focus:outline-none focus:ring-2 focus:ring-olive-500 focus:ring-offset-2 disabled:opacity-50 dark:bg-olive-500 dark:hover:bg-olive-600"
+          >
+            <SparklesIcon className="h-6 w-6" />
+            {buildingSchedule ? 'Building your day...' : 'Build my day'}
+          </button>
+          <p className="mt-3 text-sm text-olive-600 dark:text-olive-400">
+            Connect Google Calendar first (Phase 2)
+          </p>
+        </div>
+      )}
+
+      {/* Timeline View */}
+      {schedule.length > 0 && (
+        <div className="mt-8">
+          <h2 className="mb-4 text-xl font-display font-semibold text-olive-900 dark:text-olive-50">
+            Your schedule for today
+          </h2>
+          <DailyTimeline
+            scheduledBlocks={schedule.map((block) => {
+              const task = tasks.find((t) => t.id === block.task_id);
+              return {
+                task_id: block.task_id,
+                start_time: block.start_time,
+                end_time: block.end_time,
+                title: task?.title || 'Unknown task',
+              };
+            })}
+          />
+        </div>
+      )}
+
+      {/* Overflow */}
+      {overflow.length > 0 && (
+        <div className="mt-4 rounded-lg border border-yellow-200 bg-yellow-50 p-4 dark:border-yellow-800 dark:bg-yellow-900">
+          <p className="font-medium text-yellow-900 dark:text-yellow-100">
+            Couldn&apos;t schedule today:
+          </p>
+          <ul className="mt-2 list-disc pl-5 text-sm text-yellow-700 dark:text-yellow-300">
+            {overflow.map((taskId) => {
+              const task = tasks.find((t) => t.id === taskId);
+              return <li key={taskId}>{task?.title || 'Unknown task'}</li>;
+            })}
+          </ul>
+        </div>
+      )}
+    </>
   );
 
   async function buildMyDay() {

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase/client';
+import { createClient } from '@/lib/supabase/server';
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -32,6 +32,7 @@ export async function GET(request: NextRequest) {
     }
 
     // Get current user
+    const supabase = await createClient();
     const {
       data: { user },
       error: userError,

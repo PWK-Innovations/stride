@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase/client';
+import { createClient } from '@/lib/supabase/server';
 
 // GET /api/tasks - List user's tasks
 export async function GET() {
   try {
+    const supabase = await createClient();
     const {
       data: { user },
       error: userError,
@@ -35,6 +36,7 @@ export async function GET() {
 // POST /api/tasks - Create a new task
 export async function POST(request: NextRequest) {
   try {
+    const supabase = await createClient();
     const {
       data: { user },
       error: userError,
