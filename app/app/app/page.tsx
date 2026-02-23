@@ -31,6 +31,7 @@ interface Task {
 }
 
 interface ScheduledBlock {
+  id?: string;
   task_id: string;
   start_time: string;
   end_time: string;
@@ -83,6 +84,7 @@ export default function AppPage() {
   useEffect(() => {
     fetchTasks();
     fetchGoogleStatus();
+    fetchSchedule();
   }, []);
 
   const fetchGoogleStatus = async () => {
@@ -108,6 +110,29 @@ export default function AppPage() {
       console.error('Failed to fetch tasks:', error);
     } finally {
       setLoadingTasks(false);
+    }
+  };
+
+  const fetchSchedule = async () => {
+    try {
+      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      const res = await fetch(`/api/schedule?timezone=${encodeURIComponent(tz)}`);
+      const data = await res.json();
+      if (res.ok && data.scheduled_blocks?.length > 0) {
+        setSchedule(
+          data.scheduled_blocks.map((b: ScheduledBlock & { title?: string }) => ({
+            id: b.id,
+            task_id: b.task_id,
+            start_time: b.start_time,
+            end_time: b.end_time,
+            duration_minutes: Math.round(
+              (new Date(b.end_time).getTime() - new Date(b.start_time).getTime()) / 60000,
+            ),
+          })),
+        );
+      }
+    } catch (error) {
+      console.error("Failed to fetch schedule:", error);
     }
   };
 
@@ -313,7 +338,7 @@ export default function AppPage() {
       meta: true,
       handler: () => {
         if (tasks.length > 0 && !buildingSchedule) {
-          buildMyDay();
+          buildMyDay(false);
         }
       },
     },
@@ -649,7 +674,7 @@ export default function AppPage() {
       {tasks.length > 0 && (
         <div className="text-center">
           <button
-            onClick={buildMyDay}
+            onClick={() => buildMyDay()}
             disabled={buildingSchedule}
             className="inline-flex items-center gap-2 rounded-lg bg-olive-600 px-8 py-4 text-lg font-semibold text-white shadow-lg hover:bg-olive-700 focus:outline-none focus:ring-2 focus:ring-olive-500 focus:ring-offset-2 disabled:opacity-50 dark:bg-olive-500 dark:hover:bg-olive-600"
           >
@@ -669,20 +694,54 @@ export default function AppPage() {
       {/* Timeline View */}
       {schedule.length > 0 && (
         <div className="mt-8">
-          <h2 className="mb-4 text-xl font-display font-semibold text-olive-900 dark:text-olive-50">
-            Your schedule for today
-          </h2>
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-xl font-display font-semibold text-olive-900 dark:text-olive-50">
+              Your schedule for today
+            </h2>
+            <button
+              onClick={() => buildMyDay(true)}
+              disabled={buildingSchedule}
+              className="inline-flex items-center gap-1.5 rounded-md border border-olive-300 px-3 py-1.5 text-sm font-medium text-olive-700 hover:bg-olive-50 focus:outline-none focus:ring-2 focus:ring-olive-500 focus:ring-offset-2 disabled:opacity-50 dark:border-olive-600 dark:text-olive-300 dark:hover:bg-olive-800"
+            >
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182" />
+              </svg>
+              {buildingSchedule ? "Rebuilding..." : "Try again"}
+            </button>
+          </div>
           <DailyTimeline
             scheduledBlocks={schedule.map((block) => {
               const task = tasks.find((t) => t.id === block.task_id);
               return {
+                id: block.id,
                 task_id: block.task_id,
                 start_time: block.start_time,
                 end_time: block.end_time,
-                title: task?.title || 'Unknown task',
+                title: task?.title || "Unknown task",
               };
             })}
             busyWindows={busyWindows}
+            onBlockMove={async (blockId, newStart, newEnd) => {
+              // Optimistic update
+              setSchedule((prev) =>
+                prev.map((b) =>
+                  b.id === blockId ? { ...b, start_time: newStart, end_time: newEnd } : b,
+                ),
+              );
+              try {
+                const res = await fetch(`/api/schedule/${blockId}`, {
+                  method: "PATCH",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ start_time: newStart, end_time: newEnd }),
+                });
+                if (!res.ok) {
+                  // Revert on failure
+                  fetchSchedule();
+                }
+              } catch {
+                fetchSchedule();
+              }
+            }}
           />
         </div>
       )}
@@ -720,11 +779,19 @@ export default function AppPage() {
     </>
   );
 
-  async function buildMyDay() {
+  async function buildMyDay(retry = false) {
     setBuildingSchedule(true);
     setScheduleError(null);
     try {
-      const res = await fetch('/api/schedule/build', { method: 'POST' });
+      const res = await fetch("/api/schedule/build", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          currentTime: new Date().toISOString(),
+          retry,
+        }),
+      });
       const data = await res.json();
 
       if (!res.ok) {
@@ -735,6 +802,9 @@ export default function AppPage() {
       setSchedule(data.scheduled_blocks);
       setOverflow(data.overflow);
       setBusyWindows(data.busy_windows || []);
+
+      // Re-fetch to get block IDs from the database
+      fetchSchedule();
 
       // Request notification permission and schedule notifications
       const hasPermission = await requestNotificationPermission();

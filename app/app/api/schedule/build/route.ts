@@ -7,11 +7,21 @@ import { callSchedulingEngine } from '@/lib/openai/callSchedulingEngine';
 import { refreshAccessToken } from '@/lib/google/refreshAccessToken';
 import { friendlyMessage } from '@/lib/errors/friendlyMessage';
 import { createLogger } from '@/lib/logger';
+import { getDayBoundsInZone, getUtcOffsetString, ensureOffset } from '@/lib/timezone';
 
 const logger = createLogger("api:schedule");
 
-export async function POST() {
+export async function POST(request: Request) {
   try {
+    const body = await request.json().catch(() => ({}));
+    const timezone = typeof body.timezone === "string" ? body.timezone : "UTC";
+    const currentTime = typeof body.currentTime === "string" ? body.currentTime : undefined;
+    const retry = body.retry === true;
+
+    // Compute timezone-aware day boundaries once, reuse everywhere
+    const { startOfDay, endOfDay } = getDayBoundsInZone(timezone);
+    const utcOffset = getUtcOffsetString(timezone);
+
     const supabase = await createClient();
 
     // 1. Authenticate user
@@ -68,7 +78,7 @@ export async function POST() {
     // 4. Fetch tasks + calendar events in parallel
     const [tasksResult, events] = await Promise.all([
       supabase.from('tasks').select('*').eq('user_id', user.id),
-      fetchTodaysEvents(accessToken),
+      fetchTodaysEvents(accessToken, startOfDay, endOfDay),
     ]);
 
     if (tasksResult.error) {
@@ -89,9 +99,24 @@ export async function POST() {
 
     const busyWindows = parseBusyWindows(events);
 
-    // 6. Build prompt and call OpenAI
-    const prompt = buildSchedulePrompt({ tasks, busyWindows });
-    const schedule = await callSchedulingEngine(prompt);
+    // 6. If retry, load existing schedule as context
+    let previousSchedule: unknown = undefined;
+    if (retry) {
+      const { data: existingBlocks } = await supabase
+        .from("scheduled_blocks")
+        .select("task_id, start_time, end_time, title")
+        .eq("user_id", user.id)
+        .gte("start_time", startOfDay.toISOString())
+        .lte("start_time", endOfDay.toISOString());
+
+      if (existingBlocks && existingBlocks.length > 0) {
+        previousSchedule = existingBlocks;
+      }
+    }
+
+    // 7. Build prompt and call OpenAI
+    const prompt = buildSchedulePrompt({ tasks, busyWindows, timezone, currentTime, previousSchedule });
+    const schedule = await callSchedulingEngine(prompt, retry);
 
     // 7. Validate AI output — filter to only real task IDs
     const taskIds = new Set(tasks.map((t) => t.id));
@@ -111,11 +136,6 @@ export async function POST() {
     const validOverflow = schedule.overflow.filter((id) => taskIds.has(id));
 
     // 8. Delete existing scheduled blocks for today
-    const startOfDay = new Date();
-    startOfDay.setHours(0, 0, 0, 0);
-    const endOfDay = new Date();
-    endOfDay.setHours(23, 59, 59, 999);
-
     await supabase
       .from('scheduled_blocks')
       .delete()
@@ -123,15 +143,15 @@ export async function POST() {
       .gte('start_time', startOfDay.toISOString())
       .lte('start_time', endOfDay.toISOString());
 
-    // 9. Insert new scheduled blocks
+    // 9. Insert new scheduled blocks (with timezone offset on timestamps)
     if (validBlocks.length > 0) {
       const blocksToInsert = validBlocks.map((block) => {
         const task = tasks.find((t) => t.id === block.task_id);
         return {
           user_id: user.id,
           task_id: block.task_id,
-          start_time: block.start_time,
-          end_time: block.end_time,
+          start_time: ensureOffset(block.start_time, utcOffset),
+          end_time: ensureOffset(block.end_time, utcOffset),
           title: task?.title || 'Unknown task',
           source: 'ai' as const,
         };
@@ -149,9 +169,15 @@ export async function POST() {
       }
     }
 
-    // 10. Return schedule
+    // 10. Return schedule (with offset-normalized timestamps)
+    const normalizedBlocks = validBlocks.map((block) => ({
+      ...block,
+      start_time: ensureOffset(block.start_time, utcOffset),
+      end_time: ensureOffset(block.end_time, utcOffset),
+    }));
+
     return NextResponse.json({
-      scheduled_blocks: validBlocks,
+      scheduled_blocks: normalizedBlocks,
       overflow: validOverflow,
       busy_windows: busyWindows,
     });

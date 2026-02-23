@@ -16,15 +16,18 @@ interface ScheduleResponse {
 }
 
 export async function callSchedulingEngine(
-  prompt: string
+  prompt: string,
+  retry = false,
 ): Promise<ScheduleResponse> {
+  logger.info("Sending prompt to OpenAI", { retry, promptLength: prompt.length });
+
   const response = await openai.chat.completions.create({
     model: 'gpt-4o-mini',
     messages: [
       {
         role: 'system',
         content:
-          'You are a scheduling assistant. Return valid JSON only. No markdown, no explanations.',
+          'You are a scheduling assistant. You MUST strictly respect the time boundaries and rules given. Return valid JSON only. No markdown, no explanations.',
       },
       {
         role: 'user',
@@ -32,7 +35,7 @@ export async function callSchedulingEngine(
       },
     ],
     response_format: { type: 'json_object' },
-    temperature: 0.7,
+    temperature: retry ? 0.9 : 0.3,
   });
 
   const content = response.choices[0]?.message?.content;
@@ -40,6 +43,8 @@ export async function callSchedulingEngine(
     logger.error("Empty response from OpenAI");
     throw new Error('No response from OpenAI');
   }
+
+  logger.info("OpenAI response received", { content });
 
   let parsed;
   try {
