@@ -31,9 +31,10 @@ fi
 
 SUPABASE_URL="${NEXT_PUBLIC_SUPABASE_URL}"
 ANON_KEY="${NEXT_PUBLIC_SUPABASE_ANON_KEY}"
-PROJECT_REF="ryujcepkgncxzyenddsz"
-STABLE_EMAIL="stride-ci-test@test.local"
-TEST_PASSWORD="TestPassword1234"
+# Extract project ref from Supabase URL (e.g. https://xxxx.supabase.co → xxxx)
+PROJECT_REF=$(echo "$SUPABASE_URL" | sed -E 's|https://([^.]+)\.supabase\.co.*|\1|')
+STABLE_EMAIL="${TEST_USER_EMAIL:-stride-ci-test@test.local}"
+TEST_PASSWORD="${TEST_USER_PASSWORD:-TestPassword1234}"
 COOKIE_NAME="sb-${PROJECT_REF}-auth-token"
 
 # Try sign-in first, then fall back to signup

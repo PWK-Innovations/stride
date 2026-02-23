@@ -240,9 +240,49 @@ All scripts are in the `scripts/` directory:
 
 ---
 
-## Security
+## Security Practices
 
-- Secrets: Never committed to git (`.env*` in `.gitignore`)
-- Production secrets: Vercel environment variables only
-- `.env.example`: Committed with placeholder values for developer reference
-- Dependencies: Run `npm audit` regularly
+### Secrets Management
+
+All secrets live in `.env.local`, which is gitignored. Never commit real credentials.
+Production secrets are set exclusively through the Vercel Environment Variables
+dashboard. A `.env.example` file is committed with placeholder values so new developers
+know which variables to configure.
+
+### API Key Rotation Schedule
+
+| Key | Rotation Policy | Where to Regenerate |
+|-----|-----------------|---------------------|
+| Supabase anon key | Rotate if compromised; otherwise stable (managed by Supabase) | Supabase dashboard > Project Settings > API |
+| Supabase service role key | Rotate if compromised; otherwise stable (managed by Supabase) | Supabase dashboard > Project Settings > API |
+| OpenAI API key | Every 90 days, or immediately if exposed | platform.openai.com > API Keys |
+| Google OAuth client secret | Rotate if compromised | Google Cloud Console > APIs & Services > Credentials |
+
+After rotating a key, update `.env.local` locally and the corresponding Vercel
+environment variable in production. Redeploy for changes to take effect.
+
+### Input Sanitization
+
+User-supplied text (task titles, notes) is sanitized before inclusion in OpenAI
+prompts: strings are truncated to a maximum length and control characters are stripped.
+
+All AI calls use JSON structured output mode (`response_format: { type: 'json_object' }`)
+to mitigate prompt injection. AI responses are validated after parsing: task IDs are
+checked against known IDs and invalid blocks are filtered out.
+
+### Dependency Auditing
+
+Run `npm audit` regularly. Current status: **0 moderate/critical vulnerabilities** in
+production dependencies. Remaining `minimatch` high-severity warnings are from eslint
+devDependencies only and are not shipped to production. Plan: upgrade eslint to v10+
+when the ecosystem supports it.
+
+### What NOT to Commit
+
+These paths must stay out of version control (already in `.gitignore`):
+
+- `.env*` -- local environment files with real secrets
+- `.testEnvVars` -- test environment variables
+- `scripts/.test-cookies` -- session cookies used by integration tests
+- `node_modules/` -- installed dependencies
+- `.next/` -- Next.js build output

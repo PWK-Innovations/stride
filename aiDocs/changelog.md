@@ -113,3 +113,11 @@ High-level changes; add a line or two here when you commit and push.
 - **Logging Docs:** Created `ai/testing.md` documenting log locations, levels, tailing, and usage patterns.
 - **Test Env:** Added `LOG_LEVEL=debug` and `NEXT_PUBLIC_LOG_LEVEL=debug` to `.testEnvVars`.
 - **Lint Fixes:** Fixed all 11 ESLint errors: unescaped entities in about page, `any` → `unknown` in 4 files, `let` → `const` in 3 files. 0 errors remain (32 pre-existing warnings only).
+- **Phase 6.3: Security Hardening.**
+- **Credentials Scan:** Scanned codebase for hardcoded secrets — clean. Moved auth-helper hardcoded project ref/email/password to env vars.
+- **Input Sanitization:** Created `lib/openai/sanitizeInput.ts` — truncates and strips control characters from user input before OpenAI prompts. Wired into `buildSchedulePrompt` (task titles/notes) and `extractTasksFromText` (transcription).
+- **npm audit:** Fixed `ajv` moderate vulnerability. Remaining 8 highs are `minimatch` in eslint-config-next devDeps (not shipped to production, blocked on upstream Next.js update).
+- **`.env.example`:** Created with placeholder values, added `!.env.example` exception to `.gitignore`.
+- **Security Docs:** Added security practices section to `ai/testing.md` covering secrets management, API key rotation schedule, input sanitization model, dependency auditing, and what not to commit.
+- **Build Script Fix:** Fixed `build.sh` millisecond timing on macOS (replaced GNU `date +%s%3N` with portable `python3` fallback).
+- **Phase 6 complete.** All 6.1/6.2/6.3 tasks checked off, roadmap updated.

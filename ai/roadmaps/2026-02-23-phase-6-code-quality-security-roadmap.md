@@ -43,15 +43,15 @@
 
 ### 6.3 Security Hardening
 
-- [ ] Verify `.env`, `.env.local`, `.env.production` are in `.gitignore`
-- [ ] Scan codebase for hardcoded credentials (API keys, passwords, tokens, connection strings)
-- [ ] Verify `.testEnvVars` contains only fake/test data (no production values)
-- [ ] Run `npm audit` and fix any high/critical vulnerabilities
-- [ ] Review user input sanitization before OpenAI API calls (task text, photo descriptions)
-- [ ] Document API key rotation schedule
-- [ ] Verify production secrets are in Vercel environment variables only
-- [ ] Create or verify `.env.example` with placeholder values (no actual secrets)
-- [ ] Verify `.env.example` is committed to the repo
+- [x] Verify `.env`, `.env.local`, `.env.production` are in `.gitignore`
+- [x] Scan codebase for hardcoded credentials (API keys, passwords, tokens, connection strings)
+- [x] Verify `.testEnvVars` contains only fake/test data (no production values)
+- [x] Run `npm audit` and fix any high/critical vulnerabilities
+- [x] Review user input sanitization before OpenAI API calls (task text, photo descriptions)
+- [x] Document API key rotation schedule
+- [x] Verify production secrets are in Vercel environment variables only
+- [x] Create or verify `.env.example` with placeholder values (no actual secrets)
+- [x] Verify `.env.example` is committed to the repo
 
 ---
 
@@ -63,9 +63,9 @@ Codebase is AI-testable (CLI scripts with JSON output), has structured logging e
 
 ## Acceptance Criteria
 
-- [ ] All 6.1 tasks checked off — scripts/ folder with all scripts, explore → codify done
-- [ ] All 6.2 tasks checked off — structured logging with DEBUG level, zero console.* calls, ai/testing.md created
-- [ ] All 6.3 tasks checked off — security checklist passes, npm audit clean, .env.example committed
+- [x] All 6.1 tasks checked off — scripts/ folder with all scripts, explore → codify done
+- [x] All 6.2 tasks checked off — structured logging with DEBUG level, zero console.* calls, ai/testing.md created
+- [x] All 6.3 tasks checked off — security checklist passes, npm audit clean, .env.example committed
 - [ ] All scripts support `--help` flag
 - [ ] Test output is JSON and parseable
 - [ ] LOG_LEVEL env var controls log verbosity

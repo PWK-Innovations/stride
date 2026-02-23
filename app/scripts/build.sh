@@ -16,15 +16,15 @@ fi
 
 cd "$APP_DIR"
 
-start_ms=$(date +%s%3N 2>/dev/null || python3 -c 'import time; print(int(time.time()*1000))')
+start_ms=$(python3 -c 'import time; print(int(time.time()*1000))')
 
 if output=$(npm run build 2>&1); then
-  end_ms=$(date +%s%3N 2>/dev/null || python3 -c 'import time; print(int(time.time()*1000))')
+  end_ms=$(python3 -c 'import time; print(int(time.time()*1000))')
   duration=$(( end_ms - start_ms ))
   echo "{\"ok\":true,\"duration_ms\":${duration}}"
   exit 0
 else
-  end_ms=$(date +%s%3N 2>/dev/null || python3 -c 'import time; print(int(time.time()*1000))')
+  end_ms=$(python3 -c 'import time; print(int(time.time()*1000))')
   duration=$(( end_ms - start_ms ))
   # Escape the output for JSON (replace newlines, quotes)
   escaped=$(echo "$output" | tail -20 | tr '\n' ' ' | sed 's/"/\\"/g')
