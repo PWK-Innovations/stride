@@ -1,3 +1,7 @@
+import { createLogger } from "@/lib/logger";
+
+const logger = createLogger("notifications");
+
 interface ScheduledBlock {
   task_id: string;
   start_time: string;
@@ -7,7 +11,7 @@ interface ScheduledBlock {
 
 export async function requestNotificationPermission(): Promise<boolean> {
   if (!('Notification' in window)) {
-    console.log("[INFO] notifications: This browser does not support notifications");
+    logger.info("This browser does not support notifications");
     return false;
   }
 

@@ -52,7 +52,7 @@ export default function Page() {
           headline="Planning made simple with AI."
           subheadline={
             <p>
-              We're on a mission to help people reclaim their time and reduce decision fatigue. Stride uses AI to automatically build your perfect day, so you can focus on what matters most.
+              We&apos;re on a mission to help people reclaim their time and reduce decision fatigue. Stride uses AI to automatically build your perfect day, so you can focus on what matters most.
             </p>
           }
           photo={
@@ -137,7 +137,7 @@ export default function Page() {
           headline="What drives us forward."
           subheadline={
             <p>
-              Stride is built on the belief that technology should reduce complexity, not add to it. We're committed to building tools that actually help people be more productive.
+              Stride is built on the belief that technology should reduce complexity, not add to it. We&apos;re committed to building tools that actually help people be more productive.
             </p>
           }
           features={
@@ -155,7 +155,7 @@ export default function Page() {
               <Feature
                 icon={<HeartIcon />}
                 headline="Care deeply"
-                subheadline={<p>Treat users' time and data with respect. Build products we'd want to use ourselves.</p>}
+                subheadline={<p>Treat users&apos; time and data with respect. Build products we&apos;d want to use ourselves.</p>}
               />
             </>
           }

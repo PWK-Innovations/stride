@@ -21,9 +21,10 @@ export async function GET() {
       message: 'OpenAI connection successful',
       response: message,
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
     return NextResponse.json(
-      { success: false, error: error.message || String(error) },
+      { success: false, error: message },
       { status: 500 }
     );
   }

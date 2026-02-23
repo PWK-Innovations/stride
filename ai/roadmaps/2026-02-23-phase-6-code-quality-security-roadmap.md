@@ -28,18 +28,18 @@
 
 ### 6.2 Structured Logging
 
-- [ ] Add `debug` level to `app/lib/logger.ts`
-- [ ] Add `LOG_LEVEL` env var support (default: `info` in production, `debug` in development)
-- [ ] Implement log level filtering (only emit logs at or above the configured level)
-- [ ] Replace 9 `console.error()` calls in `app/app/page.tsx` with structured logger
-- [ ] Replace `console.log` in `lib/notifications/scheduleNotifications.ts` with logger
-- [ ] Audit for any other direct `console.*` calls and replace them
-- [ ] Verify all API route handlers log entry, exit, and errors with full context
-- [ ] Verify all OpenAI integration functions log entry, exit, and errors
-- [ ] Verify all Google Calendar integration functions log entry, exit, and errors
-- [ ] Add `LOG_LEVEL=debug` to `.testEnvVars`
-- [ ] Create `ai/testing.md` with logging documentation (log location, clearing, tailing, log level config)
-- [ ] Test: set LOG_LEVEL=debug, verify debug logs appear; set LOG_LEVEL=error, verify only errors appear
+- [x] Add `debug` level to `app/lib/logger.ts`
+- [x] Add `LOG_LEVEL` env var support (default: `info` in production, `debug` in development)
+- [x] Implement log level filtering (only emit logs at or above the configured level)
+- [x] Replace 9 `console.error()` calls in `app/app/page.tsx` with structured logger
+- [x] Replace `console.log` in `lib/notifications/scheduleNotifications.ts` with logger
+- [x] Audit for any other direct `console.*` calls and replace them
+- [x] Verify all API route handlers log entry, exit, and errors with full context
+- [x] Verify all OpenAI integration functions log entry, exit, and errors
+- [x] Verify all Google Calendar integration functions log entry, exit, and errors
+- [x] Add `LOG_LEVEL=debug` to `.testEnvVars`
+- [x] Create `ai/testing.md` with logging documentation (log location, clearing, tailing, log level config)
+- [x] Test: set LOG_LEVEL=debug, verify debug logs appear; set LOG_LEVEL=error, verify only errors appear
 
 ### 6.3 Security Hardening
 

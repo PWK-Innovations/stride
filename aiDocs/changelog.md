@@ -107,3 +107,9 @@ High-level changes; add a line or two here when you commit and push.
 - **Explore Phase:** 3 parallel agents curled the running dev server testing public endpoints, task CRUD, and schedule/profile routes. Discovered 3 bugs: malformed JSON body → 500 (should be 400), delete nonexistent UUID → 200 (should be 404), delete invalid UUID → 500 leaking raw Postgres error.
 - **Integration Tests:** Created `scripts/test-integration.sh` — 18 automated tests covering smoke tests, auth guards, profile, task CRUD (create/validate/list/delete/verify), and schedule endpoints. Outputs structured JSON results. All 18 pass.
 - **Gitignore:** Added `scripts/.test-cookies` to `.gitignore`.
+- **Phase 6.2: Structured Logging.**
+- **Logger Enhancement:** Added `debug` level and `LOG_LEVEL` / `NEXT_PUBLIC_LOG_LEVEL` env var support to `lib/logger.ts`. Log level hierarchy: debug < info < warn < error. Default: `debug` in dev, `info` in production.
+- **Console Cleanup:** Replaced all 9 `console.error` calls in `app/app/page.tsx` and 1 `console.log` in `lib/notifications/scheduleNotifications.ts` with structured logger. Zero `console.*` calls remain outside `logger.ts`.
+- **Logging Docs:** Created `ai/testing.md` documenting log locations, levels, tailing, and usage patterns.
+- **Test Env:** Added `LOG_LEVEL=debug` and `NEXT_PUBLIC_LOG_LEVEL=debug` to `.testEnvVars`.
+- **Lint Fixes:** Fixed all 11 ESLint errors: unescaped entities in about page, `any` → `unknown` in 4 files, `let` → `const` in 3 files. 0 errors remain (32 pre-existing warnings only).
