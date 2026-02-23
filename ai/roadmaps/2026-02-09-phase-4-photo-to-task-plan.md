@@ -1,7 +1,7 @@
-# Phase 4: Photo-to-Task - Implementation Plan
+# Phase 4: Photo & Audio to Task - Implementation Plan
 
 **Date:** 2026-02-09
-**Phase:** 4 - Photo-to-Task
+**Phase:** 4 - Photo & Audio to Task
 **Status:** Not started
 **Parent Plan:** `2026-02-08-stride-high-level-plan.md`
 **Roadmap:** `2026-02-09-phase-4-photo-to-task-roadmap.md`
@@ -11,13 +11,13 @@
 
 ## Clean Code Principles
 
-Keep photo upload and OCR simple. Don't build a full image editor or complex photo management system. Just: upload → extract tasks → save.
+Keep photo upload, audio recording, and AI extraction simple. Don't build a full image editor, audio waveform display, or complex media management system. Just: capture → extract tasks → save. Avoid over-engineering, cruft, and legacy-compatibility features.
 
 ---
 
 ## Goal
 
-Enable users to add tasks by uploading photos (whiteboards, syllabi, handwritten notes). By the end of this phase, users can take a photo, the app extracts tasks from it, and those tasks are added to their list.
+Enable users to add tasks by uploading photos (whiteboards, syllabi, handwritten notes) or recording/uploading audio (voice memos, spoken task lists). By the end of this phase, users can capture media, the app extracts tasks from it, and those tasks are added to their list.
 
 ---
 
@@ -69,7 +69,7 @@ Create helper: `lib/openai/extractTasksFromPhoto.ts`
 
 ### Parse AI Response
 
-Define JSON schema for photo-to-task response:
+Define JSON schema for extracted tasks response:
 - `tasks`: array of `{ title: string, duration_minutes: number, deadline?: string, notes?: string }`
 
 Parse response and validate:
@@ -86,7 +86,79 @@ After extraction:
 
 ---
 
-## 4.3 Photo Display
+## 4.3 Audio-to-Task
+
+### Add Audio Input UI
+
+Update task form component:
+- Add a "Record audio" button that uses the browser MediaRecorder API
+- Show recording state (red dot, elapsed time) while recording
+- Add a "Stop" button to end recording
+- Also accept audio file upload via `<input type="file" accept="audio/*">` for pre-recorded files
+- Show playback preview of recorded/uploaded audio before submission
+
+### Audio Recording Implementation
+
+Create helper: `lib/audio/useAudioRecorder.ts` (custom React hook)
+- Request microphone permission via `navigator.mediaDevices.getUserMedia`
+- Record using MediaRecorder API, output as webm or mp3
+- Return: `{ isRecording, start, stop, audioBlob, audioUrl, duration, reset }`
+- Handle permission denied gracefully (show message, don't break UI)
+
+### Transcribe Audio with OpenAI Whisper
+
+Create helper: `lib/openai/transcribeAudio.ts`
+- Input: audio File or Blob
+- Call OpenAI Audio Transcription API (`whisper-1` model)
+- Return transcription text
+- Handle errors (file too large, unsupported format, API error)
+
+### Extract Tasks from Transcription
+
+Create helper: `lib/openai/extractTasksFromText.ts`
+- Input: transcription text (plain string)
+- Call OpenAI with text prompt: "Extract tasks from this text. Return JSON with array of tasks (title, duration_minutes, optional notes)."
+- Use Structured Outputs (same JSON schema as photo extraction)
+- Handle case where no tasks are found
+
+### API Route for Audio
+
+Create API route: `POST /api/tasks/extract-audio`
+- Accept audio file (multipart form data)
+- Transcribe with Whisper → extract tasks from transcription
+- Return extracted tasks (same shape as photo extraction)
+
+### Create Tasks in Database
+
+Reuse the same confirmation UI from photo-to-task:
+- Show extracted tasks for user review/edit
+- On confirm: create tasks in Supabase
+- On cancel: discard
+
+---
+
+## 4.4 Shared Extraction UI
+
+### Confirmation/Edit Modal
+
+Create component: `components/features/ExtractedTasksReview.tsx`
+- Shared by both photo and audio extraction flows
+- Shows list of extracted tasks with editable title, duration, notes
+- "Add all" and "Cancel" buttons
+- Loading state while AI is processing
+- Error state if extraction fails
+
+### Media Input Selector
+
+Update the task form to present input options cleanly:
+- Text input (existing)
+- Camera/photo upload button
+- Microphone/audio upload button
+- All three options visible, not buried in menus
+
+---
+
+## 4.5 Photo Display
 
 ### Show Photo Thumbnails on Tasks
 
@@ -105,7 +177,7 @@ Create modal component: `components/features/PhotoModal.tsx`
 
 ## Deliverable
 
-Users can take a photo of a whiteboard or syllabus, the app extracts tasks from it, and those tasks are added to their list. Photos are stored and shown with tasks.
+Users can take a photo of a whiteboard or syllabus, or record a voice memo describing their tasks. The app extracts tasks from either input, lets the user review and edit them, and saves them to the task list. Photos are stored and shown with tasks.
 
 ---
 
@@ -114,13 +186,16 @@ Users can take a photo of a whiteboard or syllabus, the app extracts tasks from 
 - User can upload photo via file input or camera
 - Photo is uploaded to Supabase Storage
 - OpenAI extracts tasks from photo (title, duration)
-- Extracted tasks are shown to user for confirmation
+- User can record audio or upload an audio file
+- Audio is transcribed via OpenAI Whisper
+- Tasks are extracted from transcription
+- Extracted tasks (from photo or audio) are shown to user for confirmation
 - User can edit extracted tasks before saving
-- Tasks are saved with `photo_url` attached
+- Tasks are saved (with `photo_url` attached if from photo)
 - Task list shows photo thumbnails
 - Clicking thumbnail opens full-size photo
-- Photo-to-task flow works on mobile (camera input)
-- Errors are handled (no tasks found, upload failed, OpenAI error)
+- Both flows work on mobile (camera input, microphone recording)
+- Errors are handled (no tasks found, upload failed, permission denied, API error)
 
 ---
 

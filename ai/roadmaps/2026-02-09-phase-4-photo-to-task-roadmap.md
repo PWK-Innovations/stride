@@ -1,7 +1,7 @@
-# Phase 4: Photo-to-Task - Roadmap
+# Phase 4: Photo & Audio to Task - Roadmap
 
 **Date:** 2026-02-09
-**Phase:** 4 - Photo-to-Task
+**Phase:** 4 - Photo & Audio to Task
 **Status:** Not started
 **Plan:** `2026-02-09-phase-4-photo-to-task-plan.md`
 **Previous Phase:** `2026-02-09-phase-3-core-data-flow-roadmap.md`
@@ -25,7 +25,7 @@
 
 ### 4.2 Photo-to-Task with OpenAI
 
-- [ ] Define JSON schema for photo-to-task response (tasks array)
+- [ ] Define JSON schema for extracted tasks response (tasks array)
 - [ ] Create helper: `lib/openai/extractTasksFromPhoto.ts`
 - [ ] Build prompt: "Extract tasks from this image. Return JSON."
 - [ ] Call OpenAI with multi-modal input (text + image URL)
@@ -33,12 +33,38 @@
 - [ ] Test: send sample photo (whiteboard, syllabus), verify tasks extracted
 - [ ] Parse AI response and validate structure
 - [ ] Handle edge case: no tasks found in image
-- [ ] Create confirmation UI (show extracted tasks, allow edit)
-- [ ] Add "Confirm" and "Cancel" buttons
-- [ ] On confirm: create tasks in Supabase (with `photo_url`)
-- [ ] Test full flow: upload photo → extract tasks → edit → confirm → see tasks in list
 
-### 4.3 Photo Display
+### 4.3 Audio-to-Task
+
+- [ ] Add "Record audio" button to task form (MediaRecorder API)
+- [ ] Show recording state (red indicator, elapsed time)
+- [ ] Add "Stop" button to end recording
+- [ ] Add audio file upload input (`<input type="file" accept="audio/*">`)
+- [ ] Show audio playback preview before submission
+- [ ] Create hook: `lib/audio/useAudioRecorder.ts` (start, stop, audioBlob, duration, reset)
+- [ ] Handle microphone permission denied gracefully
+- [ ] Create helper: `lib/openai/transcribeAudio.ts` (Whisper API)
+- [ ] Test: transcribe sample audio, verify transcription text
+- [ ] Create helper: `lib/openai/extractTasksFromText.ts` (text → tasks JSON)
+- [ ] Use Structured Outputs (same JSON schema as photo extraction)
+- [ ] Handle edge case: no tasks found in transcription
+- [ ] Create API route: `POST /api/tasks/extract-audio` (audio → transcribe → extract)
+- [ ] Test full flow: record audio → transcribe → extract tasks → verify output
+
+### 4.4 Shared Extraction UI
+
+- [ ] Create component: `components/features/ExtractedTasksReview.tsx`
+- [ ] Show extracted tasks with editable title, duration, notes fields
+- [ ] Add "Add all" and "Cancel" buttons
+- [ ] Add loading state while AI is processing
+- [ ] Add error state if extraction fails
+- [ ] Wire photo extraction flow through shared review UI
+- [ ] Wire audio extraction flow through shared review UI
+- [ ] On confirm: create tasks in Supabase (with `photo_url` if from photo)
+- [ ] Test full photo flow: upload → extract → review/edit → confirm → tasks in list
+- [ ] Test full audio flow: record → transcribe → extract → review/edit → confirm → tasks in list
+
+### 4.5 Photo Display
 
 - [ ] Update task list component to show photo thumbnails (64x64px)
 - [ ] Add click handler to thumbnail (open full-size photo)
@@ -52,7 +78,7 @@
 
 ## Deliverable
 
-Users can upload photos, extract tasks, and see photos attached to tasks.
+Users can upload photos or record audio to extract tasks. Extracted tasks can be reviewed and edited before saving. Photos are stored and displayed with tasks.
 
 ---
 
@@ -60,12 +86,14 @@ Users can upload photos, extract tasks, and see photos attached to tasks.
 
 - [ ] All tasks checked off
 - [ ] Photo upload works on mobile (camera input)
+- [ ] Audio recording works on mobile (microphone)
 - [ ] OpenAI extracts tasks from photos
+- [ ] OpenAI Whisper transcribes audio, tasks extracted from transcription
 - [ ] User can edit extracted tasks before saving
 - [ ] Photos are stored in Supabase Storage
 - [ ] Thumbnails show on task list
 - [ ] Full-size photo opens in modal
-- [ ] Errors handled gracefully
+- [ ] Errors handled gracefully (permission denied, no tasks found, upload failed)
 
 ---
 
