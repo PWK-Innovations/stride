@@ -23,7 +23,7 @@ export function buildSchedulePrompt({
   const taskList = tasks
     .map(
       (task, i) =>
-        `${i + 1}. "${task.title}" (${task.duration_minutes} minutes)${task.notes ? ` - Notes: ${task.notes}` : ''}`
+        `${i + 1}. [id: ${task.id}] "${task.title}" (${task.duration_minutes} minutes)${task.notes ? ` - Notes: ${task.notes}` : ''}`
     )
     .join('\n');
 
@@ -60,16 +60,16 @@ ${busyList || 'None'}
 4. If tasks don't fit, put them in the overflow list
 5. Return valid JSON only
 
-**Output format:**
+**Output format (use the exact task IDs from the list above):**
 {
   "scheduled_blocks": [
     {
-      "task_id": "uuid",
+      "task_id": "the-exact-id-from-the-task-list",
       "start_time": "2026-02-09T10:00:00Z",
       "end_time": "2026-02-09T10:30:00Z",
       "duration_minutes": 30
     }
   ],
-  "overflow": ["task_id_1", "task_id_2"]
+  "overflow": ["id-of-task-that-didnt-fit"]
 }`;
 }

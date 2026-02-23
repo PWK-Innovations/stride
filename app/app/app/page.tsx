@@ -34,10 +34,25 @@ export default function AppPage() {
   const [buildingSchedule, setBuildingSchedule] = useState(false);
   const [schedule, setSchedule] = useState<ScheduledBlock[]>([]);
   const [overflow, setOverflow] = useState<string[]>([]);
+  const [busyWindows, setBusyWindows] = useState<Array<{ start: string; end: string; title?: string }>>([]);
+  const [googleConnected, setGoogleConnected] = useState<boolean | null>(null);
 
   useEffect(() => {
     fetchTasks();
+    fetchGoogleStatus();
   }, []);
+
+  const fetchGoogleStatus = async () => {
+    try {
+      const res = await fetch('/api/profile');
+      const data = await res.json();
+      if (res.ok) {
+        setGoogleConnected(data.googleConnected);
+      }
+    } catch (error) {
+      console.error('Failed to fetch Google status:', error);
+    }
+  };
 
   const fetchTasks = async () => {
     try {
@@ -201,6 +216,46 @@ export default function AppPage() {
         )}
       </div>
 
+      {/* Google Calendar Connection */}
+      <div className="mb-8 rounded-lg border border-olive-200 bg-white p-4 shadow-sm dark:border-olive-800 dark:bg-olive-900">
+        {googleConnected === null ? (
+          <p className="text-sm text-olive-500 dark:text-olive-400">
+            Checking Google Calendar status...
+          </p>
+        ) : googleConnected ? (
+          <div className="flex items-center gap-2">
+            <svg
+              className="h-5 w-5 text-green-600 dark:text-green-400"
+              fill="none"
+              viewBox="0 0 24 24"
+              strokeWidth={2}
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+              />
+            </svg>
+            <span className="text-sm font-medium text-green-700 dark:text-green-300">
+              Google Calendar connected
+            </span>
+          </div>
+        ) : (
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-olive-600 dark:text-olive-400">
+              Connect your Google Calendar to schedule around existing events.
+            </p>
+            <a
+              href="/api/auth/google"
+              className="inline-flex items-center gap-2 rounded-md bg-olive-600 px-4 py-2 text-sm font-medium text-white hover:bg-olive-700 focus:outline-none focus:ring-2 focus:ring-olive-500 focus:ring-offset-2 dark:bg-olive-500 dark:hover:bg-olive-600"
+            >
+              Connect Google Calendar
+            </a>
+          </div>
+        )}
+      </div>
+
       {/* Build My Day Button */}
       {tasks.length > 0 && (
         <div className="text-center">
@@ -212,9 +267,6 @@ export default function AppPage() {
             <SparklesIcon className="h-6 w-6" />
             {buildingSchedule ? 'Building your day...' : 'Build my day'}
           </button>
-          <p className="mt-3 text-sm text-olive-600 dark:text-olive-400">
-            Connect Google Calendar first (Phase 2)
-          </p>
         </div>
       )}
 
@@ -234,6 +286,7 @@ export default function AppPage() {
                 title: task?.title || 'Unknown task',
               };
             })}
+            busyWindows={busyWindows}
           />
         </div>
       )}
@@ -268,6 +321,7 @@ export default function AppPage() {
 
       setSchedule(data.scheduled_blocks);
       setOverflow(data.overflow);
+      setBusyWindows(data.busy_windows || []);
 
       // Request notification permission and schedule notifications
       const hasPermission = await requestNotificationPermission();

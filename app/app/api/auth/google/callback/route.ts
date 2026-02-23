@@ -60,11 +60,7 @@ export async function GET(request: NextRequest) {
       throw updateError;
     }
 
-    return NextResponse.json({
-      success: true,
-      message: 'Google Calendar connected',
-      expires_at: expiresAt.toISOString(),
-    });
+    return NextResponse.redirect(new URL('/app', request.url));
   } catch (error: any) {
     return NextResponse.json(
       { success: false, error: error.message || String(error) },

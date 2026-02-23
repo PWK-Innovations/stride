@@ -57,3 +57,12 @@ High-level changes; add a line or two here when you commit and push.
 - **First Deploy:** GitHub Actions deploy to Vercel succeeded. App live at stride-amber.vercel.app.
 - **Favicon Fix:** Replaced default Vercel/Next.js favicon (`app/favicon.ico`) with custom olive "S" icon. Next.js App Router serves `app/favicon.ico` over `public/favicon.ico`.
 - **PWA Verified:** PWA install working on device, standalone mode confirmed.
+- **Phase 3: Core Data Flow (complete).**
+- **Profile API:** Created `GET /api/profile` — returns `{ googleConnected: boolean }` for the authenticated user by checking Google tokens in the profiles table.
+- **Google Calendar UI:** Added connection status to dashboard (`app/app/page.tsx`). Shows "Connect Google Calendar" button when not connected, green check + "Google Calendar connected" when linked. Removed static Phase 2 placeholder text.
+- **OAuth Redirect:** Updated `app/api/auth/google/callback/route.ts` to redirect to `/app` on success instead of returning JSON, completing the OAuth UX loop.
+- **Schedule Test Script:** Created `scripts/test-schedule.ts` — CLI test that builds a sample prompt, calls OpenAI scheduling engine, and validates the response structure. Added `npm run test:schedule` to package.json and updated `test:all`.
+- **Roadmaps:** Updated Phase 3 roadmap (all tasks checked off), moved plan + roadmap to `ai/roadmaps/complete/`.
+- **Timeline Redesign:** Replaced `react-calendar-timeline` + `moment` with a custom vertical day view (pure Tailwind). 80px/hour, time gutter, now indicator (red dot + line updating every minute), olive design system, full dark mode support. Scheduled tasks get solid olive-500 left border; busy calendar windows get dashed olive-400 border with muted bg. Auto-expanding time range (defaults 8AM–6PM).
+- **Busy Windows:** Added `title` field to `BusyWindow` interface, mapping Google Calendar `summary` through. Dashboard now captures `busy_windows` from the API response and passes them to `DailyTimeline`.
+- **Dependencies:** Removed `react-calendar-timeline` and `moment` (10 packages).
