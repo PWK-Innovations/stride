@@ -1,3 +1,7 @@
+import { createLogger } from "@/lib/logger";
+
+const logger = createLogger("google:refresh");
+
 export async function refreshAccessToken(refreshToken: string): Promise<{
   access_token: string;
   expires_in: number;
@@ -17,6 +21,7 @@ export async function refreshAccessToken(refreshToken: string): Promise<{
 
   if (!response.ok) {
     const error = await response.json();
+    logger.error("Token refresh failed", { error: error.error });
     throw new Error(error.error || 'Failed to refresh access token');
   }
 

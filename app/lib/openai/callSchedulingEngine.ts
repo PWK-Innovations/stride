@@ -1,4 +1,7 @@
 import { openai } from './client';
+import { createLogger } from "@/lib/logger";
+
+const logger = createLogger("openai:schedule");
 
 interface ScheduledBlock {
   task_id: string;
@@ -34,10 +37,17 @@ export async function callSchedulingEngine(
 
   const content = response.choices[0]?.message?.content;
   if (!content) {
+    logger.error("Empty response from OpenAI");
     throw new Error('No response from OpenAI');
   }
 
-  const parsed = JSON.parse(content);
+  let parsed;
+  try {
+    parsed = JSON.parse(content);
+  } catch {
+    logger.error("Failed to parse OpenAI response", { content });
+    throw new Error('Invalid JSON response from OpenAI');
+  }
   return {
     scheduled_blocks: parsed.scheduled_blocks || [],
     overflow: parsed.overflow || [],

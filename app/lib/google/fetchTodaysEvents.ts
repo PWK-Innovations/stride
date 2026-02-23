@@ -1,3 +1,7 @@
+import { createLogger } from "@/lib/logger";
+
+const logger = createLogger("google:calendar");
+
 interface CalendarEvent {
   id: string;
   summary: string;
@@ -34,6 +38,7 @@ export async function fetchTodaysEvents(accessToken: string): Promise<CalendarEv
 
   if (!response.ok) {
     const error = await response.json();
+    logger.error("Failed to fetch calendar events", { error: error.error });
     throw new Error(error.error?.message || 'Failed to fetch calendar events');
   }
 

@@ -140,23 +140,26 @@ export default function Page() {
               Stride is built on the belief that technology should reduce complexity, not add to it. We're committed to building tools that actually help people be more productive.
             </p>
           }
-        >
-          <Feature
-            icon={<RocketIcon />}
-            headline="Move fast"
-            subheadline={<p>Ship features quickly and iterate based on real user feedback. No bureaucracy, just results.</p>}
-          />
-          <Feature
-            icon={<TargetIcon />}
-            headline="Stay focused"
-            subheadline={<p>Build what matters. Every feature should solve a real problem for real users.</p>}
-          />
-          <Feature
-            icon={<HeartIcon />}
-            headline="Care deeply"
-            subheadline={<p>Treat users' time and data with respect. Build products we'd want to use ourselves.</p>}
-          />
-        </FeaturesThreeColumn>
+          features={
+            <>
+              <Feature
+                icon={<RocketIcon />}
+                headline="Move fast"
+                subheadline={<p>Ship features quickly and iterate based on real user feedback. No bureaucracy, just results.</p>}
+              />
+              <Feature
+                icon={<TargetIcon />}
+                headline="Stay focused"
+                subheadline={<p>Build what matters. Every feature should solve a real problem for real users.</p>}
+              />
+              <Feature
+                icon={<HeartIcon />}
+                headline="Care deeply"
+                subheadline={<p>Treat users' time and data with respect. Build products we'd want to use ourselves.</p>}
+              />
+            </>
+          }
+        />
 
         {/* Story - Why we built Stride */}
         <section className="bg-olive-50 py-0 pb-15 dark:bg-olive-950" id="why-we-built">

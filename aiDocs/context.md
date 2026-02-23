@@ -54,4 +54,5 @@ Key differentiators:
 
 ## Current Focus
 
-- Initial MVP development. Setting up frontend and backend services.
+- Phase 2 code complete (PWA & Hosting). Pending: Vercel secrets setup, first deploy, manual device testing.
+- Next up: Phase 3 (Photo-to-Task with AI vision).
