@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { friendlyMessage } from '@/lib/errors/friendlyMessage';
 
 // GET /api/tasks - List user's tasks
 export async function GET() {
@@ -25,10 +26,10 @@ export async function GET() {
     }
 
     return NextResponse.json({ tasks });
-  } catch (error: any) {
+  } catch (error: unknown) {
     return NextResponse.json(
-      { error: error.message || 'Internal server error' },
-      { status: 500 }
+      { error: friendlyMessage(error) },
+      { status: 500 },
     );
   }
 }
@@ -73,10 +74,10 @@ export async function POST(request: NextRequest) {
     }
 
     return NextResponse.json({ task }, { status: 201 });
-  } catch (error: any) {
+  } catch (error: unknown) {
     return NextResponse.json(
-      { error: error.message || 'Internal server error' },
-      { status: 500 }
+      { error: friendlyMessage(error) },
+      { status: 500 },
     );
   }
 }

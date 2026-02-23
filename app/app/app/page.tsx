@@ -9,9 +9,11 @@ import { MicrophoneIcon } from '@/components/icons/microphone-icon';
 import { DailyTimeline } from '@/components/features/DailyTimeline';
 import { ExtractedTasksReview } from '@/components/features/ExtractedTasksReview';
 import { PhotoModal } from '@/components/features/PhotoModal';
+import { ConfirmDialog } from '@/components/features/ConfirmDialog';
 import { uploadPhoto } from '@/lib/supabase/uploadPhoto';
 import { createClient } from '@/lib/supabase/client';
 import { useAudioRecorder } from '@/lib/audio/useAudioRecorder';
+import { useKeyboardShortcuts } from '@/lib/hooks/useKeyboardShortcuts';
 import {
   requestNotificationPermission,
   scheduleNotifications,
@@ -29,6 +31,7 @@ interface Task {
 }
 
 interface ScheduledBlock {
+  id?: string;
   task_id: string;
   start_time: string;
   end_time: string;
@@ -37,15 +40,18 @@ interface ScheduledBlock {
 
 export default function AppPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [loadingTasks, setLoadingTasks] = useState(true);
   const [title, setTitle] = useState('');
   const [notes, setNotes] = useState('');
   const [duration, setDuration] = useState(30);
   const [loading, setLoading] = useState(false);
   const [buildingSchedule, setBuildingSchedule] = useState(false);
   const [schedule, setSchedule] = useState<ScheduledBlock[]>([]);
+  const [scheduleError, setScheduleError] = useState<string | null>(null);
   const [overflow, setOverflow] = useState<string[]>([]);
   const [busyWindows, setBusyWindows] = useState<Array<{ start: string; end: string; title?: string }>>([]);
   const [googleConnected, setGoogleConnected] = useState<boolean | null>(null);
+  const [deletingTaskId, setDeletingTaskId] = useState<string | null>(null);
 
   // Extraction state (shared between photo and audio)
   const [extracting, setExtracting] = useState(false);
@@ -56,6 +62,7 @@ export default function AppPage() {
   const [savingExtracted, setSavingExtracted] = useState(false);
   const [extractionSource, setExtractionSource] = useState<"photo" | "audio" | null>(null);
   const [transcription, setTranscription] = useState<string | null>(null);
+  const titleInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const audioFileInputRef = useRef<HTMLInputElement>(null);
 
@@ -77,6 +84,7 @@ export default function AppPage() {
   useEffect(() => {
     fetchTasks();
     fetchGoogleStatus();
+    fetchSchedule();
   }, []);
 
   const fetchGoogleStatus = async () => {
@@ -100,6 +108,31 @@ export default function AppPage() {
       }
     } catch (error) {
       console.error('Failed to fetch tasks:', error);
+    } finally {
+      setLoadingTasks(false);
+    }
+  };
+
+  const fetchSchedule = async () => {
+    try {
+      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      const res = await fetch(`/api/schedule?timezone=${encodeURIComponent(tz)}`);
+      const data = await res.json();
+      if (res.ok && data.scheduled_blocks?.length > 0) {
+        setSchedule(
+          data.scheduled_blocks.map((b: ScheduledBlock & { title?: string }) => ({
+            id: b.id,
+            task_id: b.task_id,
+            start_time: b.start_time,
+            end_time: b.end_time,
+            duration_minutes: Math.round(
+              (new Date(b.end_time).getTime() - new Date(b.start_time).getTime()) / 60000,
+            ),
+          })),
+        );
+      }
+    } catch (error) {
+      console.error("Failed to fetch schedule:", error);
     }
   };
 
@@ -128,7 +161,10 @@ export default function AppPage() {
     }
   };
 
-  const deleteTask = async (id: string) => {
+  const confirmDeleteTask = async () => {
+    if (!deletingTaskId) return;
+    const id = deletingTaskId;
+    setDeletingTaskId(null);
     try {
       const res = await fetch(`/api/tasks/${id}`, { method: 'DELETE' });
       if (res.ok) {
@@ -291,6 +327,35 @@ export default function AppPage() {
     return `${m}:${s.toString().padStart(2, "0")}`;
   };
 
+  // Keyboard shortcuts
+  useKeyboardShortcuts([
+    {
+      key: "/",
+      handler: () => titleInputRef.current?.focus(),
+    },
+    {
+      key: "b",
+      meta: true,
+      handler: () => {
+        if (tasks.length > 0 && !buildingSchedule) {
+          buildMyDay(false);
+        }
+      },
+    },
+    {
+      key: "Escape",
+      handler: () => {
+        if (deletingTaskId) {
+          setDeletingTaskId(null);
+        } else if (modalPhotoUrl) {
+          setModalPhotoUrl(null);
+        } else if (showExtraction) {
+          handleCancelExtraction();
+        }
+      },
+    },
+  ]);
+
   return (
     <>
       {/* Add Task Form */}
@@ -355,6 +420,7 @@ export default function AppPage() {
               Title
             </label>
             <input
+              ref={titleInputRef}
               type="text"
               id="title"
               value={title}
@@ -474,7 +540,29 @@ export default function AppPage() {
           Your tasks ({tasks.length})
         </h2>
 
-        {tasks.length === 0 ? (
+        {loadingTasks ? (
+          <div className="flex justify-center py-8">
+            <svg
+              className="h-6 w-6 animate-spin text-olive-500"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              />
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+              />
+            </svg>
+          </div>
+        ) : tasks.length === 0 ? (
           <p className="text-center text-olive-500 dark:text-olive-400">
             No tasks yet. Add your first task above.
           </p>
@@ -495,6 +583,7 @@ export default function AppPage() {
                       <img
                         src={task.photo_url}
                         alt="Task photo"
+                        loading="lazy"
                         className="h-10 w-10 object-cover"
                       />
                     </button>
@@ -514,7 +603,7 @@ export default function AppPage() {
                   </div>
                 </div>
                 <button
-                  onClick={() => deleteTask(task.id)}
+                  onClick={() => setDeletingTaskId(task.id)}
                   className="ml-4 text-olive-400 hover:text-red-600 dark:text-olive-500 dark:hover:text-red-500"
                 >
                   <TrashIcon className="h-5 w-5" />
@@ -565,11 +654,27 @@ export default function AppPage() {
         )}
       </div>
 
+      {/* Schedule Error Banner */}
+      {scheduleError && (
+        <div className="mb-4 flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/30">
+          <p className="flex-1 text-sm text-red-700 dark:text-red-300">{scheduleError}</p>
+          <button
+            onClick={() => setScheduleError(null)}
+            className="text-red-400 hover:text-red-600 dark:text-red-500 dark:hover:text-red-300"
+            aria-label="Dismiss error"
+          >
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      )}
+
       {/* Build My Day Button */}
       {tasks.length > 0 && (
         <div className="text-center">
           <button
-            onClick={buildMyDay}
+            onClick={() => buildMyDay()}
             disabled={buildingSchedule}
             className="inline-flex items-center gap-2 rounded-lg bg-olive-600 px-8 py-4 text-lg font-semibold text-white shadow-lg hover:bg-olive-700 focus:outline-none focus:ring-2 focus:ring-olive-500 focus:ring-offset-2 disabled:opacity-50 dark:bg-olive-500 dark:hover:bg-olive-600"
           >
@@ -579,23 +684,64 @@ export default function AppPage() {
         </div>
       )}
 
+      {/* Schedule Empty State */}
+      {tasks.length > 0 && schedule.length === 0 && !buildingSchedule && (
+        <p className="mt-4 text-center text-sm text-olive-500 dark:text-olive-400">
+          Click &ldquo;Build my day&rdquo; to generate your schedule.
+        </p>
+      )}
+
       {/* Timeline View */}
       {schedule.length > 0 && (
         <div className="mt-8">
-          <h2 className="mb-4 text-xl font-display font-semibold text-olive-900 dark:text-olive-50">
-            Your schedule for today
-          </h2>
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-xl font-display font-semibold text-olive-900 dark:text-olive-50">
+              Your schedule for today
+            </h2>
+            <button
+              onClick={() => buildMyDay(true)}
+              disabled={buildingSchedule}
+              className="inline-flex items-center gap-1.5 rounded-md border border-olive-300 px-3 py-1.5 text-sm font-medium text-olive-700 hover:bg-olive-50 focus:outline-none focus:ring-2 focus:ring-olive-500 focus:ring-offset-2 disabled:opacity-50 dark:border-olive-600 dark:text-olive-300 dark:hover:bg-olive-800"
+            >
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0 3.181 3.183a8.25 8.25 0 0 0 13.803-3.7M4.031 9.865a8.25 8.25 0 0 1 13.803-3.7l3.181 3.182" />
+              </svg>
+              {buildingSchedule ? "Rebuilding..." : "Try again"}
+            </button>
+          </div>
           <DailyTimeline
             scheduledBlocks={schedule.map((block) => {
               const task = tasks.find((t) => t.id === block.task_id);
               return {
+                id: block.id,
                 task_id: block.task_id,
                 start_time: block.start_time,
                 end_time: block.end_time,
-                title: task?.title || 'Unknown task',
+                title: task?.title || "Unknown task",
               };
             })}
             busyWindows={busyWindows}
+            onBlockMove={async (blockId, newStart, newEnd) => {
+              // Optimistic update
+              setSchedule((prev) =>
+                prev.map((b) =>
+                  b.id === blockId ? { ...b, start_time: newStart, end_time: newEnd } : b,
+                ),
+              );
+              try {
+                const res = await fetch(`/api/schedule/${blockId}`, {
+                  method: "PATCH",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ start_time: newStart, end_time: newEnd }),
+                });
+                if (!res.ok) {
+                  // Revert on failure
+                  fetchSchedule();
+                }
+              } catch {
+                fetchSchedule();
+              }
+            }}
           />
         </div>
       )}
@@ -620,17 +766,36 @@ export default function AppPage() {
         photoUrl={modalPhotoUrl}
         onClose={() => setModalPhotoUrl(null)}
       />
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        open={deletingTaskId !== null}
+        title="Delete task"
+        message="Are you sure you want to delete this task? This action cannot be undone."
+        confirmLabel="Delete"
+        onConfirm={confirmDeleteTask}
+        onCancel={() => setDeletingTaskId(null)}
+      />
     </>
   );
 
-  async function buildMyDay() {
+  async function buildMyDay(retry = false) {
     setBuildingSchedule(true);
+    setScheduleError(null);
     try {
-      const res = await fetch('/api/schedule/build', { method: 'POST' });
+      const res = await fetch("/api/schedule/build", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+          currentTime: new Date().toISOString(),
+          retry,
+        }),
+      });
       const data = await res.json();
 
       if (!res.ok) {
-        alert(data.error || 'Failed to build schedule');
+        setScheduleError(data.error || 'Failed to build schedule');
         return;
       }
 
@@ -638,21 +803,26 @@ export default function AppPage() {
       setOverflow(data.overflow);
       setBusyWindows(data.busy_windows || []);
 
+      // Re-fetch to get block IDs from the database
+      fetchSchedule();
+
       // Request notification permission and schedule notifications
       const hasPermission = await requestNotificationPermission();
       if (hasPermission && data.scheduled_blocks.length > 0) {
-        const blocksWithTitles = data.scheduled_blocks.map((block: any) => {
-          const task = tasks.find((t) => t.id === block.task_id);
-          return {
-            ...block,
-            title: task?.title || 'Unknown task',
-          };
-        });
+        const blocksWithTitles = data.scheduled_blocks.map(
+          (block: ScheduledBlock) => {
+            const task = tasks.find((t) => t.id === block.task_id);
+            return {
+              ...block,
+              title: task?.title || 'Unknown task',
+            };
+          },
+        );
         scheduleNotifications(blocksWithTitles);
       }
     } catch (error) {
       console.error('Failed to build schedule:', error);
-      alert('Failed to build schedule');
+      setScheduleError('Something went wrong. Please try again.');
     } finally {
       setBuildingSchedule(false);
     }

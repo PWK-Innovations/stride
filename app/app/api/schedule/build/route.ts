@@ -5,12 +5,23 @@ import { parseBusyWindows } from '@/lib/google/parseBusyWindows';
 import { buildSchedulePrompt } from '@/lib/openai/buildSchedulePrompt';
 import { callSchedulingEngine } from '@/lib/openai/callSchedulingEngine';
 import { refreshAccessToken } from '@/lib/google/refreshAccessToken';
+import { friendlyMessage } from '@/lib/errors/friendlyMessage';
 import { createLogger } from '@/lib/logger';
+import { getDayBoundsInZone, getUtcOffsetString, ensureOffset } from '@/lib/timezone';
 
 const logger = createLogger("api:schedule");
 
-export async function POST() {
+export async function POST(request: Request) {
   try {
+    const body = await request.json().catch(() => ({}));
+    const timezone = typeof body.timezone === "string" ? body.timezone : "UTC";
+    const currentTime = typeof body.currentTime === "string" ? body.currentTime : undefined;
+    const retry = body.retry === true;
+
+    // Compute timezone-aware day boundaries once, reuse everywhere
+    const { startOfDay, endOfDay } = getDayBoundsInZone(timezone);
+    const utcOffset = getUtcOffsetString(timezone);
+
     const supabase = await createClient();
 
     // 1. Authenticate user
@@ -64,37 +75,67 @@ export async function POST() {
         .eq('id', user.id);
     }
 
-    // 4. Fetch user's tasks
-    const { data: tasks, error: tasksError } = await supabase
-      .from('tasks')
-      .select('*')
-      .eq('user_id', user.id);
+    // 4. Fetch tasks + calendar events in parallel
+    const [tasksResult, events] = await Promise.all([
+      supabase.from('tasks').select('*').eq('user_id', user.id),
+      fetchTodaysEvents(accessToken, startOfDay, endOfDay),
+    ]);
 
-    if (tasksError) {
-      return NextResponse.json({ error: tasksError.message }, { status: 500 });
-    }
-
-    if (!tasks || tasks.length === 0) {
+    if (tasksResult.error) {
       return NextResponse.json(
-        { error: 'No tasks to schedule' },
-        { status: 400 }
+        { error: friendlyMessage(tasksResult.error) },
+        { status: 500 },
       );
     }
 
-    // 5. Fetch today's calendar events
-    const events = await fetchTodaysEvents(accessToken);
+    const tasks = tasksResult.data;
+
+    if (!tasks || tasks.length === 0) {
+      return NextResponse.json(
+        { error: friendlyMessage('No tasks to schedule') },
+        { status: 400 },
+      );
+    }
+
     const busyWindows = parseBusyWindows(events);
 
-    // 6. Build prompt and call OpenAI
-    const prompt = buildSchedulePrompt({ tasks, busyWindows });
-    const schedule = await callSchedulingEngine(prompt);
+    // 6. If retry, load existing schedule as context
+    let previousSchedule: unknown = undefined;
+    if (retry) {
+      const { data: existingBlocks } = await supabase
+        .from("scheduled_blocks")
+        .select("task_id, start_time, end_time, title")
+        .eq("user_id", user.id)
+        .gte("start_time", startOfDay.toISOString())
+        .lte("start_time", endOfDay.toISOString());
 
-    // 7. Delete existing scheduled blocks for today
-    const startOfDay = new Date();
-    startOfDay.setHours(0, 0, 0, 0);
-    const endOfDay = new Date();
-    endOfDay.setHours(23, 59, 59, 999);
+      if (existingBlocks && existingBlocks.length > 0) {
+        previousSchedule = existingBlocks;
+      }
+    }
 
+    // 7. Build prompt and call OpenAI
+    const prompt = buildSchedulePrompt({ tasks, busyWindows, timezone, currentTime, previousSchedule });
+    const schedule = await callSchedulingEngine(prompt, retry);
+
+    // 7. Validate AI output — filter to only real task IDs
+    const taskIds = new Set(tasks.map((t) => t.id));
+    const validBlocks = schedule.scheduled_blocks.filter((block) =>
+      taskIds.has(block.task_id),
+    );
+    const invalidBlockIds = schedule.scheduled_blocks
+      .filter((block) => !taskIds.has(block.task_id))
+      .map((block) => block.task_id);
+
+    if (invalidBlockIds.length > 0) {
+      logger.warn("AI returned invalid task IDs, filtered out", {
+        invalidIds: invalidBlockIds,
+      });
+    }
+
+    const validOverflow = schedule.overflow.filter((id) => taskIds.has(id));
+
+    // 8. Delete existing scheduled blocks for today
     await supabase
       .from('scheduled_blocks')
       .delete()
@@ -102,15 +143,15 @@ export async function POST() {
       .gte('start_time', startOfDay.toISOString())
       .lte('start_time', endOfDay.toISOString());
 
-    // 8. Insert new scheduled blocks
-    if (schedule.scheduled_blocks.length > 0) {
-      const blocksToInsert = schedule.scheduled_blocks.map((block) => {
+    // 9. Insert new scheduled blocks (with timezone offset on timestamps)
+    if (validBlocks.length > 0) {
+      const blocksToInsert = validBlocks.map((block) => {
         const task = tasks.find((t) => t.id === block.task_id);
         return {
           user_id: user.id,
           task_id: block.task_id,
-          start_time: block.start_time,
-          end_time: block.end_time,
+          start_time: ensureOffset(block.start_time, utcOffset),
+          end_time: ensureOffset(block.end_time, utcOffset),
           title: task?.title || 'Unknown task',
           source: 'ai' as const,
         };
@@ -122,23 +163,30 @@ export async function POST() {
 
       if (insertError) {
         return NextResponse.json(
-          { error: insertError.message },
-          { status: 500 }
+          { error: friendlyMessage(insertError) },
+          { status: 500 },
         );
       }
     }
 
-    // 9. Return schedule
+    // 10. Return schedule (with offset-normalized timestamps)
+    const normalizedBlocks = validBlocks.map((block) => ({
+      ...block,
+      start_time: ensureOffset(block.start_time, utcOffset),
+      end_time: ensureOffset(block.end_time, utcOffset),
+    }));
+
     return NextResponse.json({
-      scheduled_blocks: schedule.scheduled_blocks,
-      overflow: schedule.overflow,
+      scheduled_blocks: normalizedBlocks,
+      overflow: validOverflow,
       busy_windows: busyWindows,
     });
-  } catch (error: any) {
-    logger.error("Build schedule failed", { error: error.message || String(error) });
+  } catch (error: unknown) {
+    const raw = error instanceof Error ? error.message : String(error);
+    logger.error("Build schedule failed", { error: raw });
     return NextResponse.json(
-      { error: error.message || 'Internal server error' },
-      { status: 500 }
+      { error: friendlyMessage(error) },
+      { status: 500 },
     );
   }
 }

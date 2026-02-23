@@ -84,3 +84,20 @@ High-level changes; add a line or two here when you commit and push.
 - **ExtractedTasksReview Update:** Added optional `loadingMessage` and `emptyMessage` props for audio-specific messaging, backward-compatible defaults.
 - **Dashboard Update:** Added "Voice tasks" button with live recording indicator, audio file upload, audio preview bar with playback/extract/discard controls, collapsible transcription display. Shared extraction flow with photo via `extractionSource` state.
 - **Roadmaps:** Updated Phase 4 roadmap (all tasks checked off), moved plan + roadmap to `ai/roadmaps/complete/`. Phase 4 complete.
+- **Phase 5: Polish & Validation (code polish).**
+- **Friendly Errors:** Created `lib/errors/friendlyMessage.ts` — maps error messages and HTTP status codes to user-friendly strings (rate limit, timeout, OpenAI, Google Calendar, generic). Applied to all 5 API routes (`schedule/build`, `tasks`, `tasks/[id]`, `extract-photo`, `extract-audio`). Fixed `error: any` → `error: unknown` in 3 routes.
+- **Loading & Empty States:** Added `loadingTasks` spinner during initial task fetch, "No schedule yet" empty state when tasks exist but no schedule, inline error banner replacing `alert()` for schedule errors.
+- **Confirm Dialog:** Created `components/features/ConfirmDialog.tsx` — reusable HeadlessUI Dialog for destructive actions. Wired to delete task with `deletingTaskId` state.
+- **Keyboard Shortcuts:** Created `lib/hooks/useKeyboardShortcuts.ts` — registers global keydown listener, handles meta+key combos, skips when in inputs (except Escape). Wired: Cmd+N → focus title, Cmd+B → build schedule, Escape → close modals/extraction/confirm.
+- **Performance:** Parallelized tasks + calendar events fetch with `Promise.all` in schedule/build route. Added `loading="lazy"` to task photo thumbnails.
+- **Type Safety:** Replaced `block: any` with `block: ScheduledBlock` in notification scheduling code.
+- **Phase 5b: Smarter Scheduling & Persistence.**
+- **AI Prompt Fix:** Fixed working hours format (24h `17` → `5:00 PM` instead of broken `17:00 PM`). Added time hint instruction (respect "at 1 pm", "morning", "after lunch" in task notes). Added hard working hours enforcement ("NEVER schedule before/after"). Added 10-minute break enforcement between tasks. Added timezone support (browser IANA timezone passed through). Changed example timestamps from UTC `Z` suffix to local format.
+- **Retry Context:** Added `previousSchedule` param to `buildSchedulePrompt` — when retrying, includes the previous schedule as context with instructions to generate a meaningfully different arrangement.
+- **Temperature:** Lowered OpenAI temperature from `0.7` to `0.3` for more consistent scheduling.
+- **Schedule Persistence:** Created `GET /api/schedule` — fetches today's `scheduled_blocks` for authenticated user. Dashboard now loads schedule on mount alongside tasks and Google status, restoring timeline on reload.
+- **Try Again Button:** Added "Try again" button next to schedule heading. Passes `retry: true` to build API, which loads existing schedule as context for AI to produce a different arrangement. Refresh icon, disabled while building.
+- **Drag to Reschedule:** Added pointer-based drag-to-reschedule on `DailyTimeline` scheduled blocks. Blocks show grab cursor, scale + shadow while dragging, ghost outline at original position, live time preview snapped to 5-minute increments. Created `PATCH /api/schedule/:id` endpoint to persist moved block times. Optimistic local state update with rollback on failure.
+- **Build Route Update:** `POST /api/schedule/build` now accepts `timezone` and `retry` from request body. On retry, loads existing blocks as context for the AI.
+- **Scheduling Spread Rule:** Added Rule 5 ("SPREAD TASKS OUT") to AI scheduling prompt — instructs GPT-4o-mini to distribute tasks across the full working window instead of clustering them in the morning. Renumbered subsequent rules.
+- **Remove Debug Override:** Removed hardcoded 8 AM `currentTime` override from dashboard; scheduler now uses real browser time as the effective start.

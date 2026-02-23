@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { extractTasksFromPhoto } from "@/lib/openai/extractTasksFromPhoto";
+import { friendlyMessage } from "@/lib/errors/friendlyMessage";
 import { createLogger } from "@/lib/logger";
 
 const logger = createLogger("api:extract-photo");
@@ -57,9 +58,11 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     return NextResponse.json({ tasks });
   } catch (error: unknown) {
-    const message =
-      error instanceof Error ? error.message : "Internal server error";
-    logger.error("Photo extraction failed", { error: message });
-    return NextResponse.json({ error: message }, { status: 500 });
+    const raw = error instanceof Error ? error.message : String(error);
+    logger.error("Photo extraction failed", { error: raw });
+    return NextResponse.json(
+      { error: friendlyMessage(error) },
+      { status: 500 },
+    );
   }
 }

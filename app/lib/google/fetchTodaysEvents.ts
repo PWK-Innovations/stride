@@ -15,14 +15,10 @@ interface CalendarEvent {
   };
 }
 
-export async function fetchTodaysEvents(accessToken: string): Promise<CalendarEvent[]> {
-  const now = new Date();
-  const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const endOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
-
+export async function fetchTodaysEvents(accessToken: string, dayStart: Date, dayEnd: Date): Promise<CalendarEvent[]> {
   const params = new URLSearchParams({
-    timeMin: startOfDay.toISOString(),
-    timeMax: endOfDay.toISOString(),
+    timeMin: dayStart.toISOString(),
+    timeMax: dayEnd.toISOString(),
     singleEvents: 'true',
     orderBy: 'startTime',
   });

@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 interface ScheduledBlockItem {
+  id?: string;
   task_id: string;
   start_time: string;
   end_time: string;
@@ -18,6 +19,7 @@ interface BusyWindowItem {
 interface DailyTimelineProps {
   scheduledBlocks: ScheduledBlockItem[];
   busyWindows?: BusyWindowItem[];
+  onBlockMove?: (blockId: string, newStart: string, newEnd: string) => void;
 }
 
 const HOUR_HEIGHT = 80;
@@ -47,8 +49,25 @@ function getHourLabel(hour: number): string {
   return hour < 12 ? `${hour} AM` : `${hour - 12} PM`;
 }
 
-export function DailyTimeline({ scheduledBlocks, busyWindows = [] }: DailyTimelineProps): React.ReactElement {
+interface DragState {
+  blockIndex: number;
+  initialY: number;
+  initialStartTime: Date;
+  durationMs: number;
+  currentDeltaY: number;
+}
+
+function snapTo5Min(date: Date): Date {
+  const snapped = new Date(date);
+  const mins = snapped.getMinutes();
+  snapped.setMinutes(Math.round(mins / 5) * 5, 0, 0);
+  return snapped;
+}
+
+export function DailyTimeline({ scheduledBlocks, busyWindows = [], onBlockMove }: DailyTimelineProps): React.ReactElement {
   const [now, setNow] = useState(new Date());
+  const [drag, setDrag] = useState<DragState | null>(null);
+  const eventsAreaRef = useRef<HTMLDivElement>(null);
 
   // Update current time every minute
   useEffect(() => {
@@ -92,6 +111,51 @@ export function DailyTimeline({ scheduledBlocks, busyWindows = [] }: DailyTimeli
     return (hours - startHour) * HOUR_HEIGHT;
   };
 
+  // Drag handlers
+  function handlePointerDown(e: React.PointerEvent, blockIndex: number): void {
+    const block = scheduledBlocks[blockIndex];
+    if (!block.id || !onBlockMove) return;
+    e.preventDefault();
+    (e.target as HTMLElement).setPointerCapture(e.pointerId);
+    const startTime = new Date(block.start_time);
+    const endTime = new Date(block.end_time);
+    setDrag({
+      blockIndex,
+      initialY: e.clientY,
+      initialStartTime: startTime,
+      durationMs: endTime.getTime() - startTime.getTime(),
+      currentDeltaY: 0,
+    });
+  }
+
+  function handlePointerMove(e: React.PointerEvent): void {
+    setDrag((prev) => {
+      if (!prev) return null;
+      e.preventDefault();
+      return { ...prev, currentDeltaY: e.clientY - prev.initialY };
+    });
+  }
+
+  function handlePointerUp(e: React.PointerEvent): void {
+    if (!drag) return;
+    e.preventDefault();
+    const block = scheduledBlocks[drag.blockIndex];
+
+    // Compute new times before clearing drag state
+    const deltaHours = drag.currentDeltaY / HOUR_HEIGHT;
+    const deltaMs = deltaHours * 60 * 60 * 1000;
+    const newStart = snapTo5Min(new Date(drag.initialStartTime.getTime() + deltaMs));
+    const newEnd = new Date(newStart.getTime() + drag.durationMs);
+    const moved = newStart.getTime() !== drag.initialStartTime.getTime();
+
+    // Clear drag state first, then notify parent — avoids setState-during-render
+    setDrag(null);
+
+    if (block.id && onBlockMove && moved) {
+      onBlockMove(block.id, newStart.toISOString(), newEnd.toISOString());
+    }
+  }
+
   // Now indicator position
   const nowY = dateToY(now);
   const showNow = now.getHours() >= startHour && now.getHours() < endHour;
@@ -130,7 +194,13 @@ export function DailyTimeline({ scheduledBlocks, busyWindows = [] }: DailyTimeli
         </div>
 
         {/* Events area */}
-        <div className="relative min-w-0 flex-1" style={{ height: totalHeight }}>
+        <div
+          ref={eventsAreaRef}
+          className="relative min-w-0 flex-1"
+          style={{ height: totalHeight }}
+          onPointerMove={handlePointerMove}
+          onPointerUp={handlePointerUp}
+        >
           {/* Hour grid lines */}
           {hours.map((hour) => (
             <div
@@ -165,23 +235,47 @@ export function DailyTimeline({ scheduledBlocks, busyWindows = [] }: DailyTimeli
 
           {/* Scheduled task blocks */}
           {scheduledBlocks.map((block, i) => {
+            const isDragging = drag?.blockIndex === i;
             const blockStart = new Date(block.start_time);
             const blockEnd = new Date(block.end_time);
-            const top = dateToY(blockStart);
-            const height = Math.max(dateToY(blockEnd) - top, MIN_BLOCK_HEIGHT);
+            const baseTop = dateToY(blockStart);
+            const top = isDragging ? baseTop + drag.currentDeltaY : baseTop;
+            const height = Math.max(dateToY(blockEnd) - dateToY(blockStart), MIN_BLOCK_HEIGHT);
+            const canDrag = !!block.id && !!onBlockMove;
+
+            // Show preview times when dragging
+            let displayStart = blockStart;
+            let displayEnd = blockEnd;
+            if (isDragging) {
+              const deltaHours = drag.currentDeltaY / HOUR_HEIGHT;
+              const deltaMs = deltaHours * 60 * 60 * 1000;
+              displayStart = snapTo5Min(new Date(drag.initialStartTime.getTime() + deltaMs));
+              displayEnd = new Date(displayStart.getTime() + drag.durationMs);
+            }
 
             return (
-              <div
-                key={`task-${i}`}
-                className="absolute right-2 left-2 overflow-hidden rounded-md border-l-2 border-solid border-olive-500 bg-olive-50 px-3 py-2 dark:border-olive-400 dark:bg-olive-800"
-                style={{ top, height }}
-              >
-                <p className="truncate text-sm font-medium text-olive-900 dark:text-olive-50">
-                  {block.title}
-                </p>
-                <p className="text-xs text-olive-500 dark:text-olive-400">
-                  {formatTime(blockStart)} · {formatDuration(blockStart, blockEnd)}
-                </p>
+              <div key={`task-${i}`}>
+                {/* Ghost outline at original position when dragging */}
+                {isDragging && (
+                  <div
+                    className="absolute right-2 left-2 rounded-md border-2 border-dashed border-olive-300 dark:border-olive-600"
+                    style={{ top: baseTop, height }}
+                  />
+                )}
+                <div
+                  className={`absolute right-2 left-2 overflow-hidden rounded-md border-l-2 border-solid border-olive-500 bg-olive-50 px-3 py-2 dark:border-olive-400 dark:bg-olive-800 ${
+                    canDrag ? "cursor-grab touch-none" : ""
+                  } ${isDragging ? "z-20 scale-[1.02] shadow-lg cursor-grabbing" : ""}`}
+                  style={{ top, height }}
+                  onPointerDown={canDrag ? (e) => handlePointerDown(e, i) : undefined}
+                >
+                  <p className="truncate text-sm font-medium text-olive-900 dark:text-olive-50">
+                    {block.title}
+                  </p>
+                  <p className="text-xs text-olive-500 dark:text-olive-400">
+                    {formatTime(displayStart)} · {formatDuration(displayStart, displayEnd)}
+                  </p>
+                </div>
               </div>
             );
           })}
