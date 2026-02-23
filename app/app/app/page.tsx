@@ -5,11 +5,13 @@ import { PlusIcon } from '@/components/icons/plus-icon';
 import { TrashIcon } from '@/components/icons/trash-icon';
 import { SparklesIcon } from '@/components/icons/sparkles-icon';
 import { CameraIcon } from '@/components/icons/camera-icon';
+import { MicrophoneIcon } from '@/components/icons/microphone-icon';
 import { DailyTimeline } from '@/components/features/DailyTimeline';
 import { ExtractedTasksReview } from '@/components/features/ExtractedTasksReview';
 import { PhotoModal } from '@/components/features/PhotoModal';
 import { uploadPhoto } from '@/lib/supabase/uploadPhoto';
 import { createClient } from '@/lib/supabase/client';
+import { useAudioRecorder } from '@/lib/audio/useAudioRecorder';
 import {
   requestNotificationPermission,
   scheduleNotifications,
@@ -45,14 +47,29 @@ export default function AppPage() {
   const [busyWindows, setBusyWindows] = useState<Array<{ start: string; end: string; title?: string }>>([]);
   const [googleConnected, setGoogleConnected] = useState<boolean | null>(null);
 
-  // Photo extraction state
+  // Extraction state (shared between photo and audio)
   const [extracting, setExtracting] = useState(false);
   const [extractedTasks, setExtractedTasks] = useState<ExtractedTask[]>([]);
   const [extractionError, setExtractionError] = useState<string | null>(null);
   const [showExtraction, setShowExtraction] = useState(false);
   const [pendingPhoto, setPendingPhoto] = useState<File | null>(null);
   const [savingExtracted, setSavingExtracted] = useState(false);
+  const [extractionSource, setExtractionSource] = useState<"photo" | "audio" | null>(null);
+  const [transcription, setTranscription] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const audioFileInputRef = useRef<HTMLInputElement>(null);
+
+  // Audio recorder
+  const {
+    isRecording,
+    duration: recordingDuration,
+    audioBlob,
+    audioUrl,
+    error: recorderError,
+    start: startRecording,
+    stop: stopRecording,
+    reset: resetRecording,
+  } = useAudioRecorder();
 
   // Photo modal state
   const [modalPhotoUrl, setModalPhotoUrl] = useState<string | null>(null);
@@ -130,6 +147,8 @@ export default function AppPage() {
     e.target.value = '';
 
     setPendingPhoto(file);
+    setExtractionSource("photo");
+    setTranscription(null);
     setShowExtraction(true);
     setExtracting(true);
     setExtractionError(null);
@@ -165,9 +184,9 @@ export default function AppPage() {
 
     setSavingExtracted(true);
     try {
-      // Upload the photo to Supabase Storage
+      // Upload the photo to Supabase Storage (only for photo extractions)
       let photoUrl: string | null = null;
-      if (pendingPhoto) {
+      if (extractionSource === "photo" && pendingPhoto) {
         const supabase = createClient();
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
@@ -203,6 +222,9 @@ export default function AppPage() {
       setShowExtraction(false);
       setPendingPhoto(null);
       setExtractedTasks([]);
+      setExtractionSource(null);
+      setTranscription(null);
+      resetRecording();
       await fetchTasks();
     } catch (error) {
       console.error('Failed to save extracted tasks:', error);
@@ -217,6 +239,56 @@ export default function AppPage() {
     setPendingPhoto(null);
     setExtractedTasks([]);
     setExtractionError(null);
+    setExtractionSource(null);
+    setTranscription(null);
+    resetRecording();
+  };
+
+  const handleAudioSubmit = async (blob: Blob) => {
+    setExtractionSource("audio");
+    setTranscription(null);
+    setShowExtraction(true);
+    setExtracting(true);
+    setExtractionError(null);
+    setExtractedTasks([]);
+
+    try {
+      const formData = new FormData();
+      formData.append("audio", blob, "recording.webm");
+
+      const res = await fetch("/api/tasks/extract-audio", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setExtractionError(data.error || "Failed to extract tasks from audio");
+        return;
+      }
+
+      setTranscription(data.transcription || null);
+      setExtractedTasks(data.tasks);
+    } catch (error) {
+      console.error("Failed to extract tasks from audio:", error);
+      setExtractionError("Failed to analyze audio. Please try again.");
+    } finally {
+      setExtracting(false);
+    }
+  };
+
+  const handleAudioFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    e.target.value = "";
+    handleAudioSubmit(file);
+  };
+
+  const formatDuration = (seconds: number): string => {
+    const m = Math.floor(seconds / 60);
+    const s = seconds % 60;
+    return `${m}:${s.toString().padStart(2, "0")}`;
   };
 
   return (
@@ -227,7 +299,7 @@ export default function AppPage() {
           <h2 className="text-xl font-display font-semibold text-olive-900 dark:text-olive-50">
             Add a task
           </h2>
-          <div>
+          <div className="flex items-center gap-2">
             <input
               ref={fileInputRef}
               type="file"
@@ -236,15 +308,42 @@ export default function AppPage() {
               onChange={handlePhotoCapture}
               className="hidden"
             />
+            <input
+              ref={audioFileInputRef}
+              type="file"
+              accept="audio/*"
+              onChange={handleAudioFileUpload}
+              className="hidden"
+            />
             <button
               type="button"
               onClick={() => fileInputRef.current?.click()}
-              disabled={extracting || savingExtracted}
+              disabled={extracting || savingExtracted || isRecording}
               className="inline-flex items-center gap-2 rounded-md border border-olive-300 px-3 py-2 text-sm font-medium text-olive-700 hover:bg-olive-50 focus:outline-none focus:ring-2 focus:ring-olive-500 focus:ring-offset-2 disabled:opacity-50 dark:border-olive-600 dark:text-olive-300 dark:hover:bg-olive-800"
             >
               <CameraIcon className="h-4 w-4" />
               Snap tasks
             </button>
+            {isRecording ? (
+              <button
+                type="button"
+                onClick={stopRecording}
+                className="inline-flex items-center gap-2 rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-100 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 dark:border-red-600 dark:bg-red-900/30 dark:text-red-300 dark:hover:bg-red-900/50"
+              >
+                <span className="h-2 w-2 animate-pulse rounded-full bg-red-500" />
+                Stop ({formatDuration(recordingDuration)})
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={startRecording}
+                disabled={extracting || savingExtracted}
+                className="inline-flex items-center gap-2 rounded-md border border-olive-300 px-3 py-2 text-sm font-medium text-olive-700 hover:bg-olive-50 focus:outline-none focus:ring-2 focus:ring-olive-500 focus:ring-offset-2 disabled:opacity-50 dark:border-olive-600 dark:text-olive-300 dark:hover:bg-olive-800"
+              >
+                <MicrophoneIcon className="h-4 w-4" />
+                Voice tasks
+              </button>
+            )}
           </div>
         </div>
         <form onSubmit={addTask} className="space-y-4">
@@ -312,9 +411,38 @@ export default function AppPage() {
         </form>
       </div>
 
-      {/* Photo Extraction Review */}
+      {/* Recorder Error */}
+      {recorderError && (
+        <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/30">
+          <p className="text-sm text-red-700 dark:text-red-300">{recorderError}</p>
+        </div>
+      )}
+
+      {/* Audio Preview */}
+      {audioBlob && audioUrl && !showExtraction && (
+        <div className="mb-4 flex items-center gap-3 rounded-lg border border-olive-200 bg-white p-4 shadow-sm dark:border-olive-800 dark:bg-olive-900">
+          <audio src={audioUrl} controls className="h-8 flex-1" />
+          <button
+            type="button"
+            onClick={() => handleAudioSubmit(audioBlob)}
+            disabled={extracting}
+            className="inline-flex items-center gap-2 rounded-md bg-olive-600 px-3 py-2 text-sm font-medium text-white hover:bg-olive-700 focus:outline-none focus:ring-2 focus:ring-olive-500 focus:ring-offset-2 disabled:opacity-50 dark:bg-olive-500 dark:hover:bg-olive-600"
+          >
+            Extract tasks
+          </button>
+          <button
+            type="button"
+            onClick={resetRecording}
+            className="rounded-md border border-olive-300 px-3 py-2 text-sm font-medium text-olive-700 hover:bg-olive-50 focus:outline-none focus:ring-2 focus:ring-olive-500 focus:ring-offset-2 dark:border-olive-600 dark:text-olive-300 dark:hover:bg-olive-800"
+          >
+            Discard
+          </button>
+        </div>
+      )}
+
+      {/* Extraction Review */}
       {showExtraction && (
-        <div className="mb-8">
+        <div className="mb-8 space-y-3">
           <ExtractedTasksReview
             tasks={extractedTasks}
             loading={extracting}
@@ -322,7 +450,21 @@ export default function AppPage() {
             error={extractionError}
             onConfirm={handleConfirmExtracted}
             onCancel={handleCancelExtraction}
+            {...(extractionSource === "audio" && {
+              loadingMessage: "Transcribing and extracting tasks...",
+              emptyMessage: "No tasks found in the audio. Try recording a clearer voice memo listing your tasks.",
+            })}
           />
+          {transcription && !extracting && (
+            <details className="rounded-lg border border-olive-200 bg-white p-4 shadow-sm dark:border-olive-800 dark:bg-olive-900">
+              <summary className="cursor-pointer text-sm font-medium text-olive-700 dark:text-olive-300">
+                View transcription
+              </summary>
+              <p className="mt-2 whitespace-pre-wrap text-sm text-olive-600 dark:text-olive-400">
+                {transcription}
+              </p>
+            </details>
+          )}
         </div>
       )}
 

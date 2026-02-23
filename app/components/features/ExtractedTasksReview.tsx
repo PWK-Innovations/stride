@@ -17,6 +17,8 @@ interface ExtractedTasksReviewProps {
   error: string | null;
   onConfirm: (tasks: ExtractedTask[]) => void;
   onCancel: () => void;
+  loadingMessage?: string;
+  emptyMessage?: string;
 }
 
 let keyCounter = 0;
@@ -35,6 +37,8 @@ export function ExtractedTasksReview({
   error,
   onConfirm,
   onCancel,
+  loadingMessage = "Analyzing photo for tasks...",
+  emptyMessage = "No tasks found in the image. Try a clearer photo of a to-do list or assignment.",
 }: ExtractedTasksReviewProps): React.ReactNode {
   const [editableTasks, setEditableTasks] = useState<EditableTask[]>(() =>
     toEditable(initialTasks),
@@ -65,7 +69,7 @@ export function ExtractedTasksReview({
         <div className="flex items-center gap-3">
           <div className="h-5 w-5 animate-spin rounded-full border-2 border-olive-300 border-t-olive-600 dark:border-olive-600 dark:border-t-olive-300" />
           <p className="text-sm text-olive-600 dark:text-olive-400">
-            Analyzing photo for tasks...
+            {loadingMessage}
           </p>
         </div>
       </div>
@@ -92,7 +96,7 @@ export function ExtractedTasksReview({
     return (
       <div className="rounded-lg border border-olive-200 bg-white p-6 shadow-sm dark:border-olive-800 dark:bg-olive-900">
         <p className="text-sm text-olive-600 dark:text-olive-400">
-          No tasks found in the image. Try a clearer photo of a to-do list or assignment.
+          {emptyMessage}
         </p>
         <button
           onClick={onCancel}
