@@ -1,11 +1,11 @@
-# Phase 8: Scale & Monetization - Implementation Plan
+# Phase 9: Scale & Monetization - Implementation Plan
 
 **Date:** 2026-02-09
-**Phase:** 8 - Scale & Monetization (Future)
+**Phase:** 9 - Scale & Monetization (Future)
 **Status:** Not started
 **Parent Plan:** `2026-02-08-stride-high-level-plan.md`
-**Roadmap:** `2026-02-09-phase-8-scale-monetization-roadmap.md`
-**Previous Phase:** `2026-02-09-phase-7-secondary-features-plan.md`
+**Roadmap:** `2026-02-09-phase-9-scale-monetization-roadmap.md`
+**Previous Phase:** `2026-02-09-phase-8-secondary-features-plan.md`
 
 ---
 
@@ -23,13 +23,13 @@ Prepare for broader launch: pricing (free tier, professional, student discount),
 
 ## Prerequisites
 
-- Phase 7 complete (goals, dynamic updates shipped)
+- Phase 8 complete (goals, dynamic updates shipped)
 - Clear signal from beta/usage that users will pay
 - Decision on which P1 integrations to build first (Outlook/Apple vs. Jira/Linear/GitHub)
 
 ---
 
-## 8.1 Pricing & Billing
+## 9.1 Pricing & Billing
 
 - **Free tier:** Limit AI schedules (e.g. 10/month); enforce in API when calling OpenAI.
 - **Professional:** $12–15/mo via Stripe (subscription); unlock unlimited AI scheduling, full features.
@@ -39,7 +39,7 @@ Prepare for broader launch: pricing (free tier, professional, student discount),
 
 ---
 
-## 8.2 Multi-Calendar Support (P1)
+## 9.2 Multi-Calendar Support (P1)
 
 - Add Outlook and/or Apple Calendar OAuth and event fetch (similar to Google).
 - Store tokens per user per provider in Supabase.
@@ -48,7 +48,7 @@ Prepare for broader launch: pricing (free tier, professional, student discount),
 
 ---
 
-## 8.3 Integrations for Engineers (P1)
+## 9.3 Integrations for Engineers (P1)
 
 - **Jira / Linear / GitHub:** Import tasks (e.g. "My issues" or "Sprint tasks") into Stride task list; map to Stride task model; optional sync (one-way or periodic).
 - **Focus Time / Deep Work:** Allow user to block large time blocks as "focus"; scheduling engine avoids or respects these.
@@ -58,7 +58,7 @@ Prioritize based on user segment (engineers vs. students vs. professionals).
 
 ---
 
-## 8.4 Go-to-Market
+## 9.4 Go-to-Market
 
 - **Product Hunt:** Prepare launch (assets, description, timing).
 - **Communities:** Reddit (r/productivity, r/ADHD, r/college, r/cscareerquestions); referral loop ("invite a peer" for extended trial).
@@ -85,5 +85,5 @@ Stride is live, monetized, and growing. Pricing and key P1 integrations (per fee
 
 ## Notes
 
-- Phase 8 is "future"; scope and order of 8.2–8.4 should be driven by beta and early revenue feedback.
+- Phase 9 is "future"; scope and order of 9.2–9.4 should be driven by beta and early revenue feedback.
 - Avoid building all integrations at once; ship one, learn, then next.

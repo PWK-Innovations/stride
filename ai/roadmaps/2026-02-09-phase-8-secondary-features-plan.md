@@ -1,11 +1,11 @@
-# Phase 7: Secondary Features - Implementation Plan
+# Phase 8: Secondary Features - Implementation Plan
 
 **Date:** 2026-02-09
-**Phase:** 7 - Secondary Features (Post-MVP)
+**Phase:** 8 - Secondary Features (Post-MVP)
 **Status:** Not started
 **Parent Plan:** `2026-02-08-stride-high-level-plan.md`
-**Roadmap:** `2026-02-09-phase-7-secondary-features-roadmap.md`
-**Previous Phase:** `2026-02-09-phase-6-beta-launch-plan.md`
+**Roadmap:** `2026-02-09-phase-8-secondary-features-roadmap.md`
+**Previous Phase:** `2026-02-09-phase-7-beta-launch-plan.md`
 
 ---
 
@@ -23,12 +23,12 @@ Add P1 features from the MVP doc: goals and dynamic calendar updates. By the end
 
 ## Prerequisites
 
-- Phase 6 complete (beta launched, feedback collected, P1 priorities decided)
+- Phase 7 complete (beta launched, feedback collected, P1 priorities decided)
 - Beta feedback should drive whether goals and/or dynamic updates are built first
 
 ---
 
-## 7.1 Goals
+## 8.1 Goals
 
 ### Goal Data Model
 
@@ -49,7 +49,7 @@ Add P1 features from the MVP doc: goals and dynamic calendar updates. By the end
 
 ---
 
-## 7.2 Dynamic Calendar Updates
+## 8.2 Dynamic Calendar Updates
 
 ### Mark Task Done
 
@@ -69,7 +69,7 @@ Add P1 features from the MVP doc: goals and dynamic calendar updates. By the end
 
 ---
 
-## 7.3 Refinements (If Validated)
+## 8.3 Refinements (If Validated)
 
 - **Multi-day view:** Tomorrow, this week — only if beta users ask for it
 - **Task edit:** In-place edit (title, duration, notes) if "delete + re-add" is a major pain point
@@ -98,4 +98,4 @@ Goals and dynamic updates shipped. Users can set goals, link tasks to goals, mar
 
 ## Next Phase
 
-**Phase 8:** Scale & Monetization (`2026-02-09-phase-8-scale-monetization-plan.md`)
+**Phase 9:** Scale & Monetization (`2026-02-09-phase-9-scale-monetization-plan.md`)

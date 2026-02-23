@@ -193,22 +193,54 @@
 
 ---
 
-## Phase 6: Beta Launch
+## Phase 6: Code Quality & Security
+
+**Goal:** Make the codebase AI-friendly with CLI testing, structured logging, and security hardening before beta launch.
+
+### 6.1 CLI Testing Infrastructure
+- Create `scripts/` folder with standard scripts (build.sh, run.sh, test.sh, lint.sh, dev.sh)
+- All scripts use `--help` flag pattern for self-documentation
+- JSON input/output for test scripts (machine-parseable by AI)
+- Standard exit codes (0=success, 1=failure, 2=misuse, 126=permission, 127=missing dep, 130=interrupted)
+- Data to stdout, errors/diagnostics to stderr
+- Explore → Codify testing workflow (AI explores the app, then codifies findings into repeatable tests)
+
+### 6.2 Structured Logging
+- Enhance existing logger with DEBUG level and environment-controlled log level (LOG_LEVEL env var)
+- Replace all remaining console.log/error/warn calls with structured logger
+- Log function entry, exit, and errors with full context (action, input, result, error + stack)
+- Create logging documentation at `ai/testing.md`
+
+### 6.3 Security Hardening
+- Verify secrets in .gitignore
+- Audit for hardcoded credentials
+- Ensure .testEnvVars contains only test data
+- Run dependency audit (npm audit)
+- Sanitize user input before AI processing
+- Verify API key rotation practices
+- Ensure production secrets use secret management
+- Commit .env.example (no actual secrets)
+
+**Deliverable:** Codebase is AI-testable with CLI scripts, has structured logging throughout, and passes security checklist. Ready for confident beta launch.
+
+---
+
+## Phase 7: Beta Launch
 
 **Goal:** Launch to 5-10 external users and gather feedback.
 
-### 6.1 Beta Preparation
+### 7.1 Beta Preparation
 - Set up analytics (track "Build my day" usage, task creation, photo uploads)
 - Set up error logging (Sentry or similar)
 - Create onboarding flow (connect calendar, add first task, build first day)
 - Write beta invite email and feedback survey
 
-### 6.2 Beta Launch
+### 7.2 Beta Launch
 - Invite 5-10 users (mix of students, professionals, engineers)
 - Monitor usage and errors daily
 - Collect feedback via survey and direct conversations
 
-### 6.3 Rapid Iteration
+### 7.3 Rapid Iteration
 - Fix critical bugs within 24 hours
 - Implement quick wins (small UX improvements, error messages)
 - Prioritize P1 features based on feedback
@@ -217,23 +249,23 @@
 
 ---
 
-## Phase 7: Secondary Features (Post-MVP)
+## Phase 8: Secondary Features (Post-MVP)
 
 **Goal:** Add goals and dynamic calendar updates (P1 from MVP doc).
 
-### 7.1 Goals
+### 8.1 Goals
 - Goal data model (professional, academic, social)
 - UI to add/edit goals
 - Link tasks to goals
 - AI scheduling: incorporate goals into placement logic (prioritize goal-related tasks)
 
-### 7.2 Dynamic Calendar Updates
+### 8.2 Dynamic Calendar Updates
 - "Mark task done" UI (checkbox or button)
 - When task is marked done: remove from schedule, re-run AI placement for remaining tasks
 - Show updated schedule in real-time
 - Handle "running late" or "skip task" scenarios
 
-### 7.3 Refinements
+### 8.3 Refinements
 - Multi-day view (tomorrow, this week) - if validated by users
 - Task edit (if delete + re-add is too cumbersome)
 - Calendar event caching (if fetch-on-demand is too slow)
@@ -242,27 +274,27 @@
 
 ---
 
-## Phase 8: Scale & Monetization (Future)
+## Phase 9: Scale & Monetization (Future)
 
 **Goal:** Prepare for broader launch and implement pricing.
 
-### 8.1 Pricing & Billing
+### 9.1 Pricing & Billing
 - Implement free tier (limited AI schedules per month)
 - Implement professional tier ($12-15/mo via Stripe)
 - Implement student discount (50% off with .edu email)
 - Payment flow and subscription management
 
-### 8.2 Multi-Calendar Support (P1)
+### 9.2 Multi-Calendar Support (P1)
 - Add Outlook and Apple Calendar integrations
 - Allow users to connect multiple calendars
 - Merge events from all calendars into one timeline
 
-### 8.3 Integrations for Engineers (P1)
+### 9.3 Integrations for Engineers (P1)
 - Jira, Linear, GitHub integration (import tasks)
 - Focus Time / Deep Work blocking (protect large time blocks)
 - Task chunking (break large tasks into smaller blocks)
 
-### 8.4 Go-to-Market
+### 9.4 Go-to-Market
 - Product Hunt launch
 - Reddit community outreach (r/productivity, r/ADHD, r/college)
 - Referral program (invite a peer for extended trial)
@@ -277,8 +309,8 @@
 **Critical path (must happen in order):**
 1. Phase 0 (Foundation & Auth) → Phase 1 (Frontend Layout) → Phase 2 (PWA & Hosting) → Phase 3 (Core Data Flow)
 2. Phase 4 (Photo-to-Task) can happen in parallel with Phase 3 if needed
-3. Phase 5 (Polish) → Phase 6 (Beta) must be sequential
-4. Phase 7+ (Secondary Features) can be prioritized based on beta feedback
+3. Phase 5 (Polish) → Phase 6 (Code Quality & Security) → Phase 7 (Beta) must be sequential
+4. Phase 8+ (Secondary Features) can be prioritized based on beta feedback
 
 **External dependencies:**
 - Supabase project setup (can be done in Phase 0)
@@ -303,15 +335,15 @@ From `aiDocs/mvp.md`, the MVP is successful if:
 ## What We're NOT Building (Yet)
 
 To avoid scope creep and over-engineering:
-- ❌ Tomorrow or multi-day view (today only for MVP)
-- ❌ Task edit (delete + re-add is fine for MVP)
-- ❌ Calendar event caching (fetch on demand is fine for MVP)
-- ❌ Multiple calendar providers (Google only for MVP)
-- ❌ Real-time sync (manual refresh is fine for MVP)
-- ❌ Complex scheduling optimization (greedy placement is fine for MVP)
-- ❌ Duration learning / feedback loops (user-provided estimates for MVP)
-- ❌ Break preservation (users can add break tasks manually for MVP)
-- ❌ Team features (single-user only for MVP)
+- No tomorrow or multi-day view (today only for MVP)
+- No task edit (delete + re-add is fine for MVP)
+- No calendar event caching (fetch on demand is fine for MVP)
+- No multiple calendar providers (Google only for MVP)
+- No real-time sync (manual refresh is fine for MVP)
+- No complex scheduling optimization (greedy placement is fine for MVP)
+- No duration learning / feedback loops (user-provided estimates for MVP)
+- No break preservation (users can add break tasks manually for MVP)
+- No team features (single-user only for MVP)
 
 These can be added in P1/P2 if validated by users.
 
@@ -320,7 +352,7 @@ These can be added in P1/P2 if validated by users.
 ## Next Steps
 
 1. **Review this plan** with the team
-2. **Use phase plan/roadmap docs** in `ai/roadmaps/`: each phase (0–8) has a plan and roadmap pair
+2. **Use phase plan/roadmap docs** in `ai/roadmaps/`: each phase (0–9) has a plan and roadmap pair
 3. **Complete Phase 0** (Foundation & Auth) — finish auth setup
 4. **Start Phase 1** (Frontend Layout) and build the auth UI + dashboard
 

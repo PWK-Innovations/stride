@@ -1,16 +1,16 @@
-# Phase 7: Secondary Features - Roadmap
+# Phase 8: Secondary Features - Roadmap
 
 **Date:** 2026-02-09
-**Phase:** 7 - Secondary Features (Post-MVP)
+**Phase:** 8 - Secondary Features (Post-MVP)
 **Status:** Not started
-**Plan:** `2026-02-09-phase-7-secondary-features-plan.md`
-**Previous Phase:** `2026-02-09-phase-6-beta-launch-roadmap.md`
+**Plan:** `2026-02-09-phase-8-secondary-features-plan.md`
+**Previous Phase:** `2026-02-09-phase-7-beta-launch-roadmap.md`
 
 ---
 
 ## Tasks
 
-### 7.1 Goals
+### 8.1 Goals
 
 - [ ] Design goals data model (table or columns)
 - [ ] Add `goal_id` to tasks (nullable FK)
@@ -21,7 +21,7 @@
 - [ ] Update AI scheduling prompt to include goals and task–goal links
 - [ ] Test: goals affect placement (e.g. goal-linked tasks in better slots)
 
-### 7.2 Dynamic Calendar Updates
+### 8.2 Dynamic Calendar Updates
 
 - [ ] Add "Mark done" to task and timeline block
 - [ ] Persist completion (e.g. completed_at, status)
@@ -32,7 +32,7 @@
 - [ ] Refresh timeline after re-schedule (no full reload)
 - [ ] Test full flow: mark done → confirm re-schedule → see updated day
 
-### 7.3 Refinements (If Validated)
+### 8.3 Refinements (If Validated)
 
 - [ ] Multi-day view (only if beta feedback supports it)
 - [ ] Task edit (only if delete + re-add is a major pain)
@@ -48,7 +48,7 @@ Goals and dynamic updates (mark done, re-schedule) shipped. Refinements only if 
 
 ## Acceptance Criteria
 
-- [ ] All 7.1 and 7.2 tasks checked off
+- [ ] All 8.1 and 8.2 tasks checked off
 - [ ] Goals and dynamic updates work end-to-end
 - [ ] Re-scheduling has user approval where specified
 - [ ] Refinements deferred or implemented based on feedback
@@ -57,4 +57,4 @@ Goals and dynamic updates (mark done, re-schedule) shipped. Refinements only if 
 
 ## Next Phase
 
-**Phase 8:** Scale & Monetization (`2026-02-09-phase-8-scale-monetization-roadmap.md`)
+**Phase 9:** Scale & Monetization (`2026-02-09-phase-9-scale-monetization-roadmap.md`)
