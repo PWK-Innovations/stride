@@ -1,20 +1,28 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { PlusIcon } from '@/components/icons/plus-icon';
 import { TrashIcon } from '@/components/icons/trash-icon';
 import { SparklesIcon } from '@/components/icons/sparkles-icon';
+import { CameraIcon } from '@/components/icons/camera-icon';
 import { DailyTimeline } from '@/components/features/DailyTimeline';
+import { ExtractedTasksReview } from '@/components/features/ExtractedTasksReview';
+import { PhotoModal } from '@/components/features/PhotoModal';
+import { uploadPhoto } from '@/lib/supabase/uploadPhoto';
+import { createClient } from '@/lib/supabase/client';
 import {
   requestNotificationPermission,
   scheduleNotifications,
 } from '@/lib/notifications/scheduleNotifications';
+
+import type { ExtractedTask } from '@/types/database';
 
 interface Task {
   id: string;
   title: string;
   notes: string | null;
   duration_minutes: number;
+  photo_url: string | null;
   created_at: string;
 }
 
@@ -36,6 +44,18 @@ export default function AppPage() {
   const [overflow, setOverflow] = useState<string[]>([]);
   const [busyWindows, setBusyWindows] = useState<Array<{ start: string; end: string; title?: string }>>([]);
   const [googleConnected, setGoogleConnected] = useState<boolean | null>(null);
+
+  // Photo extraction state
+  const [extracting, setExtracting] = useState(false);
+  const [extractedTasks, setExtractedTasks] = useState<ExtractedTask[]>([]);
+  const [extractionError, setExtractionError] = useState<string | null>(null);
+  const [showExtraction, setShowExtraction] = useState(false);
+  const [pendingPhoto, setPendingPhoto] = useState<File | null>(null);
+  const [savingExtracted, setSavingExtracted] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Photo modal state
+  const [modalPhotoUrl, setModalPhotoUrl] = useState<string | null>(null);
 
   useEffect(() => {
     fetchTasks();
@@ -102,13 +122,131 @@ export default function AppPage() {
     }
   };
 
+  const handlePhotoCapture = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Reset file input so the same file can be selected again
+    e.target.value = '';
+
+    setPendingPhoto(file);
+    setShowExtraction(true);
+    setExtracting(true);
+    setExtractionError(null);
+    setExtractedTasks([]);
+
+    try {
+      const formData = new FormData();
+      formData.append('photo', file);
+
+      const res = await fetch('/api/tasks/extract-photo', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setExtractionError(data.error || 'Failed to extract tasks');
+        return;
+      }
+
+      setExtractedTasks(data.tasks);
+    } catch (error) {
+      console.error('Failed to extract tasks from photo:', error);
+      setExtractionError('Failed to analyze photo. Please try again.');
+    } finally {
+      setExtracting(false);
+    }
+  };
+
+  const handleConfirmExtracted = async (confirmedTasks: ExtractedTask[]) => {
+    if (confirmedTasks.length === 0) return;
+
+    setSavingExtracted(true);
+    try {
+      // Upload the photo to Supabase Storage
+      let photoUrl: string | null = null;
+      if (pendingPhoto) {
+        const supabase = createClient();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          photoUrl = await uploadPhoto(user.id, pendingPhoto);
+        }
+      }
+
+      // Create each task sequentially
+      const failed: string[] = [];
+      for (const task of confirmedTasks) {
+        const res = await fetch('/api/tasks', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            title: task.title,
+            notes: task.notes,
+            duration_minutes: task.duration_minutes,
+            photo_url: photoUrl,
+          }),
+        });
+        if (!res.ok) {
+          failed.push(task.title);
+        }
+      }
+
+      if (failed.length > 0) {
+        setExtractionError(
+          `Failed to save ${failed.length} task${failed.length > 1 ? "s" : ""}: ${failed.join(", ")}`,
+        );
+        return;
+      }
+
+      setShowExtraction(false);
+      setPendingPhoto(null);
+      setExtractedTasks([]);
+      await fetchTasks();
+    } catch (error) {
+      console.error('Failed to save extracted tasks:', error);
+      setExtractionError('Failed to save tasks. Please try again.');
+    } finally {
+      setSavingExtracted(false);
+    }
+  };
+
+  const handleCancelExtraction = () => {
+    setShowExtraction(false);
+    setPendingPhoto(null);
+    setExtractedTasks([]);
+    setExtractionError(null);
+  };
+
   return (
     <>
       {/* Add Task Form */}
       <div className="mb-8 rounded-lg border border-olive-200 bg-white p-6 shadow-sm dark:border-olive-800 dark:bg-olive-900">
-        <h2 className="mb-4 text-xl font-display font-semibold text-olive-900 dark:text-olive-50">
-          Add a task
-        </h2>
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-xl font-display font-semibold text-olive-900 dark:text-olive-50">
+            Add a task
+          </h2>
+          <div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              capture="environment"
+              onChange={handlePhotoCapture}
+              className="hidden"
+            />
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              disabled={extracting || savingExtracted}
+              className="inline-flex items-center gap-2 rounded-md border border-olive-300 px-3 py-2 text-sm font-medium text-olive-700 hover:bg-olive-50 focus:outline-none focus:ring-2 focus:ring-olive-500 focus:ring-offset-2 disabled:opacity-50 dark:border-olive-600 dark:text-olive-300 dark:hover:bg-olive-800"
+            >
+              <CameraIcon className="h-4 w-4" />
+              Snap tasks
+            </button>
+          </div>
+        </div>
         <form onSubmit={addTask} className="space-y-4">
           <div>
             <label
@@ -174,6 +312,20 @@ export default function AppPage() {
         </form>
       </div>
 
+      {/* Photo Extraction Review */}
+      {showExtraction && (
+        <div className="mb-8">
+          <ExtractedTasksReview
+            tasks={extractedTasks}
+            loading={extracting}
+            saving={savingExtracted}
+            error={extractionError}
+            onConfirm={handleConfirmExtracted}
+            onCancel={handleCancelExtraction}
+          />
+        </div>
+      )}
+
       {/* Task List */}
       <div className="mb-8 rounded-lg border border-olive-200 bg-white p-6 shadow-sm dark:border-olive-800 dark:bg-olive-900">
         <h2 className="mb-4 text-xl font-display font-semibold text-olive-900 dark:text-olive-50">
@@ -191,18 +343,33 @@ export default function AppPage() {
                 key={task.id}
                 className="flex items-start justify-between rounded-md border border-olive-200 bg-olive-50 p-4 dark:border-olive-700 dark:bg-olive-800"
               >
-                <div className="flex-1">
-                  <h3 className="font-medium text-olive-900 dark:text-olive-50">
-                    {task.title}
-                  </h3>
-                  {task.notes && (
-                    <p className="mt-1 text-sm text-olive-600 dark:text-olive-400">
-                      {task.notes}
-                    </p>
+                <div className="flex flex-1 items-start gap-3">
+                  {task.photo_url && (
+                    <button
+                      onClick={() => setModalPhotoUrl(task.photo_url)}
+                      className="flex-shrink-0 overflow-hidden rounded border border-olive-200 dark:border-olive-600"
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img
+                        src={task.photo_url}
+                        alt="Task photo"
+                        className="h-10 w-10 object-cover"
+                      />
+                    </button>
                   )}
-                  <p className="mt-1 text-xs text-olive-500 dark:text-olive-500">
-                    {task.duration_minutes} minutes
-                  </p>
+                  <div className="flex-1">
+                    <h3 className="font-medium text-olive-900 dark:text-olive-50">
+                      {task.title}
+                    </h3>
+                    {task.notes && (
+                      <p className="mt-1 text-sm text-olive-600 dark:text-olive-400">
+                        {task.notes}
+                      </p>
+                    )}
+                    <p className="mt-1 text-xs text-olive-500 dark:text-olive-500">
+                      {task.duration_minutes} minutes
+                    </p>
+                  </div>
                 </div>
                 <button
                   onClick={() => deleteTask(task.id)}
@@ -305,6 +472,12 @@ export default function AppPage() {
           </ul>
         </div>
       )}
+
+      {/* Photo Modal */}
+      <PhotoModal
+        photoUrl={modalPhotoUrl}
+        onClose={() => setModalPhotoUrl(null)}
+      />
     </>
   );
 

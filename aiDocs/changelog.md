@@ -66,3 +66,13 @@ High-level changes; add a line or two here when you commit and push.
 - **Timeline Redesign:** Replaced `react-calendar-timeline` + `moment` with a custom vertical day view (pure Tailwind). 80px/hour, time gutter, now indicator (red dot + line updating every minute), olive design system, full dark mode support. Scheduled tasks get solid olive-500 left border; busy calendar windows get dashed olive-400 border with muted bg. Auto-expanding time range (defaults 8AM–6PM).
 - **Busy Windows:** Added `title` field to `BusyWindow` interface, mapping Google Calendar `summary` through. Dashboard now captures `busy_windows` from the API response and passes them to `DailyTimeline`.
 - **Dependencies:** Removed `react-calendar-timeline` and `moment` (10 packages).
+- **Phase 4a: Photo-to-Task.**
+- **ExtractedTask Type:** Added `ExtractedTask` interface to `types/database.ts` for photo extraction results.
+- **Photo Upload Helper:** Created `lib/supabase/uploadPhoto.ts` — client-side upload to `task-photos/{user_id}/{uuid}.{ext}`, returns public URL.
+- **OpenAI Vision Helper:** Created `lib/openai/extractTasksFromPhoto.ts` — sends base64 photo to GPT-4o-mini with structured JSON output, returns `ExtractedTask[]`.
+- **Extract Photo API:** Created `POST /api/tasks/extract-photo` — accepts FormData with photo, validates auth/type/size (5 MB limit, JPEG/PNG/WebP/HEIC), converts to base64, calls vision helper.
+- **ExtractedTasksReview Component:** Created `components/features/ExtractedTasksReview.tsx` — loading spinner, error state, empty state, editable task rows (title + duration), confirm/cancel buttons.
+- **PhotoModal Component:** Created `components/features/PhotoModal.tsx` — Headless UI Dialog for full-size photo viewing with close button.
+- **Tasks API Update:** Updated `POST /api/tasks` to accept and store `photo_url` field.
+- **Dashboard Update:** Updated `app/app/page.tsx` — "Snap tasks" button with camera icon triggers photo capture, extraction review UI, photo upload on confirm, task thumbnails in list, click thumbnail opens PhotoModal.
+- **Next.js Config:** Added Supabase Storage hostname to `images.remotePatterns` for task photo display.
