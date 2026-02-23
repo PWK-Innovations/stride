@@ -121,3 +121,4 @@ High-level changes; add a line or two here when you commit and push.
 - **Security Docs:** Added security practices section to `ai/testing.md` covering secrets management, API key rotation schedule, input sanitization model, dependency auditing, and what not to commit.
 - **Build Script Fix:** Fixed `build.sh` millisecond timing on macOS (replaced GNU `date +%s%3N` with portable `python3` fallback).
 - **Phase 6 complete.** All 6.1/6.2/6.3 tasks checked off, roadmap updated.
+- **Roadmaps:** Moved Phase 5 and Phase 6 plan + roadmap docs to `ai/roadmaps/complete/`.
