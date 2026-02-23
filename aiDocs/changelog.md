@@ -84,3 +84,10 @@ High-level changes; add a line or two here when you commit and push.
 - **ExtractedTasksReview Update:** Added optional `loadingMessage` and `emptyMessage` props for audio-specific messaging, backward-compatible defaults.
 - **Dashboard Update:** Added "Voice tasks" button with live recording indicator, audio file upload, audio preview bar with playback/extract/discard controls, collapsible transcription display. Shared extraction flow with photo via `extractionSource` state.
 - **Roadmaps:** Updated Phase 4 roadmap (all tasks checked off), moved plan + roadmap to `ai/roadmaps/complete/`. Phase 4 complete.
+- **Phase 5: Polish & Validation (code polish).**
+- **Friendly Errors:** Created `lib/errors/friendlyMessage.ts` — maps error messages and HTTP status codes to user-friendly strings (rate limit, timeout, OpenAI, Google Calendar, generic). Applied to all 5 API routes (`schedule/build`, `tasks`, `tasks/[id]`, `extract-photo`, `extract-audio`). Fixed `error: any` → `error: unknown` in 3 routes.
+- **Loading & Empty States:** Added `loadingTasks` spinner during initial task fetch, "No schedule yet" empty state when tasks exist but no schedule, inline error banner replacing `alert()` for schedule errors.
+- **Confirm Dialog:** Created `components/features/ConfirmDialog.tsx` — reusable HeadlessUI Dialog for destructive actions. Wired to delete task with `deletingTaskId` state.
+- **Keyboard Shortcuts:** Created `lib/hooks/useKeyboardShortcuts.ts` — registers global keydown listener, handles meta+key combos, skips when in inputs (except Escape). Wired: Cmd+N → focus title, Cmd+B → build schedule, Escape → close modals/extraction/confirm.
+- **Performance:** Parallelized tasks + calendar events fetch with `Promise.all` in schedule/build route. Added `loading="lazy"` to task photo thumbnails.
+- **Type Safety:** Replaced `block: any` with `block: ScheduledBlock` in notification scheduling code.

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { transcribeAudio } from "@/lib/openai/transcribeAudio";
 import { extractTasksFromText } from "@/lib/openai/extractTasksFromText";
+import { friendlyMessage } from "@/lib/errors/friendlyMessage";
 import { createLogger } from "@/lib/logger";
 
 const logger = createLogger("api:extract-audio");
@@ -70,9 +71,11 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     return NextResponse.json({ tasks, transcription });
   } catch (error: unknown) {
-    const message =
-      error instanceof Error ? error.message : "Internal server error";
-    logger.error("Audio extraction failed", { error: message });
-    return NextResponse.json({ error: message }, { status: 500 });
+    const raw = error instanceof Error ? error.message : String(error);
+    logger.error("Audio extraction failed", { error: raw });
+    return NextResponse.json(
+      { error: friendlyMessage(error) },
+      { status: 500 },
+    );
   }
 }

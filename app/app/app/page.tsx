@@ -9,9 +9,11 @@ import { MicrophoneIcon } from '@/components/icons/microphone-icon';
 import { DailyTimeline } from '@/components/features/DailyTimeline';
 import { ExtractedTasksReview } from '@/components/features/ExtractedTasksReview';
 import { PhotoModal } from '@/components/features/PhotoModal';
+import { ConfirmDialog } from '@/components/features/ConfirmDialog';
 import { uploadPhoto } from '@/lib/supabase/uploadPhoto';
 import { createClient } from '@/lib/supabase/client';
 import { useAudioRecorder } from '@/lib/audio/useAudioRecorder';
+import { useKeyboardShortcuts } from '@/lib/hooks/useKeyboardShortcuts';
 import {
   requestNotificationPermission,
   scheduleNotifications,
@@ -37,15 +39,18 @@ interface ScheduledBlock {
 
 export default function AppPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
+  const [loadingTasks, setLoadingTasks] = useState(true);
   const [title, setTitle] = useState('');
   const [notes, setNotes] = useState('');
   const [duration, setDuration] = useState(30);
   const [loading, setLoading] = useState(false);
   const [buildingSchedule, setBuildingSchedule] = useState(false);
   const [schedule, setSchedule] = useState<ScheduledBlock[]>([]);
+  const [scheduleError, setScheduleError] = useState<string | null>(null);
   const [overflow, setOverflow] = useState<string[]>([]);
   const [busyWindows, setBusyWindows] = useState<Array<{ start: string; end: string; title?: string }>>([]);
   const [googleConnected, setGoogleConnected] = useState<boolean | null>(null);
+  const [deletingTaskId, setDeletingTaskId] = useState<string | null>(null);
 
   // Extraction state (shared between photo and audio)
   const [extracting, setExtracting] = useState(false);
@@ -56,6 +61,7 @@ export default function AppPage() {
   const [savingExtracted, setSavingExtracted] = useState(false);
   const [extractionSource, setExtractionSource] = useState<"photo" | "audio" | null>(null);
   const [transcription, setTranscription] = useState<string | null>(null);
+  const titleInputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const audioFileInputRef = useRef<HTMLInputElement>(null);
 
@@ -100,6 +106,8 @@ export default function AppPage() {
       }
     } catch (error) {
       console.error('Failed to fetch tasks:', error);
+    } finally {
+      setLoadingTasks(false);
     }
   };
 
@@ -128,7 +136,10 @@ export default function AppPage() {
     }
   };
 
-  const deleteTask = async (id: string) => {
+  const confirmDeleteTask = async () => {
+    if (!deletingTaskId) return;
+    const id = deletingTaskId;
+    setDeletingTaskId(null);
     try {
       const res = await fetch(`/api/tasks/${id}`, { method: 'DELETE' });
       if (res.ok) {
@@ -291,6 +302,35 @@ export default function AppPage() {
     return `${m}:${s.toString().padStart(2, "0")}`;
   };
 
+  // Keyboard shortcuts
+  useKeyboardShortcuts([
+    {
+      key: "/",
+      handler: () => titleInputRef.current?.focus(),
+    },
+    {
+      key: "b",
+      meta: true,
+      handler: () => {
+        if (tasks.length > 0 && !buildingSchedule) {
+          buildMyDay();
+        }
+      },
+    },
+    {
+      key: "Escape",
+      handler: () => {
+        if (deletingTaskId) {
+          setDeletingTaskId(null);
+        } else if (modalPhotoUrl) {
+          setModalPhotoUrl(null);
+        } else if (showExtraction) {
+          handleCancelExtraction();
+        }
+      },
+    },
+  ]);
+
   return (
     <>
       {/* Add Task Form */}
@@ -355,6 +395,7 @@ export default function AppPage() {
               Title
             </label>
             <input
+              ref={titleInputRef}
               type="text"
               id="title"
               value={title}
@@ -474,7 +515,29 @@ export default function AppPage() {
           Your tasks ({tasks.length})
         </h2>
 
-        {tasks.length === 0 ? (
+        {loadingTasks ? (
+          <div className="flex justify-center py-8">
+            <svg
+              className="h-6 w-6 animate-spin text-olive-500"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              />
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
+              />
+            </svg>
+          </div>
+        ) : tasks.length === 0 ? (
           <p className="text-center text-olive-500 dark:text-olive-400">
             No tasks yet. Add your first task above.
           </p>
@@ -495,6 +558,7 @@ export default function AppPage() {
                       <img
                         src={task.photo_url}
                         alt="Task photo"
+                        loading="lazy"
                         className="h-10 w-10 object-cover"
                       />
                     </button>
@@ -514,7 +578,7 @@ export default function AppPage() {
                   </div>
                 </div>
                 <button
-                  onClick={() => deleteTask(task.id)}
+                  onClick={() => setDeletingTaskId(task.id)}
                   className="ml-4 text-olive-400 hover:text-red-600 dark:text-olive-500 dark:hover:text-red-500"
                 >
                   <TrashIcon className="h-5 w-5" />
@@ -565,6 +629,22 @@ export default function AppPage() {
         )}
       </div>
 
+      {/* Schedule Error Banner */}
+      {scheduleError && (
+        <div className="mb-4 flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/30">
+          <p className="flex-1 text-sm text-red-700 dark:text-red-300">{scheduleError}</p>
+          <button
+            onClick={() => setScheduleError(null)}
+            className="text-red-400 hover:text-red-600 dark:text-red-500 dark:hover:text-red-300"
+            aria-label="Dismiss error"
+          >
+            <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      )}
+
       {/* Build My Day Button */}
       {tasks.length > 0 && (
         <div className="text-center">
@@ -577,6 +657,13 @@ export default function AppPage() {
             {buildingSchedule ? 'Building your day...' : 'Build my day'}
           </button>
         </div>
+      )}
+
+      {/* Schedule Empty State */}
+      {tasks.length > 0 && schedule.length === 0 && !buildingSchedule && (
+        <p className="mt-4 text-center text-sm text-olive-500 dark:text-olive-400">
+          Click &ldquo;Build my day&rdquo; to generate your schedule.
+        </p>
       )}
 
       {/* Timeline View */}
@@ -620,17 +707,28 @@ export default function AppPage() {
         photoUrl={modalPhotoUrl}
         onClose={() => setModalPhotoUrl(null)}
       />
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        open={deletingTaskId !== null}
+        title="Delete task"
+        message="Are you sure you want to delete this task? This action cannot be undone."
+        confirmLabel="Delete"
+        onConfirm={confirmDeleteTask}
+        onCancel={() => setDeletingTaskId(null)}
+      />
     </>
   );
 
   async function buildMyDay() {
     setBuildingSchedule(true);
+    setScheduleError(null);
     try {
       const res = await fetch('/api/schedule/build', { method: 'POST' });
       const data = await res.json();
 
       if (!res.ok) {
-        alert(data.error || 'Failed to build schedule');
+        setScheduleError(data.error || 'Failed to build schedule');
         return;
       }
 
@@ -641,18 +739,20 @@ export default function AppPage() {
       // Request notification permission and schedule notifications
       const hasPermission = await requestNotificationPermission();
       if (hasPermission && data.scheduled_blocks.length > 0) {
-        const blocksWithTitles = data.scheduled_blocks.map((block: any) => {
-          const task = tasks.find((t) => t.id === block.task_id);
-          return {
-            ...block,
-            title: task?.title || 'Unknown task',
-          };
-        });
+        const blocksWithTitles = data.scheduled_blocks.map(
+          (block: ScheduledBlock) => {
+            const task = tasks.find((t) => t.id === block.task_id);
+            return {
+              ...block,
+              title: task?.title || 'Unknown task',
+            };
+          },
+        );
         scheduleNotifications(blocksWithTitles);
       }
     } catch (error) {
       console.error('Failed to build schedule:', error);
-      alert('Failed to build schedule');
+      setScheduleError('Something went wrong. Please try again.');
     } finally {
       setBuildingSchedule(false);
     }
