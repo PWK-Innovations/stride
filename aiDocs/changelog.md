@@ -53,3 +53,7 @@ High-level changes; add a line or two here when you commit and push.
 - **Build Fixes:** Fixed pre-existing TypeScript errors: `FeaturesThreeColumn` children→features prop in about page, `DailyTimeline` Moment→number type for timeline bounds.
 - **Dependencies:** Installed `@headlessui/react`, `@heroicons/react`, `@supabase/ssr` (missing from node_modules). Added `sharp`, `tsx`, `dotenv` as dev dependencies.
 - **Roadmaps:** Updated Phase 2 roadmap (tasks checked off) and moved plan + roadmap to `ai/roadmaps/complete/`.
+- **Deploy Workflow Fix:** Moved `.github/workflows/deploy.yml` from `app/.github/` to repo root (GitHub only detects workflows at root). Set `working-directory: app` for all steps.
+- **First Deploy:** GitHub Actions deploy to Vercel succeeded. App live at stride-amber.vercel.app.
+- **Favicon Fix:** Replaced default Vercel/Next.js favicon (`app/favicon.ico`) with custom olive "S" icon. Next.js App Router serves `app/favicon.ico` over `public/favicon.ico`.
+- **PWA Verified:** PWA install working on device, standalone mode confirmed.
