@@ -176,8 +176,9 @@ export default function AppPage() {
       }
 
       // Create each task sequentially
+      const failed: string[] = [];
       for (const task of confirmedTasks) {
-        await fetch('/api/tasks', {
+        const res = await fetch('/api/tasks', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -187,6 +188,16 @@ export default function AppPage() {
             photo_url: photoUrl,
           }),
         });
+        if (!res.ok) {
+          failed.push(task.title);
+        }
+      }
+
+      if (failed.length > 0) {
+        setExtractionError(
+          `Failed to save ${failed.length} task${failed.length > 1 ? "s" : ""}: ${failed.join(", ")}`,
+        );
+        return;
       }
 
       setShowExtraction(false);
@@ -220,7 +231,7 @@ export default function AppPage() {
             <input
               ref={fileInputRef}
               type="file"
-              accept="image/jpeg,image/png,image/webp,image/heic"
+              accept="image/jpeg,image/png,image/webp"
               capture="environment"
               onChange={handlePhotoCapture}
               className="hidden"
@@ -306,7 +317,8 @@ export default function AppPage() {
         <div className="mb-8">
           <ExtractedTasksReview
             tasks={extractedTasks}
-            loading={extracting || savingExtracted}
+            loading={extracting}
+            saving={savingExtracted}
             error={extractionError}
             onConfirm={handleConfirmExtracted}
             onCancel={handleCancelExtraction}

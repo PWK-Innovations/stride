@@ -5,7 +5,7 @@ import { createLogger } from "@/lib/logger";
 
 const logger = createLogger("api:extract-photo");
 
-const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/heic"];
+const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const MAX_SIZE = 5 * 1024 * 1024; // 5 MB
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
 
     if (!ALLOWED_TYPES.includes(photo.type)) {
       return NextResponse.json(
-        { error: "Invalid file type. Allowed: JPEG, PNG, WebP, HEIC" },
+        { error: "Invalid file type. Allowed: JPEG, PNG, WebP" },
         { status: 400 },
       );
     }

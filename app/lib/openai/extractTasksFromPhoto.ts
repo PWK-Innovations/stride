@@ -51,13 +51,13 @@ export async function extractTasksFromPhoto(
     throw new Error("Invalid JSON response from OpenAI");
   }
 
-  const tasks: ExtractedTask[] = (parsed.tasks || []).map(
-    (t: Record<string, unknown>) => ({
-      title: String(t.title || ""),
+  const tasks: ExtractedTask[] = (parsed.tasks || [])
+    .map((t: Record<string, unknown>) => ({
+      title: String(t.title || "").trim(),
       duration_minutes: Number(t.duration_minutes) || 30,
       notes: t.notes ? String(t.notes) : null,
-    }),
-  );
+    }))
+    .filter((t: ExtractedTask) => t.title.length > 0);
 
   logger.info(`Extracted ${tasks.length} tasks from photo`);
   return tasks;
