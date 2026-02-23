@@ -54,5 +54,5 @@ Key differentiators:
 
 ## Current Focus
 
-- Phase 2 code complete (PWA & Hosting). Pending: Vercel secrets setup, first deploy, manual device testing.
-- Next up: Phase 3 (Photo-to-Task with AI vision).
+- Phase 3 complete (Core Data Flow). Task CRUD, Google Calendar integration, AI scheduling, "Build my day" flow, and timeline view all working. Google Calendar connect button wired into dashboard.
+- Next up: Phase 4 (Photo-to-Task with AI vision).

@@ -10,7 +10,8 @@
     "test:supabase": "npx tsx scripts/test-supabase.ts",
     "test:openai": "npx tsx scripts/test-openai.ts",
     "test:google": "npx tsx scripts/test-google.ts",
-    "test:all": "npm run test:supabase && npm run test:openai && npm run test:google"
+    "test:schedule": "npx tsx scripts/test-schedule.ts",
+    "test:all": "npm run test:supabase && npm run test:openai && npm run test:google && npm run test:schedule"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.9",
@@ -19,11 +20,9 @@
     "@supabase/supabase-js": "^2.95.3",
     "@tailwindplus/elements": "^1.0.22",
     "clsx": "^2.1.1",
-    "moment": "^2.30.1",
     "next": "16.1.6",
     "openai": "^6.19.0",
     "react": "19.2.3",
-    "react-calendar-timeline": "^0.30.0-beta.4",
     "react-dom": "19.2.3"
   },
   "devDependencies": {

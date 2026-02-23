@@ -1,4 +1,5 @@
 interface CalendarEvent {
+  summary?: string;
   start: {
     dateTime?: string;
     date?: string;
@@ -12,6 +13,7 @@ interface CalendarEvent {
 export interface BusyWindow {
   start: Date;
   end: Date;
+  title?: string;
 }
 
 export function parseBusyWindows(events: CalendarEvent[]): BusyWindow[] {
@@ -26,6 +28,7 @@ export function parseBusyWindows(events: CalendarEvent[]): BusyWindow[] {
     busyWindows.push({
       start: new Date(event.start.dateTime),
       end: new Date(event.end.dateTime),
+      title: event.summary,
     });
   }
 
