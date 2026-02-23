@@ -101,4 +101,4 @@ Polished MVP ready for external beta. Core flow is smooth and reliable. Notifica
 
 ## Next Phase
 
-**Phase 6:** Beta Launch (`2026-02-09-phase-6-beta-launch-roadmap.md`)
+**Phase 6:** Code Quality & Security (`2026-02-23-phase-6-code-quality-security-roadmap.md`)

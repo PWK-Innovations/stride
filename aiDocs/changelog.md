@@ -101,3 +101,24 @@ High-level changes; add a line or two here when you commit and push.
 - **Build Route Update:** `POST /api/schedule/build` now accepts `timezone` and `retry` from request body. On retry, loads existing blocks as context for the AI.
 - **Scheduling Spread Rule:** Added Rule 5 ("SPREAD TASKS OUT") to AI scheduling prompt — instructs GPT-4o-mini to distribute tasks across the full working window instead of clustering them in the morning. Renumbered subsequent rules.
 - **Remove Debug Override:** Removed hardcoded 8 AM `currentTime` override from dashboard; scheduler now uses real browser time as the effective start.
+- **Phase 6.1: CLI Testing Infrastructure.**
+- **Shell Scripts:** Created 5 standard shell scripts in `app/scripts/` (`build.sh`, `run.sh`, `test.sh`, `lint.sh`, `dev.sh`) — all with `set -e`, `--help` flag, JSON stdout, stderr diagnostics, standard exit codes.
+- **Auth Helper:** Created `scripts/auth-helper.sh` — signs up/signs in a test user via Supabase REST API, constructs `@supabase/ssr`-compatible session cookie, saves to `scripts/.test-cookies` for curl-based testing.
+- **Explore Phase:** 3 parallel agents curled the running dev server testing public endpoints, task CRUD, and schedule/profile routes. Discovered 3 bugs: malformed JSON body → 500 (should be 400), delete nonexistent UUID → 200 (should be 404), delete invalid UUID → 500 leaking raw Postgres error.
+- **Integration Tests:** Created `scripts/test-integration.sh` — 18 automated tests covering smoke tests, auth guards, profile, task CRUD (create/validate/list/delete/verify), and schedule endpoints. Outputs structured JSON results. All 18 pass.
+- **Gitignore:** Added `scripts/.test-cookies` to `.gitignore`.
+- **Phase 6.2: Structured Logging.**
+- **Logger Enhancement:** Added `debug` level and `LOG_LEVEL` / `NEXT_PUBLIC_LOG_LEVEL` env var support to `lib/logger.ts`. Log level hierarchy: debug < info < warn < error. Default: `debug` in dev, `info` in production.
+- **Console Cleanup:** Replaced all 9 `console.error` calls in `app/app/page.tsx` and 1 `console.log` in `lib/notifications/scheduleNotifications.ts` with structured logger. Zero `console.*` calls remain outside `logger.ts`.
+- **Logging Docs:** Created `ai/testing.md` documenting log locations, levels, tailing, and usage patterns.
+- **Test Env:** Added `LOG_LEVEL=debug` and `NEXT_PUBLIC_LOG_LEVEL=debug` to `.testEnvVars`.
+- **Lint Fixes:** Fixed all 11 ESLint errors: unescaped entities in about page, `any` → `unknown` in 4 files, `let` → `const` in 3 files. 0 errors remain (32 pre-existing warnings only).
+- **Phase 6.3: Security Hardening.**
+- **Credentials Scan:** Scanned codebase for hardcoded secrets — clean. Moved auth-helper hardcoded project ref/email/password to env vars.
+- **Input Sanitization:** Created `lib/openai/sanitizeInput.ts` — truncates and strips control characters from user input before OpenAI prompts. Wired into `buildSchedulePrompt` (task titles/notes) and `extractTasksFromText` (transcription).
+- **npm audit:** Fixed `ajv` moderate vulnerability. Remaining 8 highs are `minimatch` in eslint-config-next devDeps (not shipped to production, blocked on upstream Next.js update).
+- **`.env.example`:** Created with placeholder values, added `!.env.example` exception to `.gitignore`.
+- **Security Docs:** Added security practices section to `ai/testing.md` covering secrets management, API key rotation schedule, input sanitization model, dependency auditing, and what not to commit.
+- **Build Script Fix:** Fixed `build.sh` millisecond timing on macOS (replaced GNU `date +%s%3N` with portable `python3` fallback).
+- **Phase 6 complete.** All 6.1/6.2/6.3 tasks checked off, roadmap updated.
+- **Roadmaps:** Moved Phase 5 and Phase 6 plan + roadmap docs to `ai/roadmaps/complete/`.

@@ -1,5 +1,6 @@
 import { openai } from "./client";
 import { createLogger } from "@/lib/logger";
+import { sanitizeText } from "./sanitizeInput";
 
 import type { ExtractedTask } from "@/types/database";
 
@@ -17,7 +18,7 @@ export async function extractTasksFromText(
       },
       {
         role: "user",
-        content: `Extract all tasks, to-do items, or action items from this voice memo transcription:\n\n${text}`,
+        content: `Extract all tasks, to-do items, or action items from this voice memo transcription:\n\n${sanitizeText(text)}`,
       },
     ],
     response_format: { type: "json_object" },

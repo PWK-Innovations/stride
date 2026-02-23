@@ -54,6 +54,5 @@ Key differentiators:
 
 ## Current Focus
 
-- Phase 3 complete (Core Data Flow). Task CRUD, Google Calendar integration, AI scheduling, "Build my day" flow, and timeline view all working. Google Calendar connect button wired into dashboard.
-- Phase 4 complete (Photo & Audio to Task). Photo capture → OpenAI Vision extraction → review/edit → save tasks with photo URL. Voice recording/audio upload → OpenAI Whisper transcription → GPT-4o-mini task extraction → review/edit → save. Supabase Storage bucket for task photos.
-- Phase 5 in progress (Polish & Validation). Code polish complete: friendly error messages in all API routes, loading/empty states, delete confirmation dialog, keyboard shortcuts (Cmd+N/B/Escape), parallel fetch in schedule/build, photo lazy loading. Phase 5b (Smarter Scheduling & Persistence) complete: fixed AI prompt (proper 12h format, time hints, break enforcement, hard working hours, timezone, retry context), lowered temperature to 0.3, schedule persistence on reload (GET /api/schedule), "Try again" button for re-scheduling, drag-to-reschedule on timeline (PATCH /api/schedule/:id). Phase 5c: added "spread tasks out" rule to AI prompt so tasks distribute across the full working window instead of clustering in the morning; removed debug currentTime override so scheduler uses real browser time. Remaining: dogfooding, manual testing, beta prep.
+- Phases 0–6 complete (Foundation through Code Quality & Security).
+- Phase 6 delivered: CLI testing infrastructure (18-test integration suite), structured logging (debug level, LOG_LEVEL env var, zero console.* calls), security hardening (input sanitization, npm audit, .env.example, credentials scan). Next: Phase 7 (Beta Launch).

@@ -19,7 +19,10 @@ import {
   scheduleNotifications,
 } from '@/lib/notifications/scheduleNotifications';
 
+import { createLogger } from '@/lib/logger';
 import type { ExtractedTask } from '@/types/database';
+
+const logger = createLogger("app:dashboard");
 
 interface Task {
   id: string;
@@ -95,7 +98,7 @@ export default function AppPage() {
         setGoogleConnected(data.googleConnected);
       }
     } catch (error) {
-      console.error('Failed to fetch Google status:', error);
+      logger.error("Failed to fetch Google status", { error });
     }
   };
 
@@ -107,7 +110,7 @@ export default function AppPage() {
         setTasks(data.tasks);
       }
     } catch (error) {
-      console.error('Failed to fetch tasks:', error);
+      logger.error("Failed to fetch tasks", { error });
     } finally {
       setLoadingTasks(false);
     }
@@ -132,7 +135,7 @@ export default function AppPage() {
         );
       }
     } catch (error) {
-      console.error("Failed to fetch schedule:", error);
+      logger.error("Failed to fetch schedule", { error });
     }
   };
 
@@ -155,7 +158,7 @@ export default function AppPage() {
         await fetchTasks();
       }
     } catch (error) {
-      console.error('Failed to add task:', error);
+      logger.error("Failed to add task", { error });
     } finally {
       setLoading(false);
     }
@@ -171,7 +174,7 @@ export default function AppPage() {
         await fetchTasks();
       }
     } catch (error) {
-      console.error('Failed to delete task:', error);
+      logger.error("Failed to delete task", { error });
     }
   };
 
@@ -208,7 +211,7 @@ export default function AppPage() {
 
       setExtractedTasks(data.tasks);
     } catch (error) {
-      console.error('Failed to extract tasks from photo:', error);
+      logger.error("Failed to extract tasks from photo", { error });
       setExtractionError('Failed to analyze photo. Please try again.');
     } finally {
       setExtracting(false);
@@ -263,7 +266,7 @@ export default function AppPage() {
       resetRecording();
       await fetchTasks();
     } catch (error) {
-      console.error('Failed to save extracted tasks:', error);
+      logger.error("Failed to save extracted tasks", { error });
       setExtractionError('Failed to save tasks. Please try again.');
     } finally {
       setSavingExtracted(false);
@@ -307,7 +310,7 @@ export default function AppPage() {
       setTranscription(data.transcription || null);
       setExtractedTasks(data.tasks);
     } catch (error) {
-      console.error("Failed to extract tasks from audio:", error);
+      logger.error("Failed to extract tasks from audio", { error });
       setExtractionError("Failed to analyze audio. Please try again.");
     } finally {
       setExtracting(false);
@@ -821,7 +824,7 @@ export default function AppPage() {
         scheduleNotifications(blocksWithTitles);
       }
     } catch (error) {
-      console.error('Failed to build schedule:', error);
+      logger.error("Failed to build schedule", { error });
       setScheduleError('Something went wrong. Please try again.');
     } finally {
       setBuildingSchedule(false);

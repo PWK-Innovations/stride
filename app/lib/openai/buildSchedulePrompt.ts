@@ -6,6 +6,7 @@ import {
   getTimeInZone,
   getLocalDateString,
 } from '@/lib/timezone';
+import { sanitizeTitle, sanitizeNotes } from './sanitizeInput';
 
 interface SchedulePromptInput {
   tasks: Task[];
@@ -49,7 +50,7 @@ export function buildSchedulePrompt({
   const taskList = tasks
     .map(
       (task, i) =>
-        `${i + 1}. [id: ${task.id}] "${task.title}" (${task.duration_minutes} minutes)${task.notes ? ` - Notes: ${task.notes}` : ''}`,
+        `${i + 1}. [id: ${task.id}] "${sanitizeTitle(task.title)}" (${task.duration_minutes} minutes)${task.notes ? ` - Notes: ${sanitizeNotes(task.notes)}` : ''}`,
     )
     .join('\n');
 
