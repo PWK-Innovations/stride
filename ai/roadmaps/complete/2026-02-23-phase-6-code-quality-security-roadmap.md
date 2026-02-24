@@ -38,7 +38,7 @@
 - [x] Verify all OpenAI integration functions log entry, exit, and errors
 - [x] Verify all Google Calendar integration functions log entry, exit, and errors
 - [x] Add `LOG_LEVEL=debug` to `.testEnvVars`
-- [x] Create `ai/testing.md` with logging documentation (log location, clearing, tailing, log level config)
+- [x] Create `ai/guides/testing.md` with logging documentation (log location, clearing, tailing, log level config)
 - [x] Test: set LOG_LEVEL=debug, verify debug logs appear; set LOG_LEVEL=error, verify only errors appear
 
 ### 6.3 Security Hardening
@@ -64,7 +64,7 @@ Codebase is AI-testable (CLI scripts with JSON output), has structured logging e
 ## Acceptance Criteria
 
 - [x] All 6.1 tasks checked off — scripts/ folder with all scripts, explore → codify done
-- [x] All 6.2 tasks checked off — structured logging with DEBUG level, zero console.* calls, ai/testing.md created
+- [x] All 6.2 tasks checked off — structured logging with DEBUG level, zero console.* calls, ai/guides/testing.md created
 - [x] All 6.3 tasks checked off — security checklist passes, npm audit clean, .env.example committed
 - [ ] All scripts support `--help` flag
 - [ ] Test output is JSON and parseable

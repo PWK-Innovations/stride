@@ -186,7 +186,7 @@ logger.error({
 
 ### Create Logging Documentation
 
-Create `ai/testing.md` with:
+Create `ai/guides/testing.md` with:
 - Where logs are located
 - How to clear logs
 - How to tail recent logs
@@ -223,7 +223,7 @@ Codebase is AI-testable with CLI scripts, has structured logging throughout, and
 - Logger has DEBUG level and LOG_LEVEL env var support
 - Zero direct `console.*` calls in the codebase (except inside logger.ts)
 - All key functions log entry, exit, and errors with full context
-- `ai/testing.md` documents logging setup
+- `ai/guides/testing.md` documents logging setup
 - All security checklist items pass
 - `npm audit` shows no high/critical vulnerabilities
 - `.env.example` is committed with placeholder values

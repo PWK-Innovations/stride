@@ -209,7 +209,7 @@
 - Enhance existing logger with DEBUG level and environment-controlled log level (LOG_LEVEL env var)
 - Replace all remaining console.log/error/warn calls with structured logger
 - Log function entry, exit, and errors with full context (action, input, result, error + stack)
-- Create logging documentation at `ai/testing.md`
+- Create logging documentation at `ai/guides/testing.md`
 
 ### 6.3 Security Hardening
 - Verify secrets in .gitignore
