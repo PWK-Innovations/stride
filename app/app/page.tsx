@@ -43,6 +43,7 @@ export default function Page() {
         }
         actions={
           <>
+            <NavbarLink href="/login">Sign in</NavbarLink>
             <ButtonLink href="/app">Get started</ButtonLink>
           </>
         }
