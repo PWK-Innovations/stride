@@ -2,17 +2,20 @@
 
 ## Quick Overview
 
-Stride is an AI-powered daily planner that builds your schedule for you. Give it your tasks (text, photos, or voice memos) and your Google Calendar — hit "Plan my day" and the AI does the rest. No manual time-blocking, no drag-and-drop, no configuration rituals. Just a clean daily view of what to do and when.
+Stride is an AI-powered daily planner that builds your schedule and keeps it on track throughout the day. Give it your tasks (text, photos, or voice memos) and your calendar (Google or Outlook) — hit "Plan my day" and an agentic AI builds your schedule. Then interact with the agent via a chat modal to report progress, add tasks, and get guidance as your day unfolds. No manual time-blocking, no drag-and-drop, no configuration rituals.
 
-Built as a Next.js PWA so it works on any device.
+Built for knowledge workers with unstructured schedules — freelancers, developers, remote professionals, students, and individuals with ADHD. Delivered as a Next.js PWA so it works on any device.
 
 ## Differentiator
 
-Drop in tasks however you want (quick text, a photo of a syllabus, a voice note), connect your calendar, and tap one button. The AI figures out durations, priorities, and placement. Zero configuration tax. The less the user has to think about the tool, the more they actually use it.
+**"AI keeps your day on track"** — not just a schedule generator, but an agentic system that adapts throughout the day. Drop in tasks however you want (quick text, a photo of a syllabus, a voice note), connect your calendar (Google or Outlook), and tap one button. The AI figures out durations, priorities, and placement. Then keep the schedule alive via a chat modal: "I finished early", "I'm running late", "what should I do next?"
 
 Key differentiators:
-- **Zero-config scheduling** — no manual durations, priority sliders, or project setup required
-- **Multi-modal input** — text, photos (OCR), voice memos (Whisper transcription), keeping input friction as low as possible
+- **Agentic AI scheduling** — LangChain-powered agent with multi-step reasoning, not a single-shot prompt. Handles conflicts, overload, and mid-day changes conversationally
+- **Stability-first rescheduling** — minimal adjustments over cascade reshuffles; respects the user's need for anchoring (especially critical for ADHD users)
+- **Zero-friction multi-modal input** — text, photos (OCR), voice memos (Whisper transcription), keeping input friction as low as possible
+- **Hybrid architecture** — LLM for reasoning/intent, deterministic solver for time placement (no hallucinated overlaps)
+- **Multi-calendar** — Google Calendar and Outlook Calendar; covers personal and enterprise users
 - **PWA-first** — installable on any phone, no app store gatekeeping, instant updates
 - **Today-focused** — one day at a time, not an overwhelming weekly/monthly planner
 
@@ -39,15 +42,15 @@ Key differentiators:
 ## Tech Stack
 
 - **Frontend**: Next.js, React, TypeScript, Tailwind CSS.
-- **Backend / Data: Supabase** — Auth (user identity), PostgreSQL (profiles, tasks, scheduled_blocks), Storage (task photos). Google Calendar is **attached per user**: OAuth tokens stored in Supabase after user connects.
-- **AI: OpenAI API** — Used for schedule construction and smart placement. Called from Next.js API routes only; API key in env (never in client).
+- **Backend / Data: Supabase** — Auth (user identity), PostgreSQL (profiles, tasks, scheduled_blocks, agent_conversations), Storage (task photos). Calendar providers **attached per user**: OAuth tokens stored per provider in Supabase after user connects.
+- **AI: LangChain + OpenAI** — Agentic scheduling system. LangChain agent orchestrates multi-step tool use (fetch tasks, fetch calendar, reason, place blocks). OpenAI GPT-4o-mini provides LLM reasoning. Deterministic constraint solver handles time placement. Called from Next.js API routes only; API keys in env (never in client).
 - **PWA**: Next.js app is installable (manifest + service worker); add to desktop/home screen, own window and icon. Browser notifications for task reminders where supported.
-- **API**: Next.js API routes: Supabase for tasks/schedule/auth; OpenAI for AI scheduling; Google Calendar OAuth and fetch (tokens per user in Supabase).
-- **Calendar**: Google Calendar API (read-only, OAuth 2.0); fetch today's events when building the day (no caching for MVP).
+- **API**: Next.js API routes: Supabase for tasks/schedule/auth; LangChain agent for AI scheduling and chat; calendar OAuth and fetch per provider (tokens per user in Supabase).
+- **Calendars**: Google Calendar API (read-only, OAuth 2.0) and Outlook Calendar via Microsoft Graph API (read-only, OAuth 2.0); fetch today's events from all connected providers when building the day (no caching for MVP).
 
 ## Important Notes
 
-- MVP scope: today only, one calendar (Google), task input (text + photos + voice), "Build my day" / "Plan my day" builds the schedule. See mvp.md before adding features.
+- MVP scope: today only, two calendar providers (Google + Outlook), task input (text + photos + voice), "Build my day" triggers agentic AI scheduling, chat modal for mid-day agent interaction. See mvp.md before adding features.
 - We ship as a PWA so users can install on their phones; use browser notifications for reminders.
 - Update **Current Focus** in this file regularly when priorities change.
 - **Secrets**: Never commit API keys. Use env vars for Supabase (URL, anon key, service role), OpenAI API key, and Google OAuth client credentials.
@@ -55,4 +58,5 @@ Key differentiators:
 ## Current Focus
 
 - Phases 0–6 complete (Foundation through Code Quality & Security).
-- Phase 6 delivered: CLI testing infrastructure (18-test integration suite), structured logging (debug level, LOG_LEVEL env var, zero console.* calls), security hardening (input sanitization, npm audit, .env.example, credentials scan). Next: Phase 7 (Beta Launch).
+- Phase 6 delivered: CLI testing infrastructure (18-test integration suite), structured logging (debug level, LOG_LEVEL env var, zero console.* calls), security hardening (input sanitization, npm audit, .env.example, credentials scan).
+- Next: Agentic AI system (LangChain agent, chat modal, Outlook Calendar integration), then Beta Launch. PRD, MVP, and architecture docs updated 2026-04-01 to reflect broadened target users, agentic AI, and multi-calendar support.

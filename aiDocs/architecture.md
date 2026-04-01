@@ -2,19 +2,25 @@
 
 ## Overview
 
-Stride is an AI-powered daily planner. Users add tasks and connect Google Calendar; "Plan my day" runs a scheduling engine that places tasks into today's free slots and shows a timeline. The app is delivered as a PWA (installable, own window/icon) and uses browser notifications for task reminders. **Backend and data are built on Supabase.** MVP is today-only, no calendar cache, manual refresh. See `aiDocs/mvp.md` for scope and timeline.
+Stride is an AI-powered daily planner for knowledge workers with unstructured schedules — freelancers, developers, remote professionals, students, and individuals with ADHD. Users add tasks (text, photos, voice) and connect their calendar (Google or Outlook); "Plan my day" triggers an agentic AI system that reasons through tasks, priorities, and constraints to build a daily schedule. A chat modal lets users interact with the agent throughout the day to report progress, add tasks, and trigger rescheduling. The app is delivered as a PWA (installable, own window/icon) and uses browser notifications for task reminders. **Backend and data are built on Supabase.** MVP is today-only, no calendar cache. See `aiDocs/mvp.md` for scope and timeline.
 
 ## High-Level Architecture
 
-- **Frontend**: Next.js app (React, TypeScript, Tailwind); task list, timeline view, "Plan my day" action; delivered as a PWA (installable to desktop/home screen).
+- **Frontend**: Next.js app (React, TypeScript, Tailwind); task list, timeline view, "Plan my day" action, agent chat modal; delivered as a PWA (installable to desktop/home screen).
 - **Backend: Supabase**
-  - **Auth**: Supabase Auth for user identity; link or store Google Calendar OAuth tokens per user (e.g. in user metadata or a `profiles`/`calendar_tokens` table).
-  - **Database**: Supabase (PostgreSQL). Tables: `users`/profiles, `tasks`, `scheduled_blocks`; no stored calendar events (fetch on demand).
+  - **Auth**: Supabase Auth for user identity; link or store calendar OAuth tokens per user per provider (e.g. in `profiles`/`calendar_tokens` table).
+  - **Database**: Supabase (PostgreSQL). Tables: `users`/profiles, `tasks`, `scheduled_blocks`, `agent_conversations`; no stored calendar events (fetch on demand).
   - **Storage**: Supabase Storage for task attachments (e.g. photos); tasks reference file paths or public URLs.
-  - **API**: Next.js API routes call Supabase (client or service role as needed) for tasks, schedule, and calendar OAuth callback; "Plan my day" triggers the scheduling engine and persists blocks to Supabase.
-- **Google Calendar**: OAuth 2.0, read-only; fetch today's events when user hits "Plan my day." **Attached per user** (tokens stored in Supabase after user connects).
-- **AI: OpenAI API** — Used for schedule construction and smart placement (e.g. priorities, context from task text/photos). Next.js API routes call OpenAI; keep API key server-side only (env var).
-- **Scheduling engine**: Uses OpenAI API where helpful; inputs = tasks (title, duration, optional photo refs), today's busy windows, working hours; output = scheduled_blocks + overflow list. Can combine rule-based placement with AI for ordering or time suggestions.
+  - **API**: Next.js API routes call Supabase (client or service role as needed) for tasks, schedule, and calendar OAuth callbacks; "Plan my day" triggers the agentic scheduling system and persists blocks to Supabase.
+- **Calendar Providers**: Google Calendar and Outlook Calendar. OAuth 2.0, read-only; fetch today's events when user hits "Plan my day." **Attached per user** (tokens stored in Supabase after user connects). Events from all connected calendars merged into a single busy-windows list.
+  - **Google Calendar**: Google OAuth 2.0, Google Calendar API v3.
+  - **Outlook Calendar**: Microsoft OAuth 2.0 (MSAL), Microsoft Graph API.
+- **AI: Agentic System (LangChain + OpenAI)**
+  - **LangChain Agent**: Orchestrates multi-step scheduling. Tools: `getTaskList`, `getCalendarEvents`, `createScheduledBlock`, `checkForConflicts`, `updateTask`, `askUserForClarification`. Max iteration guardrail to prevent runaway loops.
+  - **Hybrid Architecture**: LLM (OpenAI GPT-4o-mini) handles reasoning, intent, and priority decisions (natural language → structured JSON). Deterministic constraint solver handles actual time placement and conflict detection — no LLM time-math.
+  - **Stability Buffer**: Rescheduling prefers minimal adjustments (cut/defer low-priority tasks) over cascading ripple effects. Optimizes for psychological comfort, not perfect time utilization.
+  - **Chat Interface**: Agent maintains conversation context per user per day for mid-day interactions (progress updates, new tasks, rescheduling requests).
+  - All API keys server-side only (env vars). Agent actions logged for debugging.
 
 ```mermaid
 flowchart LR
@@ -25,18 +31,34 @@ flowchart LR
   Supabase --> Storage
   Supabase --> Auth
   NextAPI --> GoogleCalendar
-  NextAPI --> OpenAI
-  NextAPI --> SchedulingEngine
-  SchedulingEngine --> NextAPI
+  NextAPI --> OutlookCalendar
+  NextAPI --> LangChainAgent
+  LangChainAgent --> OpenAI
+  LangChainAgent --> ConstraintSolver
+  LangChainAgent --> Supabase
+  LangChainAgent --> GoogleCalendar
+  LangChainAgent --> OutlookCalendar
 ```
 
 ## Data Flow: Plan my day
 
 1. User clicks "Plan my day."
-2. Next.js API (using Supabase) fetches today's events from Google Calendar.
-3. Load tasks from Supabase (and any attachment URLs from Storage).
-4. Run scheduling engine (optionally using OpenAI API for placement); inputs = free windows + working hours + tasks.
-5. Save scheduled_blocks to Supabase; return timeline + overflow to frontend.
+2. Next.js API initializes LangChain agent with user context.
+3. Agent calls `getCalendarEvents` tool — fetches today's events from all connected calendars (Google and/or Outlook), merges into busy-windows list.
+4. Agent calls `getTaskList` tool — loads tasks from Supabase (and any attachment URLs from Storage).
+5. Agent reasons about priorities, constraints, and ordering (LLM step).
+6. Deterministic constraint solver places tasks into free slots, enforces no overlaps, respects working hours and break rules.
+7. If tasks exceed available time, agent surfaces the conflict — suggests what to defer or drop.
+8. Agent calls `createScheduledBlock` tool — saves blocks to Supabase; returns timeline + overflow to frontend.
+
+## Data Flow: Mid-day chat update
+
+1. User opens chat modal, types a message (e.g. "I finished the report early" or "add groceries, 30 min").
+2. Next.js API passes message to LangChain agent with existing conversation context and current schedule state.
+3. Agent interprets intent, calls relevant tools (update task status, add new task, fetch updated calendar).
+4. Agent applies stability-first rescheduling — prefers minimal adjustments over cascade reshuffles.
+5. Updated schedule saved to Supabase; timeline refreshes on frontend.
+6. Agent responds conversationally explaining what changed and why.
 
 ## PWA and Notifications
 
@@ -45,9 +67,11 @@ flowchart LR
 
 ## Key Decisions
 
-- **Supabase** for auth, database (PostgreSQL), and file storage (task photos). Next.js talks to Supabase via client SDK or server-side with service role where needed. Users sign in with Supabase Auth; **Google Calendar is attached to that user** (OAuth tokens stored per user in Supabase).
-- **OpenAI API** for AI-powered scheduling (schedule construction, placement, priorities). API key in env only; all calls from Next.js API routes.
+- **Supabase** for auth, database (PostgreSQL), and file storage (task photos). Next.js talks to Supabase via client SDK or server-side with service role where needed. Users sign in with Supabase Auth; **calendar providers are attached per user** (OAuth tokens stored per user per provider in Supabase).
+- **LangChain + OpenAI** for agentic AI scheduling. The LangChain agent orchestrates multi-step tool use (fetch tasks, fetch calendar, reason about placement, write blocks). OpenAI GPT-4o-mini provides the LLM reasoning. A deterministic constraint solver handles time-math (no LLM hallucinations on temporal logic). API keys in env only; all calls from Next.js API routes.
+- **Hybrid architecture**: LLM for reasoning/intent, deterministic solver for time placement. This prevents the known issue of LLMs hallucinating overlapping time blocks.
+- **Stability-first rescheduling**: When the agent reschedules, it prefers cutting/deferring low-priority tasks over ripple-reshuffling the entire day. This is a deliberate design choice for users with ADHD and anyone who experiences anxiety from constant plan changes.
+- **Multi-calendar**: Google Calendar and Outlook Calendar. Events merged into a single busy-windows list. Architecture supports additional providers in the future.
 - Calendar fetched on demand (no cache).
 - Today only for MVP.
-- Single calendar provider (Google).
-- PWA for native-app feel (installable, ~1 day). Browser notifications for task reminders; client-only in MVP, no push server.
+- PWA for native-app feel (installable). Browser notifications for task reminders; client-only in MVP, no push server.
