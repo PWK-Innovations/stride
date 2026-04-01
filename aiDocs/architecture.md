@@ -8,8 +8,8 @@ Stride is an AI-powered daily planner for knowledge workers with unstructured sc
 
 - **Frontend**: Next.js app (React, TypeScript, Tailwind); task list, timeline view, "Plan my day" action, agent chat modal; delivered as a PWA (installable to desktop/home screen).
 - **Backend: Supabase**
-  - **Auth**: Supabase Auth for user identity; link or store calendar OAuth tokens per user per provider (e.g. in `profiles`/`calendar_tokens` table).
-  - **Database**: Supabase (PostgreSQL). Tables: `users`/profiles, `tasks`, `scheduled_blocks`, `agent_conversations`; no stored calendar events (fetch on demand).
+  - **Auth**: Supabase Auth for user identity.
+  - **Database**: Supabase (PostgreSQL). Tables: `profiles` (user metadata), `calendar_tokens` (OAuth tokens per user per provider — Google, Outlook), `tasks`, `scheduled_blocks`, `agent_conversations` (chat history per user per day); no stored calendar events (fetch on demand).
   - **Storage**: Supabase Storage for task attachments (e.g. photos); tasks reference file paths or public URLs.
   - **API**: Next.js API routes call Supabase (client or service role as needed) for tasks, schedule, and calendar OAuth callbacks; "Plan my day" triggers the agentic scheduling system and persists blocks to Supabase.
 - **Calendar Providers**: Google Calendar and Outlook Calendar. OAuth 2.0, read-only; fetch today's events when user hits "Plan my day." **Attached per user** (tokens stored in Supabase after user connects). Events from all connected calendars merged into a single busy-windows list.
@@ -19,7 +19,8 @@ Stride is an AI-powered daily planner for knowledge workers with unstructured sc
   - **LangChain Agent**: Orchestrates multi-step scheduling. Tools: `getTaskList`, `getCalendarEvents`, `createScheduledBlock`, `checkForConflicts`, `updateTask`, `askUserForClarification`. Max iteration guardrail to prevent runaway loops.
   - **Hybrid Architecture**: LLM (OpenAI GPT-4o-mini) handles reasoning, intent, and priority decisions (natural language → structured JSON). Deterministic constraint solver handles actual time placement and conflict detection — no LLM time-math.
   - **Stability Buffer**: Rescheduling prefers minimal adjustments (cut/defer low-priority tasks) over cascading ripple effects. Optimizes for psychological comfort, not perfect time utilization.
-  - **Chat Interface**: Agent maintains conversation context per user per day for mid-day interactions (progress updates, new tasks, rescheduling requests).
+  - **Chat Interface**: Agent maintains conversation context per user per day (`agent_conversations` table) for mid-day interactions (progress updates, new tasks, rescheduling requests).
+  - **Streaming**: Both schedule building and chat use Server-Sent Events (SSE) to stream agent progress to the frontend in real-time. Event types: `thinking`, `tool_call`, `text`, `schedule_update`, `done`, `error`.
   - All API keys server-side only (env vars). Agent actions logged for debugging.
 
 ```mermaid
@@ -60,6 +61,18 @@ flowchart LR
 5. Updated schedule saved to Supabase; timeline refreshes on frontend.
 6. Agent responds conversationally explaining what changed and why.
 
+## Database Schema
+
+| Table | Key Columns | Purpose |
+|-------|------------|---------|
+| `profiles` | id, email, subscription_tier, created_at | User metadata (auto-created on signup via trigger) |
+| `calendar_tokens` | id, user_id, provider ('google' \| 'outlook'), access_token, refresh_token, token_expires_at | OAuth tokens per user per calendar provider. Unique on (user_id, provider) |
+| `tasks` | id, user_id, title, notes, duration_minutes, photo_url, goal_id (future) | User's task list |
+| `scheduled_blocks` | id, user_id, task_id, start_time, end_time, title, source | Generated schedule blocks for today |
+| `agent_conversations` | id, user_id, date, messages (jsonb) | Chat history per user per day. Unique on (user_id, date) |
+
+All tables have RLS policies scoping to the authenticated user's own data. Auto-creates profile on signup via `handle_new_user` trigger.
+
 ## PWA and Notifications
 
 - **PWA**: Web app manifest + minimal service worker so the app is installable; standalone window and icon. No offline-first requirement for MVP.
@@ -72,6 +85,21 @@ flowchart LR
 - **Hybrid architecture**: LLM for reasoning/intent, deterministic solver for time placement. This prevents the known issue of LLMs hallucinating overlapping time blocks.
 - **Stability-first rescheduling**: When the agent reschedules, it prefers cutting/deferring low-priority tasks over ripple-reshuffling the entire day. This is a deliberate design choice for users with ADHD and anyone who experiences anxiety from constant plan changes.
 - **Multi-calendar**: Google Calendar and Outlook Calendar. Events merged into a single busy-windows list. Architecture supports additional providers in the future.
+- **`calendar_tokens` table**: Multi-provider token storage instead of Google-specific columns on `profiles`. Supports Google and Outlook now; extensible to Apple Calendar later.
+- **SSE streaming**: Agent responses streamed to frontend via Server-Sent Events for real-time progress feedback during both schedule building and chat.
 - Calendar fetched on demand (no cache).
 - Today only for MVP.
 - PWA for native-app feel (installable). Browser notifications for task reminders; client-only in MVP, no push server.
+
+## Environment Variables
+
+Required in `.env.local`:
+- `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`
+- `OPENAI_API_KEY`
+- `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, `GOOGLE_REDIRECT_URI`
+- `MICROSOFT_CLIENT_ID`, `MICROSOFT_CLIENT_SECRET`, `MICROSOFT_REDIRECT_URI`
+
+## Dependencies (Key Additions for Agent)
+
+- `langchain`, `@langchain/openai`, `@langchain/core` — LangChain agent framework
+- `@azure/msal-node` — Microsoft OAuth for Outlook Calendar

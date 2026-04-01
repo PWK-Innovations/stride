@@ -225,82 +225,123 @@
 
 ---
 
-## Phase 7: Beta Launch
+## Phase 7: Agentic AI & Multi-Calendar
 
-**Goal:** Launch to 5-10 external users and gather feedback.
+**Goal:** Replace single-shot OpenAI scheduling with a LangChain agent. Add Outlook Calendar as second provider. Hybrid architecture: LLM for reasoning, deterministic solver for time placement.
 
-### 7.1 Beta Preparation
-- Set up analytics (track "Build my day" usage, task creation, photo uploads)
-- Set up error logging (Sentry or similar)
-- Create onboarding flow (connect calendar, add first task, build first day)
-- Write beta invite email and feedback survey
+### 7.1 LangChain Agent Infrastructure
+- Install LangChain dependencies; define agent tools (getTaskList, getCalendarEvents, createScheduledBlocks, checkForConflicts, updateTask)
+- Create agent executor with system prompt, scheduling rules, max iteration guardrail
 
-### 7.2 Beta Launch
-- Invite 5-10 users (mix of students, professionals, engineers)
-- Monitor usage and errors daily
-- Collect feedback via survey and direct conversations
+### 7.2 Hybrid Scheduling Architecture
+- Deterministic constraint solver for time placement (no LLM time-math)
+- Stability-first rescheduling rules (prefer minimal adjustments, cap change count)
+- Agent reasons about priority/ordering; solver places blocks
 
-### 7.3 Rapid Iteration
+### 7.3 Outlook Calendar Integration
+- Azure AD app registration, Microsoft OAuth flow
+- New `calendar_tokens` table (multi-provider token storage); migrate Google tokens
+- Fetch Outlook events via Microsoft Graph API; merge all providers into single busy-windows list
+
+### 7.4 Agent-Powered "Build My Day"
+- Replace existing OpenAI call with LangChain agent flow
+- SSE streaming endpoint for agent progress (thinking, tool calls, result)
+- Frontend shows real-time agent status during schedule build
+
+**Deliverable:** "Build my day" powered by agentic AI with hybrid architecture. Google + Outlook Calendar supported. Streaming shows agent progress.
+
+**Plan/Roadmap:** `2026-04-01-phase-7-agentic-ai-multi-calendar-plan.md` / `-roadmap.md`
+
+---
+
+## Phase 8: Chat Modal & Dynamic Updates
+
+**Goal:** Add conversational chat interface for mid-day agent interaction. Quick-action shortcuts on timeline blocks.
+
+### 8.1 Chat Modal UI
+- Sliding panel with message list, text input, streaming responses
+- Conversation persistence per user per day (`agent_conversations` table)
+- SSE streaming chat endpoint
+
+### 8.2 Mid-Day Agent Interactions
+- Progress updates ("I finished early"), delays ("running late"), new tasks, rescheduling requests, guidance ("what's next?")
+- Agent modifies schedule with stability-first rules; timeline refreshes automatically
+
+### 8.3 Quick-Action Shortcuts
+- Mark done, skip, running late buttons on timeline blocks
+- Trigger agent rescheduling without opening chat
+- Toast notifications for feedback when chat is closed
+
+**Deliverable:** Chat modal for conversational scheduling throughout the day. Quick-actions on timeline blocks. Schedule adapts in real-time.
+
+**Plan/Roadmap:** `2026-04-01-phase-8-chat-modal-dynamic-updates-plan.md` / `-roadmap.md`
+
+---
+
+## Phase 9: Beta Launch
+
+**Goal:** Launch to 5-10 external users and gather feedback on the full product (agent + chat + multi-calendar).
+
+### 9.1 Beta Preparation
+- Set up analytics (build day, chat messages, quick-actions, calendar connections)
+- Set up error logging (Sentry or similar) including agent errors
+- Create onboarding flow (connect calendar, add task, build day, meet the chat assistant)
+
+### 9.2 Beta Launch
+- Invite 5-10 users (freelancers, developers, students, ADHD community)
+- Monitor usage, errors, and agent performance daily
+- Collect feedback via survey and 1-on-1 calls
+
+### 9.3 Rapid Iteration
 - Fix critical bugs within 24 hours
-- Implement quick wins (small UX improvements, error messages)
-- Prioritize P1 features based on feedback
+- Quick UX wins based on feedback
+- Prioritize next features
 
-**Deliverable:** MVP validated with real users. Clear signal on what works, what doesn't, and what to build next.
+**Deliverable:** Full product validated with real users. Feedback collected, priorities identified.
 
----
-
-## Phase 8: Secondary Features (Post-MVP)
-
-**Goal:** Add goals and dynamic calendar updates (P1 from MVP doc).
-
-### 8.1 Goals
-- Goal data model (professional, academic, social)
-- UI to add/edit goals
-- Link tasks to goals
-- AI scheduling: incorporate goals into placement logic (prioritize goal-related tasks)
-
-### 8.2 Dynamic Calendar Updates
-- "Mark task done" UI (checkbox or button)
-- When task is marked done: remove from schedule, re-run AI placement for remaining tasks
-- Show updated schedule in real-time
-- Handle "running late" or "skip task" scenarios
-
-### 8.3 Refinements
-- Multi-day view (tomorrow, this week) - if validated by users
-- Task edit (if delete + re-add is too cumbersome)
-- Calendar event caching (if fetch-on-demand is too slow)
-
-**Deliverable:** P1 features (goals, dynamic updates) shipped. Users can set goals and the schedule adapts when they finish tasks.
+**Plan/Roadmap:** `2026-04-01-phase-9-beta-launch-plan.md` / `-roadmap.md`
 
 ---
 
-## Phase 9: Scale & Monetization (Future)
+## Phase 10: Secondary Features (Post-Beta)
 
-**Goal:** Prepare for broader launch and implement pricing.
+**Goal:** Add goals, personalization loop, and refinements — driven by beta feedback.
 
-### 9.1 Pricing & Billing
-- Implement free tier (limited AI schedules per month)
-- Implement professional tier ($12-15/mo via Stripe)
-- Implement student discount (50% off with .edu email)
-- Payment flow and subscription management
+### 10.1 Goals
+- Goal data model, UI, link tasks to goals, agent prioritizes goal-linked tasks
 
-### 9.2 Multi-Calendar Support (P1)
-- Add Outlook and Apple Calendar integrations
-- Allow users to connect multiple calendars
-- Merge events from all calendars into one timeline
+### 10.2 Personalization Loop
+- Track user patterns (duration accuracy, skip patterns, productive hours)
+- Agent auto-adjusts future schedules based on learned patterns
 
-### 9.3 Integrations for Engineers (P1)
-- Jira, Linear, GitHub integration (import tasks)
-- Focus Time / Deep Work blocking (protect large time blocks)
-- Task chunking (break large tasks into smaller blocks)
+### 10.3 Refinements (If Validated)
+- Multi-day view, task edit, calendar caching — only if users ask for them
 
-### 9.4 Go-to-Market
-- Product Hunt launch
-- Reddit community outreach (r/productivity, r/ADHD, r/college)
-- Referral program (invite a peer for extended trial)
-- Content marketing (blog posts, YouTube demos)
+**Deliverable:** Goals and personalization shipped. Refinements only if validated.
 
-**Deliverable:** Stride is live, monetized, and growing. Broader feature set for different user segments (students, professionals, engineers).
+**Plan/Roadmap:** `2026-04-01-phase-10-secondary-features-plan.md` / `-roadmap.md`
+
+---
+
+## Phase 11: Scale & Monetization (Future)
+
+**Goal:** Pricing, additional integrations, and go-to-market.
+
+### 11.1 Pricing & Billing
+- Free tier (limited schedules/chat), Professional ($12-15/mo via Stripe), Student (50% off)
+
+### 11.2 Additional Calendar Providers
+- Apple Calendar (CalDAV) if validated
+
+### 11.3 Integrations
+- Todoist task import, Slack slash commands/notifications, Jira/Linear/GitHub — one at a time
+
+### 11.4 Go-to-Market
+- Product Hunt launch, Reddit/ADHD/freelancer community outreach, referral program, content marketing
+
+**Deliverable:** Stride is live, monetized, and growing.
+
+**Plan/Roadmap:** `2026-04-01-phase-11-scale-monetization-plan.md` / `-roadmap.md`
 
 ---
 
@@ -309,14 +350,17 @@
 **Critical path (must happen in order):**
 1. Phase 0 (Foundation & Auth) → Phase 1 (Frontend Layout) → Phase 2 (PWA & Hosting) → Phase 3 (Core Data Flow)
 2. Phase 4 (Photo-to-Task) can happen in parallel with Phase 3 if needed
-3. Phase 5 (Polish) → Phase 6 (Code Quality & Security) → Phase 7 (Beta) must be sequential
-4. Phase 8+ (Secondary Features) can be prioritized based on beta feedback
+3. Phase 5 (Polish) → Phase 6 (Code Quality & Security) must be sequential
+4. Phase 7 (Agentic AI) → Phase 8 (Chat Modal) must be sequential (chat depends on agent)
+5. Phase 9 (Beta) → Phase 10+ (Secondary Features, Scale) based on feedback
 
 **External dependencies:**
-- Supabase project setup (can be done in Phase 0)
-- Google Cloud project + OAuth credentials (can be done in Phase 0)
-- OpenAI API key (can be done in Phase 0)
+- Supabase project setup (done in Phase 0)
+- Google Cloud project + OAuth credentials (done in Phase 0)
+- OpenAI API key (done in Phase 0)
 - Domain name + hosting (Vercel; done in Phase 2)
+- Azure AD app registration for Outlook OAuth (Phase 7)
+- LangChain packages (Phase 7)
 
 ---
 
@@ -325,8 +369,9 @@
 From `aiDocs/mvp.md`, the MVP is successful if:
 - Next.js app runs and is responsive on mobile
 - PWA installable on at least one phone (iPhone or Android)
-- Users can add tasks (text + photos)
-- "Build my day" generates a daily schedule from tasks + calendar
+- Users can add tasks (text, photos, voice)
+- "Build my day" generates a daily schedule via agentic AI from tasks + calendar (Google and/or Outlook)
+- Chat modal allows mid-day agent interaction
 - Daily view shows the built schedule clearly
 - Users would actually use this daily (validated in beta)
 
@@ -335,26 +380,25 @@ From `aiDocs/mvp.md`, the MVP is successful if:
 ## What We're NOT Building (Yet)
 
 To avoid scope creep and over-engineering:
-- No tomorrow or multi-day view (today only for MVP)
-- No task edit (delete + re-add is fine for MVP)
-- No calendar event caching (fetch on demand is fine for MVP)
-- No multiple calendar providers (Google only for MVP)
-- No real-time sync (manual refresh is fine for MVP)
-- No complex scheduling optimization (greedy placement is fine for MVP)
-- No duration learning / feedback loops (user-provided estimates for MVP)
-- No break preservation (users can add break tasks manually for MVP)
-- No team features (single-user only for MVP)
+- No tomorrow or multi-day view (today only)
+- No task edit (delete + re-add is fine)
+- No calendar event caching (fetch on demand is fine)
+- No calendar providers beyond Google and Outlook (Apple Calendar is future)
+- No personalization loop (user-provided estimates until Phase 10)
+- No team features (single-user only)
+- No task manager integrations (Todoist, Notion — Phase 11)
+- No communication integrations (Slack — Phase 11)
 
-These can be added in P1/P2 if validated by users.
+These can be added post-beta if validated by users.
 
 ---
 
 ## Next Steps
 
-1. **Review this plan** with the team
-2. **Use phase plan/roadmap docs** in `ai/roadmaps/`: each phase (0–9) has a plan and roadmap pair
-3. **Complete Phase 0** (Foundation & Auth) — finish auth setup
-4. **Start Phase 1** (Frontend Layout) and build the auth UI + dashboard
+1. Phases 0–6 are complete (see `ai/roadmaps/complete/`)
+2. **Start Phase 7** (Agentic AI & Multi-Calendar) — LangChain agent, constraint solver, Outlook integration
+3. **Then Phase 8** (Chat Modal & Dynamic Updates) — conversational agent interface, quick-actions
+4. **Then Phase 9** (Beta Launch) — validate full product with real users
 
 ---
 
