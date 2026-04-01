@@ -3,33 +3,38 @@
 ## Context
 
 - **PRD Reference:** `prd.md` (same folder)
-- **Core idea:** A working Next.js web app (also a PWA) where you add tasks (text, photos, etc.) and the app builds your daily calendar for you.
+- **Core idea:** A working Next.js web app (also a PWA) where you add tasks (text, photos, voice) and an agentic AI builds and maintains your daily calendar — not just once in the morning, but throughout the day as plans change.
+- **Target users:** Knowledge workers with unstructured or variable schedules (freelancers, developers, remote professionals), busy college students, and individuals with ADHD or executive function challenges.
 
 ---
 
 ## MVP Goal
 
-Build a working web app (also a PWA) that proves the concept: **add tasks (text or photos) → AI builds your daily schedule → view and use the result.**
+Build a working web app (also a PWA) that proves the concept: **add tasks (text, photos, or voice) → AI builds your daily schedule → interact with the agent to keep it on track → view and use the result.**
 
 This is NOT a production-ready product. This is a demo to validate:
 
 1. The AI scheduling pipeline produces realistic daily plans
-2. Task input (text + photos) flows smoothly into schedule construction
+2. Task input (text, photos, voice) flows smoothly into schedule construction
 3. Users can successfully complete the core flow on web and mobile
-4. The calendar integration provides useful context for AI placement
+4. The calendar integration (Google + Outlook) provides useful context for AI placement
+5. The agentic AI system can reason through multi-step scheduling decisions and adapt the schedule conversationally throughout the day
+6. The hybrid architecture (LLM for reasoning, deterministic solver for time placement) produces reliable, conflict-free schedules
 
 ---
 
 ## MVP Scope: What's In
 
 - Next.js web app, installable as a PWA (phone + desktop)
-- Task input: text (title, notes, duration) and photo attachments
+- Task input: text (title, notes, duration), photo attachments, and voice memos
 - Add, list, delete tasks
-- Google Calendar integration (read-only, one provider)
-- "Plan my day" — AI builds a daily schedule from tasks + calendar
+- Calendar integration: Google Calendar + Outlook Calendar (read-only)
+- "Plan my day" — agentic AI builds a daily schedule from tasks + calendar using multi-step reasoning
+- Chat modal for mid-day agent interaction (report progress, add tasks, request rescheduling)
 - Daily timeline view with scheduled tasks and calendar events
 - Supabase backend: auth, database, photo storage
-- OpenAI API for schedule construction
+- Hybrid AI architecture: LangChain agent (reasoning/intent) + deterministic constraint solver (time placement)
+- Stability-first rescheduling: minimal adjustments over cascade reshuffles
 
 ### Must-Have (MVP Core)
 
@@ -49,9 +54,17 @@ This is NOT a production-ready product. This is a demo to validate:
 **Build the daily calendar**
 
 - **Single main action:** e.g. "Build my day" or "Plan my day."
-- App takes **today's tasks** (and any calendar data we use) and **builds the daily schedule**—places tasks into time slots and shows a clear daily calendar/timeline.
-- **Calendar integration (MVP):** Connect one calendar (e.g. Google) so we know busy vs free. Fetch today's events when building the day. Display busy blocks and scheduled tasks on one timeline.
-- **Output:** A daily view with tasks placed in time (and overflow or "couldn't fit" if needed).
+- App takes **today's tasks** (and any calendar data we use) and **builds the daily schedule**—an agentic AI reasons through tasks, priorities, and constraints, then places tasks into time slots.
+- **Calendar integration:** Connect Google Calendar and/or Outlook Calendar so we know busy vs free. Fetch today's events when building the day. Display busy blocks and scheduled tasks on one timeline.
+- **Hybrid architecture:** The LangChain agent handles reasoning (priority, ordering, dependencies); a deterministic solver handles time placement (no LLM time-math hallucinations).
+- **Output:** A daily view with tasks placed in time. When tasks can't all fit, the agent proactively suggests what to defer or drop rather than silently overloading.
+
+**Chat modal for mid-day updates**
+
+- **Persistent chat icon** opens a modal/sliding panel for conversational interaction with the scheduling agent.
+- Users can report progress ("I finished the report early"), add tasks ("add groceries, 30 min"), report delays ("I'm running 20 minutes behind"), or ask for guidance ("what should I do next?").
+- The agent processes updates and adjusts the schedule with stability-first rescheduling — minimal changes over cascade reshuffles.
+- The "Build my day" button remains for the initial morning schedule; the chat modal is for throughout-the-day interaction.
 
 **Persistence**
 
@@ -66,11 +79,10 @@ These are important but not required for "we have a working app that builds my d
 - Let users **add goals** (e.g. professional, academic, social).
 - When building the day, take goals into account so the daily calendar helps move toward them (e.g. slot goal-related tasks, or show goal progress).
 
-**Dynamic calendar from user input (Desktop Popup)**
+**Personalization Loop**
 
-- A **popup/overlay on the user's computer** lets them interact with the AI without opening the full app.
-- Mark a task done, say "I'm running late," "skip this," or add something new — the **AI reschedules the rest of the day** automatically.
-- Goal: the plan stays in sync with what the user actually did, without context-switching into the full app.
+- The agent **learns user patterns over time** (e.g. user consistently underestimates deep work by 20%, is more productive in mornings, always skips afternoon tasks).
+- Future schedules auto-adjust: duration padding, optimal slot placement, realistic capacity estimates.
 
 **Task Backlog**
 
@@ -78,16 +90,23 @@ These are important but not required for "we have a working app that builds my d
 - When today's tasks are finished early, the AI can pull from the backlog to fill remaining time.
 - Tasks not scheduled on a given day stay in the backlog for future days.
 
+**Future Integrations**
+
+- Todoist task import (bring existing tasks into Stride).
+- Slack notifications and slash commands (interact with Stride from Slack).
+- Apple Calendar support.
+
 ---
 
 ## MVP Scope: What's Out
 
-- Multiple calendar providers (one is enough).
+- Calendar providers beyond Google and Outlook (Apple Calendar is future).
 - Full task edit (delete + re-add).
 - Tomorrow or multi-day view (today only).
 - Calendar event caching (fetch when building the day).
-- Complex scheduling (no optimization, no learning).
-- Goals and dynamic "task finished" updates are **secondary**—we add them once the core flow works.
+- Personalization loop (learning user patterns) — secondary, after core agent works.
+- Task manager integrations (Todoist, Notion) and communication integrations (Slack) — future scope.
+- Goals are **secondary** — we add them once the core agent flow works.
 
 ---
 
@@ -104,15 +123,15 @@ These are important but not required for "we have a working app that builds my d
 7. **View schedule** → daily timeline shows tasks placed in time slots alongside calendar events; overflow list for anything that didn't fit
 8. **Execute** → work through the day following the AI-built plan
 
-### Flow 2: Desktop Popup (Quick Updates)
+### Flow 2: Chat Modal (Mid-Day Updates)
 
-1. **Popup opens** → small overlay/widget accessible from desktop (browser extension, PWA window, or mini-view)
-2. **Mark task done** → check off a completed task directly from the popup
-3. **Report a change** → "I'm running late," "skip this," or "new task came up"
-4. **AI reschedules** → the AI dynamically rebuilds the remaining schedule based on the update
-5. **Updated view** → popup shows the adjusted timeline; user stays on task without opening the full app
+1. **Open chat** → click persistent chat icon on dashboard to open agent modal/sliding panel
+2. **Natural language interaction** → type "I finished the report early", "I'm running 20 minutes late", "add groceries after work, 30 min", or "what should I do next?"
+3. **Agent processes** → the LangChain agent reasons through the update, checks calendar, identifies impact
+4. **Stability-first rescheduling** → agent makes minimal adjustments (defer or cut low-priority tasks) rather than cascade-reshuffling the whole day
+5. **Updated view** → timeline refreshes with changes; agent explains what it did and why
 
-This keeps users engaged throughout the day without context-switching into the full app every time something changes.
+This keeps the schedule alive throughout the day via conversation rather than discrete button presses.
 
 ---
 
@@ -130,9 +149,11 @@ This keeps users engaged throughout the day without context-switching into the f
 - [ ] Next.js app runs and is responsive on mobile.
 - [ ] PWA installable on at least one phone (e.g. iPhone or Android).
 - [ ] Users can add tasks (text; photos if in scope for first release).
-- [ ] "Build my day" (or equivalent) generates a daily schedule from tasks (+ calendar).
+- [ ] "Build my day" (or equivalent) generates a daily schedule from tasks (+ calendar) via agentic AI.
 - [ ] Daily view shows the built schedule clearly.
-- [ ] (Secondary) User can mark a task done and see the calendar update.
+- [ ] Chat modal allows mid-day agent interaction (add task, report progress, request reschedule).
+- [ ] Agent rescheduling uses stability-first approach (minimal changes, not cascade reshuffles).
+- [ ] Outlook Calendar integration works alongside Google Calendar.
 
 ---
 
@@ -141,9 +162,9 @@ This keeps users engaged throughout the day without context-switching into the f
 | Layer | MVP | Secondary |
 |-------|-----|-----------|
 | **App** | Working Next.js app, installable on phones (PWA) | — |
-| **Input** | Tasks (text, photos, etc.); add / list / delete | — |
-| **Output** | App builds daily calendar from tasks + calendar | — |
-| **Updates** | — | Desktop popup for quick task updates; AI reschedules dynamically |
-| **Extra** | — | Goals; dynamic calendar when user says "finished" (or marks done) |
+| **Input** | Tasks (text, photos, voice); add / list / delete | — |
+| **Output** | Agentic AI builds daily calendar from tasks + calendar (Google + Outlook) | — |
+| **Agent Chat** | Chat modal for mid-day updates (progress, new tasks, rescheduling) | — |
+| **Extra** | — | Goals; personalization loop; Todoist/Slack integrations |
 
-**In one line:** We have a Next.js web app (also a PWA) where you input tasks (text/photos), and it builds your daily calendar; a desktop popup lets you update progress so the AI keeps your schedule accurate throughout the day.
+**In one line:** We have a Next.js web app (also a PWA) where you input tasks (text/photos/voice), an agentic AI builds your daily calendar, and a chat modal lets you interact with the agent throughout the day to keep your schedule on track.

@@ -4,7 +4,13 @@ High-level changes; add a line or two here when you commit and push.
 
 ---
 
-## 2026-02-09
+## 2026-04-01
+
+- **Product Direction Pivot:** Broadened target users to knowledge workers (freelancers, devs, remote professionals, ADHD, students). Added agentic AI (LangChain), Outlook Calendar, stability-first rescheduling, hybrid architecture. Cofounder discussion in `ai/notes/feedback-discussion.md`.
+- **Docs Updated:** PRD (problem statement, users, differentiators, stories, GTM), MVP (agent + chat modal + Outlook scope), Architecture (`calendar_tokens` table, `agent_conversations`, SSE streaming, constraint solver, env vars), Context.md (simplified), CLAUDE.md (simplified to behavioral guidelines).
+- **Phase Restructure:** New Phase 7 (Agentic AI & Multi-Calendar) and Phase 8 (Chat Modal & Dynamic Updates). Old phases 7-9 renumbered to 9-11. Created 10 new plan+roadmap docs. Dynamic calendar updates absorbed into Phase 8 chat/quick-actions.
+
+## 2026-02-23
 
 - Added aiDocs: coding-style.md, changelog.md.
 - Updated context.md to reference coding style and changelog in Critical Files to Review.
