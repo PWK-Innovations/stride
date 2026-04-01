@@ -44,6 +44,7 @@ Built for knowledge workers with unstructured schedules — freelancers, develop
 - **Secrets**: Never commit API keys. Use env vars (see `.env.example`).
 - **Scope**: Today-only scheduling. Check `mvp.md` before adding features.
 - **Logging**: Use `lib/logger.ts` — no raw `console.*` calls.
+- **Changelog**: Update `aiDocs/changelog.md` before every commit. No exceptions. Make additions concise - no fluff.
 - **Plans/Roadmaps**: Save in `ai/roadmaps/` with date prefix. Plans use lists, roadmaps use checkboxes. Move to `complete/` when done.
 
 ## Current Focus
