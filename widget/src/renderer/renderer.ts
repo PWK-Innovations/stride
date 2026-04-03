@@ -172,6 +172,19 @@ function renderFullMode(): void {
   renderChatArea();
   wireChatInputListeners();
 
+  const logoutBtn = document.getElementById("logout-btn");
+  if (logoutBtn) {
+    logoutBtn.addEventListener("click", () => {
+      logger.info("Logout button clicked");
+      window.strideApi.logout();
+      if (pollTimer) {
+        clearInterval(pollTimer);
+        pollTimer = null;
+      }
+      renderLoginScreen();
+    });
+  }
+
   const compressBtn = document.getElementById("compress-btn");
   if (compressBtn) {
     compressBtn.addEventListener("click", () => {
