@@ -20,7 +20,7 @@ This phase replaces the single-shot OpenAI scheduling call with a LangChain agen
 
 ## Goal
 
-Replace single-shot OpenAI scheduling with a LangChain agent. Hybrid architecture: LLM for reasoning, deterministic solver for time placement. Agent powers both the web app and the desktop widget. Add chat and mid-day interaction capabilities so users can talk to the agent throughout the day.
+Distribute the desktop widget for download. Replace single-shot OpenAI scheduling with a LangChain agent tailored to the widget chatbot. Hybrid architecture: LLM for reasoning, deterministic solver for time placement. Agent reused in Phase 10 for web chatbot. Add chat and mid-day interaction capabilities so users can talk to the agent throughout the day.
 
 ---
 
@@ -30,6 +30,57 @@ Replace single-shot OpenAI scheduling with a LangChain agent. Hybrid architectur
 - Existing scheduling endpoint (`api/schedule/build/`) working with single-shot OpenAI
 - Task CRUD and calendar event fetching operational
 - SSE infrastructure understanding (will be needed for streaming)
+- `electron-builder` installed as dev dependency in `widget/`
+
+---
+
+## 9.0 Widget Distribution & Download
+
+### Why
+
+Phase 8 built the widget, but users have no way to download or install it. Before wiring the agent to the widget chatbot, we need a distributable DMG and visible download paths on the homepage and dashboard so users can actually get the widget.
+
+---
+
+### 9.0.1 Widget Build & Packaging
+
+#### What to Build
+
+- Configure `electron-builder` in `widget/package.json` for macOS DMG
+- Add `npm run dist` script to produce a distributable `.dmg` file
+- Host the built DMG on GitHub Releases (manual upload for MVP)
+- Add a download URL constant or env var (`NEXT_PUBLIC_WIDGET_DOWNLOAD_URL`) pointing to the GitHub release asset
+
+#### What Not to Do
+
+- No auto-update (Squirrel/electron-updater) — manual download for MVP
+- No Windows/Linux builds yet — macOS only
+- No code signing — unsigned DMG is fine for MVP/demo
+
+---
+
+### 9.0.2 Homepage Widget Section
+
+#### What to Build
+
+- Add a new section to `app/app/page.tsx` between Stats and Testimonial sections
+- Use existing section component pattern (headline, subheadline, CTA button)
+- Headline: "Stay in flow with the Stride widget" or similar
+- Subheadline: brief description of compressed pill + full chatbot modes
+- CTA: "Download for macOS" button linking to the GitHub release DMG
+- Include a static screenshot/mockup of the widget (place in `public/`)
+
+---
+
+### 9.0.3 Dashboard Download Banner
+
+#### What to Build
+
+- Add a dismissible banner/card at the top of `app/app/app/page.tsx` (dashboard)
+- "Get the Stride desktop widget — stay on track without leaving your workflow"
+- Download button linking to the DMG
+- Dismiss button that saves preference to `localStorage` so it doesn't reappear
+- Only show when user hasn't dismissed it
 
 ---
 
@@ -125,7 +176,11 @@ The schedule is not static — users need to report progress, add tasks, request
 
 ### What to Build
 
-- Chat interface in both the desktop widget and web app (adapt UI patterns from `aiDocs/stride-agent/src/app/components/`)
+**Primary target: widget chatbot.** The agent replaces `ChatController.processCommand()` in the widget. The web app chatbot is deferred to Phase 10 (10.2) — it reuses the same agent endpoint.
+
+- Wire `strideChat.sendMessage()` IPC bridge (already stubbed in `widget/src/preload.ts:154-157`) to call the new agent API endpoint
+- Main process forwards chat messages to the agent SSE endpoint and streams responses back to the renderer via IPC `chat-response` events
+- Widget `ChatController` becomes a thin wrapper: sends user text → receives streamed agent response → renders messages
 - Natural language processing: agent interprets user messages and takes appropriate actions
   - "I finished the report" → mark task done, adjust schedule
   - "Add a 30-min meeting at 3pm" → create task, reschedule around it
@@ -133,7 +188,7 @@ The schedule is not static — users need to report progress, add tasks, request
   - "What should I do next?" → check schedule, suggest current task
 - Agent modifies schedule with stability-first rescheduling rules
 - Conversation persistence per user per day (`agent_conversations` table)
-- SSE streaming for real-time agent responses in both widget and web app
+- SSE streaming for real-time agent responses in widget
 - Message history UI showing the day's conversation
 
 ### What Not to Do
@@ -141,21 +196,23 @@ The schedule is not static — users need to report progress, add tasks, request
 - Do not build a general-purpose chatbot — the agent is scheduling-focused
 - Do not allow the agent to delete tasks without user confirmation
 - Do not persist conversations across days — each day starts fresh
+- Do not build web app chat UI in this phase — that's Phase 10.2
 
 ---
 
 ## Deliverable
 
-Agentic AI powers schedule building and mid-day interactions. Agent accessible from both the desktop widget and the web app. Hybrid architecture prevents LLM time-math hallucinations. Chat enables natural-language schedule management throughout the day.
+Widget downloadable from homepage and dashboard. Agentic AI powers the widget chatbot and schedule building. Agent reused in Phase 10 for web chatbot. Hybrid architecture prevents LLM time-math hallucinations. Chat enables natural-language schedule management throughout the day.
 
 ---
 
 ## Acceptance Criteria
 
+- Widget DMG downloadable from homepage and dashboard
 - "Build my day" uses LangChain agent with streaming progress
 - Deterministic solver handles all time placement (no LLM time math)
 - Agent respects max iteration guardrail
-- Chat works in both widget and web app
+- Widget chatbot uses live agent (not client-side command parsing)
 - Natural language commands modify the schedule correctly
 - Stability-first rescheduling: minimal changes when modifying existing schedule
 - Conversation persisted per user per day

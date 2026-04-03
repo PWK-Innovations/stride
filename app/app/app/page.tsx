@@ -81,6 +81,9 @@ export default function AppPage() {
     reset: resetRecording,
   } = useAudioRecorder();
 
+  // Widget banner state
+  const [widgetBannerDismissed, setWidgetBannerDismissed] = useState(true);
+
   // Photo modal state
   const [modalPhotoUrl, setModalPhotoUrl] = useState<string | null>(null);
 
@@ -88,6 +91,13 @@ export default function AppPage() {
     fetchTasks();
     fetchGoogleStatus();
     fetchSchedule();
+  }, []);
+
+  useEffect(() => {
+    const dismissed = localStorage.getItem("stride-widget-banner-dismissed");
+    if (dismissed !== "true") {
+      setWidgetBannerDismissed(false);
+    }
   }, []);
 
   const fetchGoogleStatus = async () => {
@@ -359,8 +369,41 @@ export default function AppPage() {
     },
   ]);
 
+  const dismissWidgetBanner = () => {
+    localStorage.setItem("stride-widget-banner-dismissed", "true");
+    setWidgetBannerDismissed(true);
+  };
+
+  const widgetDownloadUrl = process.env.NEXT_PUBLIC_WIDGET_DOWNLOAD_URL || "#";
+
   return (
     <>
+      {/* Widget Download Banner */}
+      {!widgetBannerDismissed && (
+        <div className="mb-8 flex items-center justify-between gap-4 rounded-lg border border-olive-200 bg-olive-50 p-4 shadow-sm dark:border-olive-800 dark:bg-olive-900">
+          <p className="flex-1 text-sm font-medium text-olive-700 dark:text-olive-300">
+            Get the Stride desktop widget — stay on track without leaving your workflow
+          </p>
+          <div className="flex items-center gap-3">
+            <a
+              href={widgetDownloadUrl}
+              className="inline-flex shrink-0 items-center gap-1 rounded-full bg-olive-950 px-3 py-1 text-sm/7 font-medium text-white hover:bg-olive-800 dark:bg-olive-300 dark:text-olive-950 dark:hover:bg-olive-200"
+            >
+              Download for macOS
+            </a>
+            <button
+              onClick={dismissWidgetBanner}
+              className="text-olive-400 hover:text-olive-600 dark:text-olive-500 dark:hover:text-olive-300"
+              aria-label="Dismiss widget banner"
+            >
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Add Task Form */}
       <div className="mb-8 rounded-lg border border-olive-200 bg-white p-6 shadow-sm dark:border-olive-800 dark:bg-olive-900">
         <div className="mb-4 flex items-center justify-between">

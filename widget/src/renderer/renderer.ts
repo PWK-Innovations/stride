@@ -264,6 +264,7 @@ async function init(): Promise<void> {
     }
   });
 
+  chatController.initStreamListeners();
   chatController.seedWelcome();
 
   if (window.strideWidget) {

@@ -7,6 +7,7 @@
     "start": "electron .",
     "dev": "npm run compile && electron . --dev",
     "build": "npm run compile && electron-builder",
+    "dist": "npm run compile && electron-builder --mac dmg",
     "compile": "tsc && npm run bundle:renderer",
     "bundle:renderer": "esbuild src/renderer/renderer.ts --bundle --outfile=dist/renderer.js --platform=browser --target=es2020 --sourcemap"
   },
@@ -23,7 +24,8 @@
     "appId": "com.stride.widget",
     "productName": "Stride Widget",
     "mac": {
-      "category": "public.app-category.productivity"
+      "category": "public.app-category.productivity",
+      "target": ["dmg"]
     },
     "files": [
       "dist/**/*",

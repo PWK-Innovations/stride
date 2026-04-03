@@ -23,16 +23,17 @@ function buildTypingIndicator(): string {
 }
 
 function buildMessage(message: ChatMessage): string {
-  if (message.typing) {
+  if (message.typing && !message.content) {
     return buildTypingIndicator();
   }
 
   const roleClass = message.role === "user" ? "message-user" : "message-assistant";
   const content = escapeHtml(message.content).replace(/\n/g, "<br>");
+  const typingCursor = message.typing ? '<span class="typing-cursor"></span>' : "";
 
   return `
     <div class="message ${roleClass} message-fade-in">
-      <div class="message-content">${content}</div>
+      <div class="message-content">${content}${typingCursor}</div>
     </div>
   `;
 }

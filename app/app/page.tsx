@@ -1,9 +1,12 @@
 import { AnnouncementBadge } from '@/components/elements/announcement-badge'
 import { ButtonLink, PlainButtonLink, SoftButtonLink } from '@/components/elements/button'
+import { Container } from '@/components/elements/container'
 import { EmailSignupForm } from '@/components/elements/email-signup-form'
 import { Link } from '@/components/elements/link'
 import { Main } from '@/components/elements/main'
 import { Screenshot } from '@/components/elements/screenshot'
+import { Subheading } from '@/components/elements/subheading'
+import { Text } from '@/components/elements/text'
 import { ArrowNarrowRightIcon } from '@/components/icons/arrow-narrow-right-icon'
 import { ChevronIcon } from '@/components/icons/chevron-icon'
 import { CallToActionSimple } from '@/components/sections/call-to-action-simple'
@@ -306,6 +309,35 @@ export default function Page() {
           <Stat stat="10k+" text="Tasks scheduled every day across thousands of users." />
           <Stat stat="30 min" text="Average time saved per day." />
         </StatsWithGraph>
+
+        {/* Widget Download */}
+        <section id="widget" className="py-16">
+          <Container className="flex flex-col items-center gap-10 text-center">
+            <div className="flex max-w-3xl flex-col gap-4">
+              <Subheading>Stay in flow with the Stride widget</Subheading>
+              <Text className="text-pretty">
+                <p>
+                  A floating desktop companion that shows your current task, upcoming schedule, and lets you chat with your AI planner — without switching to the browser.
+                </p>
+              </Text>
+            </div>
+            <div className="w-full max-w-3xl overflow-hidden rounded-2xl border border-olive-200 shadow-lg dark:border-olive-800">
+              <img
+                src="/widget-preview.svg"
+                alt="Stride desktop widget preview"
+                width={760}
+                height={480}
+                className="h-auto w-full"
+              />
+            </div>
+            <ButtonLink
+              href={process.env.NEXT_PUBLIC_WIDGET_DOWNLOAD_URL || "#"}
+              size="lg"
+            >
+              Download for macOS
+            </ButtonLink>
+          </Container>
+        </section>
 
         {/* Testimonial */}
         <TestimonialLargeQuote

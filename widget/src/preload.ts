@@ -152,14 +152,35 @@ contextBridge.exposeInMainWorld('strideWidget', {
 
 contextBridge.exposeInMainWorld('strideChat', {
   sendMessage: async (message: string): Promise<string> => {
-    logger.debug('sendMessage called (stub)', { message });
-    return 'Chat is not yet available. This feature is coming in a future update.';
+    logger.debug('sendMessage called', { message });
+    return ipcRenderer.invoke('chat-send-message', message) as Promise<string>;
   },
 
   onResponse: (callback: (response: string) => void): void => {
-    logger.debug('onResponse listener registered (stub)');
+    logger.debug('onResponse listener registered');
     ipcRenderer.on('chat-response', (_, response: string) => {
       callback(response);
+    });
+  },
+
+  onStreamChunk: (callback: (chunk: string) => void): void => {
+    logger.debug('onStreamChunk listener registered');
+    ipcRenderer.on('chat-stream-chunk', (_, chunk: string) => {
+      callback(chunk);
+    });
+  },
+
+  onStreamDone: (callback: () => void): void => {
+    logger.debug('onStreamDone listener registered');
+    ipcRenderer.on('chat-stream-done', () => {
+      callback();
+    });
+  },
+
+  onStreamError: (callback: (error: string) => void): void => {
+    logger.debug('onStreamError listener registered');
+    ipcRenderer.on('chat-stream-error', (_, error: string) => {
+      callback(error);
     });
   },
 });
