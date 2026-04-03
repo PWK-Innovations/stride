@@ -2,7 +2,7 @@
 
 **Date:** 2026-04-01
 **Phase:** 8 - Desktop Widget
-**Status:** In progress
+**Status:** Complete
 **Plan:** `2026-04-01-phase-8-desktop-widget-plan.md`
 **Previous Phase:** `2026-04-01-phase-7-final-project-setup-roadmap.md`
 
@@ -62,7 +62,7 @@
 - [x] Persist preferred mode across sessions (electron-store)
 - [x] Add mode toggle to system tray context menu
 - [x] Update type declarations in `global.d.ts`
-- [ ] Test mode switching does not lose data or break polling
+- [x] Test mode switching does not lose data or break polling
 
 ### 8.5 Chat UI (Gemini-style)
 
@@ -112,74 +112,74 @@
 
 #### Compressed Mode Testing
 
-- [ ] Widget launches in compressed mode by default
-- [ ] Current task title displays correctly in pill (truncated if long)
-- [ ] Countdown timer updates every 60 seconds
-- [ ] "No task right now" shows in muted text when schedule is empty
-- [ ] Clicking expand button transitions to full mode
-- [ ] Entire pill is draggable to any screen position
-- [ ] Dragged position persists after widget restart
+- [x] Widget launches in compressed mode by default
+- [x] Current task title displays correctly in pill (truncated if long)
+- [x] Countdown timer updates every 60 seconds
+- [x] "No task right now" shows in muted text when schedule is empty
+- [x] Clicking expand button transitions to full mode
+- [x] Entire pill is draggable to any screen position
+- [x] Dragged position persists after widget restart
 
 #### Full Mode Testing
 
-- [ ] Full mode opens at correct dimensions (380x620)
-- [ ] Header shows "Stride" branding with compress/close buttons
-- [ ] Current task bar displays at top with task info and countdown
-- [ ] Chat message area is scrollable
-- [ ] Suggestion chips appear in empty chat state
-- [ ] Clicking a suggestion chip sends it as a user message
-- [ ] Chat input accepts text and sends on Enter
-- [ ] User messages appear right-aligned in olive
-- [ ] Assistant responses appear left-aligned in dark card
-- [ ] "Thinking..." indicator shows during processing
-- [ ] Auto-scroll to newest message on arrival
-- [ ] Compress button returns to compressed mode
-- [ ] Close button hides window (tray icon remains active)
+- [x] Full mode opens at correct dimensions (380x620)
+- [x] Header shows "Stride" branding with compress/close buttons
+- [x] Current task bar displays at top with task info and countdown
+- [x] Chat message area is scrollable
+- [x] Suggestion chips appear in empty chat state
+- [x] Clicking a suggestion chip sends it as a user message
+- [x] Chat input accepts text and sends on Enter
+- [x] User messages appear right-aligned in olive
+- [x] Assistant responses appear left-aligned in dark card
+- [x] "Thinking..." indicator shows during processing
+- [x] Auto-scroll to newest message on arrival
+- [x] Compress button returns to compressed mode
+- [x] Close button hides window (tray icon remains active)
 
 #### Chat Command Testing
 
-- [ ] "add groceries" creates a task named "groceries" via API
-- [ ] "what's next" returns formatted next task info
-- [ ] "what's my schedule" returns today's full schedule
-- [ ] "help" / "what can you do" returns capabilities list
-- [ ] Unrecognized input returns helpful fallback message
-- [ ] Task creation failure shows error message in chat
+- [x] "add groceries" creates a task named "groceries" via API
+- [x] "what's next" returns formatted next task info
+- [x] "what's my schedule" returns today's full schedule
+- [x] "help" / "what can you do" returns capabilities list
+- [x] Unrecognized input returns helpful fallback message
+- [x] Task creation failure shows error message in chat
 
 #### Auth Testing
 
-- [ ] Task creation with valid Bearer token succeeds (status 201)
-- [ ] Task creation with empty/missing token returns clear auth error
-- [ ] Widget shows auth status indicator when token is missing
-- [ ] Setting token in widget enables API calls
-- [ ] All 4 API routes accept Bearer token authentication
-- [ ] Cookie auth (web app) continues to work unchanged after changes
+- [x] Task creation with valid Bearer token succeeds (status 201)
+- [x] Task creation with empty/missing token returns clear auth error
+- [x] Widget shows auth status indicator when token is missing
+- [x] Setting token in widget enables API calls
+- [x] All 4 API routes accept Bearer token authentication
+- [x] Cookie auth (web app) continues to work unchanged after changes
 
 #### Integration Testing
 
-- [ ] Create task in widget chat → appears in web app task list
-- [ ] Complete task in web app → disappears from widget on next poll
-- [ ] Mode switch does not interrupt polling cycle
-- [ ] Mode switch does not lose chat message history
-- [ ] Tray menu mode toggle matches actual widget state
-- [ ] Multiple rapid mode switches do not cause layout corruption
+- [x] Create task in widget chat → appears in web app task list
+- [x] Complete task in web app → disappears from widget on next poll
+- [x] Mode switch does not interrupt polling cycle
+- [x] Mode switch does not lose chat message history
+- [x] Tray menu mode toggle matches actual widget state
+- [x] Multiple rapid mode switches do not cause layout corruption
 
 #### Login & Session Testing
 
-- [ ] Login screen appears on first launch (no stored token)
-- [ ] Valid email/password signs in and transitions to widget
-- [ ] Invalid credentials show error message on login screen
-- [ ] Token persists after widget restart (no re-login needed)
-- [ ] Logout clears tokens and returns to login screen
-- [ ] Expired token triggers re-authentication flow
+- [x] Login screen appears on first launch (no stored token)
+- [x] Valid email/password signs in and transitions to widget
+- [x] Invalid credentials show error message on login screen
+- [x] Token persists after widget restart (no re-login needed)
+- [x] Logout clears tokens and returns to login screen
+- [x] Expired token triggers re-authentication flow
 
 #### Edge Case Testing
 
-- [ ] Widget handles backend offline gracefully in both modes
-- [ ] Extremely long task titles truncate properly in both modes
-- [ ] Chat with 50+ messages still scrolls smoothly
-- [ ] Window resize animation does not flicker on macOS
-- [ ] Widget remains responsive during API calls
-- [ ] System sleep/wake does not break widget state or polling
+- [x] Widget handles backend offline gracefully in both modes
+- [x] Extremely long task titles truncate properly in both modes
+- [x] Chat with 50+ messages still scrolls smoothly
+- [x] Window resize animation does not flicker on macOS
+- [x] Widget remains responsive during API calls
+- [x] System sleep/wake does not break widget state or polling
 
 ---
 
@@ -196,16 +196,16 @@
 - [x] `npm run test:all` passes
 - [x] `aiDocs/changelog.md` updated
 - [x] Roadmap tasks checked off
-- [ ] All 8.4/8.5/8.6/8.7 tasks checked off
-- [ ] Compressed mode shows current task in floating pill
-- [ ] Full mode shows Gemini-style chat with suggestion chips
-- [ ] Widget is draggable and position persists
-- [ ] Chat commands create tasks and query schedule
-- [ ] Bearer token auth works for all API routes
-- [ ] Mode switching is smooth with no data loss
-- [ ] All edge cases handled gracefully
-- [ ] Widget login screen works without DevTools
-- [ ] Widget colors match website green (not yellow)
+- [x] All 8.4/8.5/8.6/8.7 tasks checked off
+- [x] Compressed mode shows current task in floating pill
+- [x] Full mode shows Gemini-style chat with suggestion chips
+- [x] Widget is draggable and position persists
+- [x] Chat commands create tasks and query schedule
+- [x] Bearer token auth works for all API routes
+- [x] Mode switching is smooth with no data loss
+- [x] All edge cases handled gracefully
+- [x] Widget login screen works without DevTools
+- [x] Widget colors match website green (not yellow)
 
 ---
 
