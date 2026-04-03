@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
+import { getAuthenticatedUser } from "@/lib/supabase/api-auth";
 import { getDayBoundsInZone } from "@/lib/timezone";
 import { createLogger } from "@/lib/logger";
 
@@ -7,16 +7,11 @@ const logger = createLogger("api:schedule:get");
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
   try {
-    const supabase = await createClient();
-
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
-
-    if (userError || !user) {
-      return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+    const auth = await getAuthenticatedUser(request);
+    if ("error" in auth) {
+      return NextResponse.json({ error: auth.error }, { status: 401 });
     }
+    const { user, supabase } = auth;
 
     const timezone =
       request.nextUrl.searchParams.get("timezone") || "UTC";

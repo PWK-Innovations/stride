@@ -1,0 +1,35 @@
+{
+  "name": "stride-widget",
+  "version": "0.1.0",
+  "description": "Stride desktop widget — floating task viewer and quick-actions",
+  "main": "dist/main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "npm run compile && electron . --dev",
+    "build": "npm run compile && electron-builder",
+    "compile": "tsc && npm run bundle:renderer",
+    "bundle:renderer": "esbuild src/renderer/renderer.ts --bundle --outfile=dist/renderer.js --platform=browser --target=es2020 --sourcemap"
+  },
+  "dependencies": {
+    "electron-store": "^8.2.0"
+  },
+  "devDependencies": {
+    "electron": "^33.0.0",
+    "electron-builder": "^25.0.0",
+    "esbuild": "^0.24.0",
+    "typescript": "^5.5.0"
+  },
+  "build": {
+    "appId": "com.stride.widget",
+    "productName": "Stride Widget",
+    "mac": {
+      "category": "public.app-category.productivity"
+    },
+    "files": [
+      "dist/**/*",
+      "src/index.html",
+      "src/renderer/styles.css",
+      "assets/**/*"
+    ]
+  }
+}

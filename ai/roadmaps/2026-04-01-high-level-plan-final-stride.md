@@ -29,7 +29,7 @@
 
 ### Technical
 
-- [ ] **Final phases implementation** — Make meaningful progress on Phase 7 (Desktop Widget), Phase 8 (Agentic AI), and Phase 9 (Integrations & Web Chatbot). Currently all unchecked. Git history only shows doc updates since midterm.
+- [ ] **Final phases implementation** — Make meaningful progress on Phase 8 (Desktop Widget), Phase 9 (Agentic AI), and Phase 10 (Integrations & Web Chatbot). Phase 7 complete. Phase 8 in progress (8.1-8.3 done, 8.4-8.7 implemented, testing remaining).
 - [ ] **Commit incrementally** — Not one big burst. Check off phase roadmap tasks as completed.
 - [ ] **Update CLAUDE.md** — Align with Casey's slides (behavioral guidance is an explicit sub-criterion in AI Development Infrastructure).
 - [ ] **Prepare live demo** — Test core flow (sign up → add tasks → build schedule → view timeline) on presentation machine
@@ -137,10 +137,10 @@ Phases 0-6 are complete. See `ai/roadmaps/complete/` for detailed plan and roadm
 
 ## Phase 8: Desktop Widget
 
-**Goal:** Build a standalone desktop widget that lives outside the browser — a small, always-accessible popup for mid-day interaction. This is the core differentiator: users stay in flow without switching to a browser tab.
+**Goal:** Build a standalone desktop widget that lives outside the browser — a small, always-accessible popup for mid-day interaction. This is the core differentiator: users stay in flow without switching to a browser tab. Includes two interaction modes (compressed pill + full chatbot), Gemini-style chat UI, and built-in authentication.
 
 ### 8.1 Widget Shell
-- Lightweight Electron (or Tauri) wrapper — small floating window, always on top option
+- Lightweight Electron wrapper — small floating window, always on top option
 - System tray icon; click to open/close the popup
 - Launches on login, minimal footprint
 - Authenticated session stored locally; communicates with the Stride API backend
@@ -157,7 +157,29 @@ Phases 0-6 are complete. See `ai/roadmaps/complete/` for detailed plan and roadm
 - Widget is the condensed daily driver; web app is the full planning view
 - System/toast notifications for schedule changes
 
-**Deliverable:** Standalone desktop widget that shows current task, quick-actions, and text input. Runs outside the browser. Syncs with the main web app.
+### 8.4 Widget Modes (Compressed + Full)
+- Compressed mode: 220x48px floating rounded rectangle showing current task + countdown
+- Full mode: 380x620px window with header, task bar, chat UI, and input
+- Mode switching via IPC, position + mode persistence via electron-store
+- Draggable in both modes, tray menu mode toggle
+
+### 8.5 Chat UI (Gemini-style)
+- Full mode chatbot interface inspired by Google Gemini's popup
+- User/assistant message bubbles, suggestion chips, typing indicator
+- Client-side command parsing: "add [task]", "what's next", "schedule", "help"
+- ChatController manages message state; `strideChat` bridge prepped for Phase 9 agent
+
+### 8.6 Bug Fixes & Auth
+- Bearer token auth added to all API routes (widget sends HTTP, not cookies)
+- Shared `api-auth.ts` utility: checks Bearer token first, falls back to cookie auth
+- Clear 401 error messages in widget API client
+
+### 8.7 Widget Login & Session Management
+- Login screen in widget: email/password form, authenticates directly with Supabase REST API
+- Stores access + refresh tokens in electron-store; auto-authenticates on restart
+- CSP updated for Supabase domain; colors updated to match website green palette
+
+**Deliverable:** Standalone desktop widget with two modes (compressed + full chat), built-in login, Gemini-style chat UI with command parsing, and Bearer token auth. Runs outside the browser. Syncs with the main web app.
 
 ---
 
@@ -303,12 +325,11 @@ These can be added post-beta if validated by users.
 
 ## Next Steps
 
-1. Phases 0–6 are complete (see `ai/roadmaps/complete/`)
-2. **Start Phase 7** (Final Project Setup) — CLAUDE.md, logging, tests, docs aligned with rubric
-3. **Then Phase 8** (Desktop Widget) — standalone Electron/Tauri app, system tray, quick-actions
-4. **Then Phase 9** (Agentic AI) — LangChain agent, hybrid architecture, powers widget + web app
-5. **Then Phase 10** (Integrations) — Outlook Calendar, web chatbot
-6. **Then Phase 11** (Beta Launch) — validate full product with real users
+1. Phases 0–7 are complete (see `ai/roadmaps/complete/`)
+2. **Phase 8 in progress** (Desktop Widget) — shell, UI, sync done; modes, chat UI, login, auth fix implemented; testing remaining
+3. **Next: Phase 9** (Agentic AI) — LangChain agent replaces client-side command parsing in widget chat
+4. **Then Phase 10** (Integrations) — Outlook Calendar, web chatbot
+5. **Then Phase 11** (Beta Launch) — validate full product with real users
 
 ---
 

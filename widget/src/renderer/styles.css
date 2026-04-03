@@ -1,0 +1,840 @@
+/* Stride Widget Styles — Olive Design System (Dark Mode) */
+
+:root {
+  --color-olive: #6B7355;
+  --color-olive-hover: #7E8768;
+  --color-olive-muted: #525A40;
+  --color-bg: #1a1a1a;
+  --color-bg-card: #242424;
+  --color-bg-input: #2a2a2a;
+  --color-text: #f5f5f0;
+  --color-text-muted: #a0a090;
+  --color-border: #3a3a3a;
+  --color-success: #4a8c4a;
+  --color-error: #b04040;
+  --font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  --radius-card: 8px;
+  --radius-button: 6px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-family);
+  font-size: 13px;
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Drag region — frameless window handle */
+.drag-region {
+  -webkit-app-region: drag;
+  height: 16px;
+  width: 100%;
+  flex-shrink: 0;
+}
+
+/* Main layout */
+.widget-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  padding: 0 12px 12px;
+  overflow: hidden;
+}
+
+.widget-scroll {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+}
+
+.widget-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+
+.widget-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.widget-scroll::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 2px;
+}
+
+/* Section spacing */
+.section {
+  margin-bottom: 10px;
+}
+
+.section-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+  margin-bottom: 4px;
+}
+
+/* Card styles */
+.card {
+  background: var(--color-bg-card);
+  border-radius: var(--radius-card);
+  padding: 10px 12px;
+}
+
+.card-highlight {
+  border-left: 3px solid var(--color-olive);
+}
+
+/* Current task */
+.current-task-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 4px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.current-task-countdown {
+  font-size: 12px;
+  color: var(--color-olive-hover);
+  font-weight: 500;
+}
+
+.current-task-empty {
+  color: var(--color-text-muted);
+  font-size: 13px;
+  font-style: italic;
+}
+
+/* Next task */
+.next-task-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.next-task-time {
+  font-size: 11px;
+  color: var(--color-text-muted);
+  margin-top: 2px;
+}
+
+.next-task-empty {
+  color: var(--color-text-muted);
+  font-size: 12px;
+  font-style: italic;
+}
+
+/* Quick action buttons */
+.quick-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.btn {
+  flex: 1;
+  padding: 6px 8px;
+  border: none;
+  border-radius: var(--radius-button);
+  font-family: var(--font-family);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s, opacity 0.15s;
+  white-space: nowrap;
+}
+
+.btn-primary {
+  background: var(--color-olive);
+  color: var(--color-text);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--color-olive-hover);
+}
+
+.btn-secondary {
+  background: var(--color-bg-input);
+  color: var(--color-text-muted);
+  border: 1px solid var(--color-border);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: var(--color-border);
+  color: var(--color-text);
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.btn-loading {
+  position: relative;
+  color: transparent !important;
+}
+
+.btn-loading::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 14px;
+  height: 14px;
+  margin: -7px 0 0 -7px;
+  border: 2px solid transparent;
+  border-top-color: var(--color-text);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Task input */
+.task-input-wrapper {
+  display: flex;
+  gap: 6px;
+}
+
+.task-input {
+  flex: 1;
+  padding: 7px 10px;
+  background: var(--color-bg-input);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-button);
+  color: var(--color-text);
+  font-family: var(--font-family);
+  font-size: 12px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.task-input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.task-input:focus {
+  border-color: var(--color-olive);
+  box-shadow: 0 0 0 1px var(--color-olive);
+}
+
+.task-input-submit {
+  padding: 7px 12px;
+  flex-shrink: 0;
+}
+
+/* Schedule overview */
+.schedule-list {
+  max-height: 160px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+}
+
+.schedule-list::-webkit-scrollbar {
+  width: 4px;
+}
+
+.schedule-list::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.schedule-list::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 2px;
+}
+
+.schedule-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.schedule-item-current {
+  background: rgba(107, 115, 85, 0.15);
+}
+
+.schedule-item-time {
+  color: var(--color-text-muted);
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+  width: 58px;
+}
+
+.schedule-item-title {
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Feedback flashes */
+.feedback {
+  font-size: 11px;
+  text-align: center;
+  padding: 4px 0;
+  border-radius: 4px;
+  animation: fadeInOut 2s ease forwards;
+}
+
+.feedback-success {
+  color: var(--color-success);
+  background: rgba(74, 140, 74, 0.1);
+}
+
+.feedback-error {
+  color: var(--color-error);
+  background: rgba(176, 64, 64, 0.1);
+}
+
+@keyframes fadeInOut {
+  0% { opacity: 0; }
+  15% { opacity: 1; }
+  70% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* Pulse animation for loading states */
+@keyframes pulse {
+  0%, 100% { opacity: 0.6; }
+  50% { opacity: 0.3; }
+}
+
+.loading-skeleton {
+  background: var(--color-bg-input);
+  border-radius: 4px;
+  animation: pulse 1.5s ease-in-out infinite;
+  height: 14px;
+  width: 60%;
+}
+
+/* Empty state container */
+.empty-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px;
+}
+
+/* ============================================================
+   Compressed Mode
+   ============================================================ */
+
+.compressed-container {
+  width: 220px;
+  height: 48px;
+  border-radius: 12px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px 0 16px;
+  -webkit-app-region: drag;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+}
+
+.compressed-task {
+  flex: 1;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.compressed-task-empty {
+  font-weight: 400;
+  font-style: italic;
+  color: var(--color-text-muted);
+}
+
+.compressed-countdown {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--color-olive-hover);
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+
+.compressed-expand {
+  -webkit-app-region: no-drag;
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: color 0.15s, background 0.15s;
+}
+
+.compressed-expand:hover {
+  color: var(--color-text);
+  background: var(--color-bg-input);
+}
+
+/* ============================================================
+   Full Mode Layout
+   ============================================================ */
+
+.full-container {
+  width: 380px;
+  height: 620px;
+  border-radius: 12px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+}
+
+/* Full Header */
+.full-header {
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 12px 0 16px;
+  border-bottom: 1px solid var(--color-border);
+  -webkit-app-region: drag;
+  flex-shrink: 0;
+}
+
+.full-header-brand {
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--color-olive);
+  letter-spacing: -0.01em;
+}
+
+.full-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  -webkit-app-region: no-drag;
+}
+
+.full-header-btn {
+  background: none;
+  border: none;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s, background 0.15s;
+}
+
+.full-header-btn:hover {
+  color: var(--color-text);
+  background: var(--color-bg-input);
+}
+
+/* Task Bar */
+.task-bar {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  border-bottom: 1px solid var(--color-border);
+  flex-shrink: 0;
+  background: var(--color-bg-card);
+}
+
+.task-bar-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+  flex: 1;
+}
+
+.task-bar-empty {
+  font-weight: 400;
+  font-style: italic;
+  color: var(--color-text-muted);
+}
+
+.task-bar-countdown {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--color-olive-hover);
+  flex-shrink: 0;
+  margin-left: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Chat Area Wrapper */
+.chat-area-wrapper {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* Chat Messages */
+.chat-area {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+}
+
+.chat-area::-webkit-scrollbar {
+  width: 4px;
+}
+
+.chat-area::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.chat-area::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 2px;
+}
+
+/* Message Bubbles */
+.message {
+  max-width: 80%;
+  display: flex;
+}
+
+.message-content {
+  padding: 10px 14px;
+  font-size: 13px;
+  line-height: 1.45;
+  word-wrap: break-word;
+  white-space: pre-wrap;
+}
+
+.message-user {
+  align-self: flex-end;
+  justify-content: flex-end;
+}
+
+.message-user .message-content {
+  background: var(--color-olive);
+  color: var(--color-text);
+  border-radius: 16px 16px 4px 16px;
+}
+
+.message-assistant {
+  align-self: flex-start;
+  justify-content: flex-start;
+}
+
+.message-assistant .message-content {
+  background: var(--color-bg-input);
+  color: var(--color-text);
+  border-radius: 4px 16px 16px 16px;
+}
+
+/* Message fade-in animation */
+.message-fade-in {
+  animation: messageFadeIn 0.25s ease-out;
+}
+
+@keyframes messageFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Typing Indicator */
+.typing-dots {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 12px 16px;
+  background: var(--color-bg-input);
+  border-radius: 4px 16px 16px 16px;
+}
+
+.typing-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-text-muted);
+  animation: typingBounce 1.4s infinite ease-in-out;
+}
+
+.typing-dot:nth-child(1) {
+  animation-delay: 0s;
+}
+
+.typing-dot:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.typing-dot:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes typingBounce {
+  0%, 60%, 100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+  30% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
+}
+
+/* ============================================================
+   Suggestion Chips
+   ============================================================ */
+
+.chips-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 8px 16px;
+}
+
+.chip {
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  padding: 6px 14px;
+  font-family: var(--font-family);
+  font-size: 12px;
+  color: var(--color-text-muted);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  white-space: nowrap;
+}
+
+.chip:hover {
+  background: var(--color-bg-input);
+  color: var(--color-text);
+  border-color: var(--color-text-muted);
+}
+
+.chip:active {
+  background: var(--color-border);
+}
+
+/* ============================================================
+   Chat Input
+   ============================================================ */
+
+.chat-input-container {
+  height: 56px;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  border-top: 1px solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.chat-input-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  background: var(--color-bg-input);
+  border: 1px solid var(--color-border);
+  border-radius: 24px;
+  padding: 0 4px 0 14px;
+  transition: border-color 0.15s;
+}
+
+.chat-input-row:focus-within {
+  border-color: var(--color-olive);
+  box-shadow: 0 0 0 1px var(--color-olive);
+}
+
+.chat-input-field {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--color-text);
+  font-family: var(--font-family);
+  font-size: 13px;
+  padding: 8px 0;
+  min-width: 0;
+}
+
+.chat-input-field::placeholder {
+  color: var(--color-text-muted);
+}
+
+.chat-send-btn {
+  background: none;
+  border: none;
+  color: var(--color-olive);
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: color 0.15s, background 0.15s;
+}
+
+.chat-send-btn:hover {
+  color: var(--color-olive-hover);
+  background: rgba(107, 115, 85, 0.1);
+}
+
+/* ============================================================
+   Auth Warning
+   ============================================================ */
+
+.auth-warning {
+  background: rgba(176, 64, 64, 0.15);
+  color: var(--color-error);
+  font-size: 11px;
+  text-align: center;
+  padding: 6px 12px;
+  flex-shrink: 0;
+}
+
+/* ============================================================
+   Login View
+   ============================================================ */
+
+.login-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 300px;
+  text-align: center;
+}
+
+.login-brand {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--color-olive);
+  margin-bottom: 4px;
+}
+
+.login-subtitle {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  margin-bottom: 24px;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.login-input {
+  padding: 10px 14px;
+  background: var(--color-bg-input);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  color: var(--color-text);
+  font-family: var(--font-family);
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.login-input::placeholder {
+  color: var(--color-text-muted);
+}
+
+.login-input:focus {
+  border-color: var(--color-olive);
+  box-shadow: 0 0 0 1px var(--color-olive);
+}
+
+.login-btn {
+  padding: 10px;
+  background: var(--color-olive);
+  color: var(--color-text);
+  border: none;
+  border-radius: 8px;
+  font-family: var(--font-family);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+  margin-top: 4px;
+}
+
+.login-btn:hover:not(:disabled) {
+  background: var(--color-olive-hover);
+}
+
+.login-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.login-error {
+  background: rgba(176, 64, 64, 0.15);
+  color: var(--color-error);
+  font-size: 12px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+
+/* ============================================================
+   Mode Transition
+   ============================================================ */
+
+body {
+  transition: opacity 0.15s ease;
+}

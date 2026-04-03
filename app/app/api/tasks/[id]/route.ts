@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { createClient } from '@/lib/supabase/server';
+import { getAuthenticatedUser } from '@/lib/supabase/api-auth';
 import { friendlyMessage } from '@/lib/errors/friendlyMessage';
 import { createLogger } from '@/lib/logger';
 
@@ -12,15 +12,11 @@ export async function DELETE(
 ) {
   try {
     const { id } = await params;
-    const supabase = await createClient();
-    const {
-      data: { user },
-      error: userError,
-    } = await supabase.auth.getUser();
-
-    if (userError || !user) {
-      return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+    const auth = await getAuthenticatedUser(request);
+    if ('error' in auth) {
+      return NextResponse.json({ error: auth.error }, { status: 401 });
     }
+    const { user, supabase } = auth;
 
     const { error } = await supabase
       .from('tasks')
