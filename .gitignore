@@ -27,6 +27,7 @@ yarn-error.log*
 # local env files
 .env*.local
 .env
+.testEnvVars
 
 # mcp config (contains secrets)
 .mcp.json

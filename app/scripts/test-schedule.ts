@@ -23,7 +23,7 @@ async function main(): Promise<void> {
 
   if (!apiKey) {
     logger.error("Missing OPENAI_API_KEY in .env.local");
-    process.exit(1);
+    process.exit(2);
   }
 
   // Build a test prompt (mirrors buildSchedulePrompt logic)
@@ -150,4 +150,7 @@ ${busyList}
   });
 }
 
-main();
+main().catch((err) => {
+  logger.error("Unexpected error", { error: err instanceof Error ? err.message : String(err) });
+  process.exit(1);
+});

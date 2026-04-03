@@ -1,10 +1,14 @@
 import { NextResponse } from 'next/server';
+import { createLogger } from '@/lib/logger';
+
+const logger = createLogger('api:auth:google');
 
 export async function GET() {
   const clientId = process.env.GOOGLE_CLIENT_ID;
   const redirectUri = process.env.GOOGLE_REDIRECT_URI;
 
   if (!clientId || !redirectUri) {
+    logger.error('Google OAuth not configured — missing GOOGLE_CLIENT_ID or GOOGLE_REDIRECT_URI');
     return NextResponse.json(
       { error: 'Google OAuth not configured' },
       { status: 500 }

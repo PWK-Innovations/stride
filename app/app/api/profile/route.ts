@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createLogger } from "@/lib/logger";
+
+const logger = createLogger("api:profile");
 
 export async function GET(): Promise<NextResponse> {
   const supabase = await createClient();
@@ -22,6 +25,7 @@ export async function GET(): Promise<NextResponse> {
     .single();
 
   if (profileError) {
+    logger.error("Failed to fetch profile", { userId: user.id, error: profileError.message });
     return NextResponse.json(
       { error: "Failed to fetch profile" },
       { status: 500 },

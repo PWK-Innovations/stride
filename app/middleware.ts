@@ -1,5 +1,8 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
+import { createLogger } from '@/lib/logger';
+
+const logger = createLogger('middleware');
 
 export async function middleware(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
@@ -33,6 +36,7 @@ export async function middleware(request: NextRequest) {
 
   // Protect /app routes — redirect to /login if not authenticated
   if (pathname.startsWith('/app') && !user) {
+    logger.debug('Unauthenticated access to protected route', { pathname });
     const url = request.nextUrl.clone();
     url.pathname = '/login';
     return NextResponse.redirect(url);

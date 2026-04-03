@@ -14,12 +14,12 @@ async function main(): Promise<void> {
 
   if (!supabaseUrl || !supabaseKey) {
     logger.error("Missing Supabase env vars in .env.local");
-    process.exit(1);
+    process.exit(2);
   }
 
   if (!clientId || !clientSecret) {
     logger.error("Missing GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET in .env.local");
-    process.exit(1);
+    process.exit(2);
   }
 
   // Find a profile with Google tokens
@@ -66,4 +66,7 @@ async function main(): Promise<void> {
   });
 }
 
-main();
+main().catch((err) => {
+  logger.error("Unexpected error", { error: err instanceof Error ? err.message : String(err) });
+  process.exit(1);
+});

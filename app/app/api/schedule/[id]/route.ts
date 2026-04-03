@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createLogger } from "@/lib/logger";
+
+const logger = createLogger("api:schedule:update");
 
 export async function PATCH(
   request: Request,
@@ -49,6 +52,7 @@ export async function PATCH(
       .eq("id", id);
 
     if (updateError) {
+      logger.error("Failed to update block", { userId: user.id, blockId: id, error: updateError.message });
       return NextResponse.json(
         { error: "Failed to update block" },
         { status: 500 },
@@ -56,7 +60,8 @@ export async function PATCH(
     }
 
     return NextResponse.json({ success: true });
-  } catch {
+  } catch (error: unknown) {
+    logger.error("Unexpected error updating block", { error: error instanceof Error ? error.message : String(error) });
     return NextResponse.json(
       { error: "Failed to update block" },
       { status: 500 },

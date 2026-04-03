@@ -12,7 +12,7 @@ async function main(): Promise<void> {
 
   if (!url || !key) {
     logger.error("Missing NEXT_PUBLIC_SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY in .env.local");
-    process.exit(1);
+    process.exit(2);
   }
 
   const supabase = createClient(url, key);
@@ -40,4 +40,7 @@ async function main(): Promise<void> {
   logger.info("All Supabase tests passed");
 }
 
-main();
+main().catch((err) => {
+  logger.error("Unexpected error", { error: err instanceof Error ? err.message : String(err) });
+  process.exit(1);
+});

@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { createLogger } from '@/lib/logger';
+
+const logger = createLogger('api:test:supabase');
 
 export async function GET() {
   try {
@@ -23,7 +26,8 @@ export async function GET() {
       message: 'Supabase connection successful',
       data,
     });
-  } catch (error) {
+  } catch (error: unknown) {
+    logger.error('Supabase test failed', { error: error instanceof Error ? error.message : String(error) });
     return NextResponse.json(
       { success: false, error: String(error) },
       { status: 500 }

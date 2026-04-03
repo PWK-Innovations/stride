@@ -26,7 +26,7 @@ if [[ -f .testEnvVars ]]; then
   source .testEnvVars
 else
   echo '{"ok":false,"error":".testEnvVars not found"}' >&2
-  exit 1
+  exit 2
 fi
 
 SUPABASE_URL="${NEXT_PUBLIC_SUPABASE_URL}"

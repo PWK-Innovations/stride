@@ -138,3 +138,11 @@ High-level changes; add a line or two here when you commit and push.
 - **Notes:** Created `ai/notes/midterm-feedback.md` (midterm scores: Casey 100, Jason 92, Presentation 70 with detailed feedback).
 - **Context.md Update:** Added references for all new guide files, reference directories, and notes. Updated Current Focus to reflect new phase structure (Phase 7-12).
 - **Alignment Verification:** Cross-checked high-level plan, phase plan/roadmap files, context.md, mvp.md, and prd.md for consistency. Fixed stale "Next Phase" references in Phase 7 files and outdated phase names in context.md.
+- **Phase 7 Complete: Final Project Setup.**
+- **CLAUDE.md Alignment:** Rewrote `stride/CLAUDE.md` with Critical Files to Review (bookshelf pattern), enhanced behavioral guidelines (from Casey's slides: "Don't add features not in the PRD", "Change code as if it was always this way", "This is MVP only"). Updated root `CLAUDE.md` to match — fixed incorrect claim that `ai/` was gitignored.
+- **Structured Logging:** Added `createLogger` to all 9 API routes missing it (`auth/google`, `auth/google/callback`, `profile`, `schedule`, `schedule/[id]`, `tasks`, `tasks/[id]`, `test/openai`, `test/supabase`) and `middleware.ts`. Every catch block now logs with structured context (userId, error). Zero raw `console.*` calls in app code.
+- **Test Scripts:** Fixed exit codes from 1→2 for missing env vars across all 4 TypeScript test scripts and 2 shell scripts (rubric requirement). Added `.catch()` handlers to all TypeScript `main()` calls for clean error output on unexpected failures.
+- **Gitignore:** Added `.testEnvVars` to root `.gitignore` (rubric requirement). Verified no secrets in git history.
+- **Build Fix:** Excluded `scripts/` from `tsconfig.json` to fix build failure caused by `dotenv` types in test scripts.
+- **Skills:** Created 3 Claude Code skills in `.claude/skills/`: `/update-changelog`, `/check-roadmap`, `/refresh-context`. Each has YAML frontmatter + markdown instructions per Unit 5 pattern.
+- **Phase 7 roadmap:** All tasks checked off. Status set to Complete.

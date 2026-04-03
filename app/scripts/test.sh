@@ -22,7 +22,7 @@ if [[ -f .testEnvVars ]]; then
   source .testEnvVars
 else
   echo '{"ok":false,"error":".testEnvVars not found"}'
-  exit 1
+  exit 2
 fi
 
 tests=("test:supabase" "test:openai" "test:google" "test:schedule")

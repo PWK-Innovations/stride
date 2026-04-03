@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server';
 import { openai } from '@/lib/openai/client';
+import { createLogger } from '@/lib/logger';
+
+const logger = createLogger('api:test:openai');
 
 export async function GET() {
   try {
@@ -23,6 +26,7 @@ export async function GET() {
     });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : String(error);
+    logger.error('OpenAI test failed', { error: message });
     return NextResponse.json(
       { success: false, error: message },
       { status: 500 }
