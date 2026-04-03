@@ -8,6 +8,8 @@ These users coordinate tasks, deadlines, meetings, and personal goals across mul
 
 In summary, our daily planning system addresses two connected problems: how people plan their day from competing responsibilities, and how they keep that plan on track as reality changes throughout the day.
 
+**How we got here — the pivot journey:** Stride's original approach was single-shot AI scheduling: users typed tasks, an OpenAI call produced a daily schedule, done. Customer feedback drove the first evolution — voice memos and photo-to-task were added for zero-friction capture (scan a whiteboard, dictate a task while walking). But the deeper insight came from watching how users actually worked: the morning schedule was dead by lunchtime, and requiring a browser tab for every interaction meant users fell back to sticky notes and mental lists. Existing tools — including ChatGPT — require opening a browser and copy-pasting context. This led to the core pivot: (1) replace the single-shot AI with a fully agentic system (multi-step LangChain agent that reasons, uses tools, and adapts the schedule conversationally throughout the day), and (2) build a standalone desktop widget that lives outside the browser — a small, always-on-top window as accessible as checking the clock. The widget makes the agent accessible without context-switching; the agent makes the schedule alive instead of static.
+
 ## 2. Target Users
 
 **Primary Users:** Knowledge workers with unstructured or variable schedules — including freelancers, developers, and remote professionals — who need help deciding what to work on and when, not just a place to store tasks.
@@ -29,10 +31,12 @@ In summary, our daily planning system addresses two connected problems: how peop
 
 **Success Metrics:**
 
-- **Automation Adoption:** Significant reduction in manual planning time vs. the 10% baseline; users rely on AI-generated schedules and AI-driven updates rather than manual slotting.
-- **Retention:** Users return regularly to plan their days rather than abandoning the tool, with the implication that they trust and use the AI-built schedule and updates.
-- **Reliability:** Technical accuracy in calendar syncing and task scheduling duration.
-- **AI Effectiveness:** Schedules and re-schedules produced by AI are perceived as realistic and actionable (e.g., via survey or usage signals: few manual overrides, tasks placed in feasible slots, re-schedules that reflect actual changes). This directly ties to "realistic schedule" and "feedback loops" in the problem statement.
+- **Time Saved (Automation Adoption):** Users save 15–30 min/day in manual planning time compared to their previous workflow. Measured via user self-report surveys comparing time spent planning before and after adopting Stride.
+- **AI Accuracy (AI Effectiveness):** Fewer than 40% of AI-generated schedule slots require manual edits (moves, deletions, or additions). Measured by tracking manual schedule modifications after an AI build.
+- **Schedule Realism:** At least 2/3 of users report the AI-built schedule is realistic and actionable. Measured via in-app survey or beta feedback.
+- **Engagement (Retention):** 50%+ of active users engage with Stride at least 3x/week. Measured by tracking unique active sessions per user per week.
+- **Retention:** Target positive week-over-week retention (users returning the following week). Measured by weekly cohort analysis.
+- **Reliability:** Calendar sync completes without errors in 95%+ of attempts. Scheduled task durations and placements are conflict-free.
 
 ## 4. Key Features (P0, P1, P2)
 
@@ -41,26 +45,24 @@ In summary, our daily planning system addresses two connected problems: how peop
 - Next.js website architecture and routing
 - User authentication system
 - Calendar view component
-- Task input/management interface
+- Task input/management interface (text, photo-to-task, voice memos)
 - Responsive design for web and mobile
 
-**P1: Core Automation & AI**
+**P1: Core Automation, Agentic AI & Desktop Widget**
 
-- Calendar integration (Google Calendar for MVP; Outlook Calendar as second provider)
-- AI-powered schedule construction algorithm
-- Automated time slot allocation based on priorities and deadlines
+- Calendar integration (Google Calendar + Outlook Calendar)
 - Agentic AI scheduling system (LangChain): multi-step reasoning, tool use, error recovery, and conversational interaction for schedule building and mid-day adjustments
-- Dynamic re-scheduling with stability buffer: when plans change, prefer minimal adjustments (cut or defer low-priority tasks) over cascading ripple effects across the entire day. Optimize for psychological comfort, not perfect time utilization — constant reshuffling creates "moving goalpost" anxiety, especially for ADHD users who need anchoring
 - Hybrid scheduling architecture: LLM handles reasoning, intent, and priority decisions (natural language → structured JSON); deterministic constraint logic handles actual time placement and conflict detection (no LLM time-math hallucinations)
-- Goal incorporation into scheduling logic
+- Dynamic re-scheduling with stability buffer: when plans change, prefer minimal adjustments (cut or defer low-priority tasks) over cascading ripple effects across the entire day. Optimize for psychological comfort, not perfect time utilization — constant reshuffling creates "moving goalpost" anxiety, especially for ADHD users who need anchoring
+- Desktop widget: standalone Electron/Tauri window, system tray icon, current task display with time remaining, quick-action buttons (done, skip, running late), text input for agent interaction
+- Chat modal on web app for fuller agent interaction (sliding panel, conversational scheduling)
+- SSE streaming for real-time agent progress (thinking, tool calls, result) in both widget and web app
 
 **P2: Enhanced User Experience**
 
-- Chat modal / sliding panel for conversational agent interaction (quick task adds, progress updates, "what should I do next?", rescheduling requests)
-- Real-time progress tracking and updates
+- Goal incorporation into scheduling logic
 - Personalization loop: the agent learns user patterns over time (e.g., user consistently underestimates deep work by 20%, is more productive in mornings, always skips afternoon tasks) and auto-adjusts future schedules accordingly — duration padding, optimal slot placement, realistic capacity estimates
-- Break preservation and flexibility features
-- Task prompts and proactive focus guidance ("You have 45 minutes before your next meeting — good time to tackle X")
+- Proactive focus guidance ("You have 45 minutes before your next meeting — good time to tackle X")
 - Future integrations: Todoist task import, Slack notifications and slash commands
 
 ## 5. User Stories
@@ -71,6 +73,8 @@ In summary, our daily planning system addresses two connected problems: how peop
 - As someone with ADHD, I want the app to tell me what to work on next and when to start, so I don't get stuck in decision paralysis between tasks.
 - As a developer, I want to snap a photo of my whiteboard standup notes and have them become scheduled tasks, so I can go straight from standup to focused work.
 - As a busy worker, I want to tell the chat "I finished early" or "I'm running late" and have the schedule adjust automatically, so the plan stays useful all day.
+- As a developer in a flow state, I want to glance at a small desktop widget to see my next task without switching to a browser tab.
+- As a freelancer between calls, I want to tap "Done" on the widget and immediately see what's next, so I never lose momentum.
 - As a goal-oriented individual, I want my daily schedule to help me achieve my specific life goals (social, academic, professional).
 - As an overwhelmed user, I want my schedule to include breaks automatically so the plan remains realistic and achievable.
 
@@ -92,6 +96,7 @@ In summary, our daily planning system addresses two connected problems: how peop
 - **Stability-first rescheduling**: When plans change, the agent prefers minimal, calm adjustments — cutting or deferring a low-priority task rather than ripple-shuffling the entire afternoon. Competitors like Motion are notorious for anxiety-inducing reshuffles; Stride respects the user's need for anchoring.
 - **Personalization over time**: The agent learns how you actually work — if you always underestimate deep work or skip afternoon tasks, future schedules adapt. This is the feature worth paying for monthly.
 - **Multi-calendar support**: Google Calendar and Outlook Calendar — covers both personal and enterprise users (Reclaim is Google-only).
+- **Always-accessible desktop widget:** Not another browser tab. A small, standalone window that lives on your desktop — check your current task, mark it done, add a new one, or ask "what's next?" without leaving what you're working on. ChatGPT requires opening a browser and copy-pasting context. Motion and Reclaim live in browser tabs. Stride's widget is as accessible as checking the clock.
 
 ## 7. Out of Scope
 
@@ -118,8 +123,11 @@ In summary, our daily planning system addresses two connected problems: how peop
 - **Risk:** The agentic AI system produces unpredictable or runaway behavior (e.g., infinite loops, unexpected calendar modifications).  
   **Mitigation:** Enforce guardrails: maximum iteration count per agent run, user confirmation before any external writes (Google/Outlook Calendar), scope agent to today's data only, and log all agent actions for debugging.
 
-- **Risk:** Broadening target audience dilutes the product and makes it generic.  
+- **Risk:** Broadening target audience dilutes the product and makes it generic.
   **Mitigation:** Keep the core loop tight (tasks in, schedule out, agent adapts). Target users share the same fundamental need (unstructured time + decision fatigue); features serve all segments without segment-specific customization.
+
+- **Risk:** Desktop widget adds cross-platform complexity (Electron/Tauri packaging, native OS differences, auto-update).
+  **Mitigation:** Start with a single platform (macOS or Windows) for MVP. Use Electron for faster iteration; consider Tauri later for smaller binary size. Widget is a thin client — all logic lives in the API backend.
 
 ## 9. Pricing and Go-to-Market (High-Level)
 
@@ -135,6 +143,6 @@ In summary, our daily planning system addresses two connected problems: how peop
 
 ## 10. Timeline and Milestones
 
-- **Milestone 1 (P0 — Foundation & UI):** Next.js app layout, routing, auth, calendar view component, task input/management UI, and responsive design. Ship a working website users can open and navigate.
-- **Milestone 2 (P1 — Core Automation & AI):** Calendar integration (Google Calendar + Outlook), agentic AI scheduling system (LangChain) with multi-step reasoning and conversational interaction, automated time slot allocation, dynamic re-scheduling. Users get an AI-built daily schedule tied to their real calendar and can interact with the agent to keep it on track.
-- **Milestone 3 (P2 — Enhanced UX):** Chat modal for agent interaction (quick updates, progress reporting, "what's next?" guidance), real-time progress tracking, AI feedback loop from user progress, break preservation, and proactive task prompts. Future: Todoist import, Slack integration.
+- **Milestone 1 (P0 — Foundation & UI):** Next.js app layout, routing, auth, calendar view component, task input/management UI (text, photo-to-task, voice memos), and responsive design. Ship a working website users can open and navigate.
+- **Milestone 2 (P1 — Core Automation, Agentic AI & Desktop Widget):** Calendar integration (Google Calendar + Outlook Calendar), agentic AI scheduling system (LangChain) with multi-step reasoning and hybrid architecture (LLM reasoning + deterministic solver), desktop widget (standalone Electron/Tauri window, system tray, current task display, quick actions, agent text input), chat modal on web app, SSE streaming for real-time agent progress. Users get an AI-built daily schedule and can interact with the agent from both the widget and the web app.
+- **Milestone 3 (P2 — Enhanced UX):** Goal incorporation into scheduling, personalization loop (learn user patterns, auto-adjust), proactive focus guidance. Future: Todoist import, Slack integration.

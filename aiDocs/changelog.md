@@ -4,11 +4,18 @@ High-level changes; add a line or two here when you commit and push.
 
 ---
 
-## 2026-04-01
+## 2026-02-22
 
-- **Product Direction Pivot:** Broadened target users to knowledge workers (freelancers, devs, remote professionals, ADHD, students). Added agentic AI (LangChain), Outlook Calendar, stability-first rescheduling, hybrid architecture. Cofounder discussion in `ai/notes/feedback-discussion.md`.
-- **Docs Updated:** PRD (problem statement, users, differentiators, stories, GTM), MVP (agent + chat modal + Outlook scope), Architecture (`calendar_tokens` table, `agent_conversations`, SSE streaming, constraint solver, env vars), Context.md (simplified), CLAUDE.md (simplified to behavioral guidelines).
-- **Phase Restructure:** New Phase 7 (Agentic AI & Multi-Calendar) and Phase 8 (Chat Modal & Dynamic Updates). Old phases 7-9 renumbered to 9-11. Created 10 new plan+roadmap docs. Dynamic calendar updates absorbed into Phase 8 chat/quick-actions.
+- **Auth Infrastructure (Phase 0.4):** Rewrote `lib/supabase/client.ts` to use `createBrowserClient` from `@supabase/ssr` (replaced singleton). Rewrote `lib/supabase/server.ts` to use `createServerClient` with `next/headers` cookie handling; kept `supabaseAdmin` export. Created `lib/supabase/auth.ts` with signUp, signIn, signOut, getSession, onAuthStateChange helpers.
+- **Middleware:** Created `middleware.ts` to protect `/app/*` routes (redirects to `/login`), and redirect `/login` & `/signup` to `/app` if already logged in.
+- **API Route Updates:** Updated all 5 API routes (`tasks`, `tasks/[id]`, `schedule/build`, `auth/google/callback`, `test/supabase`) to use per-request `createClient()` from server.ts instead of singleton. Fixed `params` type in `tasks/[id]` to `Promise` for Next.js 16.
+- **Login Page:** Created `app/login/page.tsx` — olive-themed sign-in form with email/password, "Remember me" checkbox, "Forgot password?" link, "Or continue with Google" button, error messages, link to signup.
+- **Signup Page:** Created `app/signup/page.tsx` — olive-themed sign-up form with email/password/confirm, "Or continue with Google" button, validation, link to login.
+- **Dashboard Layout:** Created `app/app/layout.tsx` (server component reading session) and `components/features/DashboardShell.tsx` — sidebar layout adapted from Tailwind reference with olive-900 sidebar, mobile slide-out drawer (HeadlessUI), desktop fixed sidebar, profile dropdown with sign out. Updated `app/app/page.tsx` to remove redundant wrapper/header.
+- **Database:** Created all tables (profiles, tasks, scheduled_blocks) with RLS policies and indexes via Supabase MCP. Created profile auto-creation trigger (`handle_new_user`). Fixed `update_updated_at_column` function search path per security advisor.
+- **Dependencies:** Installed `@supabase/ssr`, `@headlessui/react`, `@heroicons/react`.
+- **Supabase MCP:** Configured Supabase MCP server for direct database access from Claude Code.
+- **Roadmaps:** Moved Phase 0 and Phase 1 roadmaps to `ai/roadmaps/complete/`.
 
 ## 2026-02-23
 
@@ -33,22 +40,6 @@ High-level changes; add a line or two here when you commit and push.
   - Each phase has a plan doc (implementation details) and roadmap doc (task checklist) that reference each other.
 - **Alignment review:** Fixed context.md (##Behavior → ## Behavior; removed stray `|`; ai/changelog.md → aiDocs/changelog.md). Added "Guides & Roadmaps" section in context.md pointing to ai/guides and ai/roadmaps. Created Phase 6 (Secondary Features) and Phase 7 (Scale & Monetization) plan and roadmap docs so all phases have sub-plans. Updated main implementation plan Next Steps to reference phase docs.
 - **Phase 0-2 Complete:** Implemented full MVP through Phase 2. Next.js app running at localhost:3001 with home, pricing, about, and app pages. All components from oatmeal-olive-instrument template copied and adapted. Task CRUD, AI scheduling, timeline view, PWA, and notifications all implemented. Roadmaps updated with checkboxes.
-
-## 2026-02-22
-
-- **Auth Infrastructure (Phase 0.4):** Rewrote `lib/supabase/client.ts` to use `createBrowserClient` from `@supabase/ssr` (replaced singleton). Rewrote `lib/supabase/server.ts` to use `createServerClient` with `next/headers` cookie handling; kept `supabaseAdmin` export. Created `lib/supabase/auth.ts` with signUp, signIn, signOut, getSession, onAuthStateChange helpers.
-- **Middleware:** Created `middleware.ts` to protect `/app/*` routes (redirects to `/login`), and redirect `/login` & `/signup` to `/app` if already logged in.
-- **API Route Updates:** Updated all 5 API routes (`tasks`, `tasks/[id]`, `schedule/build`, `auth/google/callback`, `test/supabase`) to use per-request `createClient()` from server.ts instead of singleton. Fixed `params` type in `tasks/[id]` to `Promise` for Next.js 16.
-- **Login Page:** Created `app/login/page.tsx` — olive-themed sign-in form with email/password, "Remember me" checkbox, "Forgot password?" link, "Or continue with Google" button, error messages, link to signup.
-- **Signup Page:** Created `app/signup/page.tsx` — olive-themed sign-up form with email/password/confirm, "Or continue with Google" button, validation, link to login.
-- **Dashboard Layout:** Created `app/app/layout.tsx` (server component reading session) and `components/features/DashboardShell.tsx` — sidebar layout adapted from Tailwind reference with olive-900 sidebar, mobile slide-out drawer (HeadlessUI), desktop fixed sidebar, profile dropdown with sign out. Updated `app/app/page.tsx` to remove redundant wrapper/header.
-- **Database:** Created all tables (profiles, tasks, scheduled_blocks) with RLS policies and indexes via Supabase MCP. Created profile auto-creation trigger (`handle_new_user`). Fixed `update_updated_at_column` function search path per security advisor.
-- **Dependencies:** Installed `@supabase/ssr`, `@headlessui/react`, `@heroicons/react`.
-- **Supabase MCP:** Configured Supabase MCP server for direct database access from Claude Code.
-- **Roadmaps:** Moved Phase 0 and Phase 1 roadmaps to `ai/roadmaps/complete/`.
-
-## 2026-02-23
-
 - **Phase 2: PWA & Hosting (code complete).**
 - **Structured Logger:** Created `lib/logger.ts` — `createLogger(context)` factory with info/warn/error levels. JSON output in production, readable format in dev. Integrated into schedule build route, Google refresh/calendar, OpenAI engine, and notifications.
 - **PWA Icons:** Generated olive-themed "S" lettermark icons (192px, 512px, 180px for iOS, 32px favicon). Removed placeholder `.txt` files.
@@ -128,3 +119,22 @@ High-level changes; add a line or two here when you commit and push.
 - **Build Script Fix:** Fixed `build.sh` millisecond timing on macOS (replaced GNU `date +%s%3N` with portable `python3` fallback).
 - **Phase 6 complete.** All 6.1/6.2/6.3 tasks checked off, roadmap updated.
 - **Roadmaps:** Moved Phase 5 and Phase 6 plan + roadmap docs to `ai/roadmaps/complete/`.
+
+## 2026-04-01
+
+- **Product Direction Pivot:** Broadened target users to knowledge workers (freelancers, devs, remote professionals, ADHD, students). Added agentic AI (LangChain), Outlook Calendar, stability-first rescheduling, hybrid architecture. Cofounder discussion in `ai/notes/feedback-discussion.md`.
+- **PRD Updates:** Added pivot journey narrative (Section 1). Quantified success metrics with hard numbers — 15-30 min/day saved, <40% manual edits, 2/3 report realistic schedule, 50%+ engage 3x/week, 95%+ calendar sync reliability (Section 3). Moved desktop widget and chat modal to P1, goals and personalization to P2. Added widget user stories. Added desktop widget as differentiator vs. browser-based tools.
+- **MVP Updates:** Added desktop widget as MVP-critical scope (Electron/Tauri wrapper, system tray, current task display, quick-actions, agent text input). Added evolution narrative explaining pivot from single-shot to agentic AI + widget. Expanded agent interaction section to cover both web chat modal and widget. Added validation point 7 (widget differentiates from browser-based tools). Added widget checklist items.
+- **Other Docs Updated:** Architecture (`calendar_tokens` table, `agent_conversations`, SSE streaming, constraint solver, env vars), Context.md (simplified), CLAUDE.md (simplified to behavioral guidelines).
+
+## 2026-04-03
+
+- **Phase Restructure:** Added Phase 7 (Final Project Setup) and shifted all phases down. New structure: Phase 7 (Final Project Setup) → Phase 8 (Desktop Widget) → Phase 9 (Agentic AI) → Phase 10 (Integrations & Web Chatbot) → Phase 11 (Beta Launch) → Phase 12 (Secondary Features). Created 12 new plan + roadmap docs for phases 7-12. Deleted old phase files from previous structure.
+- **High-Level Plan:** Rewrote `ai/roadmaps/2026-04-01-high-level-plan-final-stride.md` with comprehensive final to-do checklist (cross-referenced against rubric + midterm feedback), updated phase descriptions, dependencies, and success criteria. Moved old high-level plan (`2026-02-08-stride-high-level-plan.md`) to `ai/roadmaps/complete/`.
+- **Final To-Do Checklist:** Created `ai/notes/final-to-do-checklist.md` — comprehensive submission checklist covering product design, technical, final checks, and artifacts, cross-referenced against `ai/guides/final-rubric.md` and `ai/notes/midterm-feedback.md`.
+- **MVP Update:** Removed Task Backlog from secondary features (not in PRD, out of scope).
+- **Guides Reorganization:** Moved API reference guides from `ai/guides/` to `ai/guides/external/` (google-calendar, openai, supabase). Renamed `testing.md` to `logging-testing.md`. Added new guides: `final-rubric.md`, `midterm-rubric.md`, `presentation.md`.
+- **Reference Materials:** Added `ai/guides/reference/class/` (agentic-development + business-development lecture notes), `ai/guides/reference/stride-agent/` (standalone LangChain agent reference implementation), `ai/guides/reference/tailwind-components/` (sideBarLayout, signIn templates). Added `aiDocs/stride-agent/` as agent reference implementation.
+- **Notes:** Created `ai/notes/midterm-feedback.md` (midterm scores: Casey 100, Jason 92, Presentation 70 with detailed feedback).
+- **Context.md Update:** Added references for all new guide files, reference directories, and notes. Updated Current Focus to reflect new phase structure (Phase 7-12).
+- **Alignment Verification:** Cross-checked high-level plan, phase plan/roadmap files, context.md, mvp.md, and prd.md for consistency. Fixed stale "Next Phase" references in Phase 7 files and outdated phase names in context.md.

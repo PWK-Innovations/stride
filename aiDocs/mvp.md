@@ -3,8 +3,9 @@
 ## Context
 
 - **PRD Reference:** `prd.md` (same folder)
-- **Core idea:** A working Next.js web app (also a PWA) where you add tasks (text, photos, voice) and an agentic AI builds and maintains your daily calendar — not just once in the morning, but throughout the day as plans change.
+- **Core idea:** A working Next.js web app (also a PWA) and a **standalone desktop widget** where you add tasks (text, photos, voice) and an agentic AI builds and maintains your daily calendar — not just once in the morning, but throughout the day as plans change. The desktop widget provides always-accessible interaction outside the browser.
 - **Target users:** Knowledge workers with unstructured or variable schedules (freelancers, developers, remote professionals), busy college students, and individuals with ADHD or executive function challenges.
+- **Evolution:** Stride started as a basic AI scheduling app (text tasks → single-shot OpenAI call → daily schedule). Customer feedback drove two additions: voice memos and photo-to-task for zero-friction capture. The deeper insight was that a one-shot schedule isn't enough — the plan dies mid-day, and requiring a browser tab kills quick interactions. This led to the pivot: fully agentic AI (multi-step LangChain agent, conversational, adapts throughout the day) + a standalone desktop widget (always accessible, lives outside the browser).
 
 ---
 
@@ -18,8 +19,9 @@ This is NOT a production-ready product. This is a demo to validate:
 2. Task input (text, photos, voice) flows smoothly into schedule construction
 3. Users can successfully complete the core flow on web and mobile
 4. The calendar integration (Google + Outlook) provides useful context for AI placement
-5. The agentic AI system can reason through multi-step scheduling decisions and adapt the schedule conversationally throughout the day
+5. The agentic AI system (pivoted from single-shot OpenAI to multi-step LangChain agent) can reason through scheduling decisions and adapt the schedule conversationally throughout the day
 6. The hybrid architecture (LLM for reasoning, deterministic solver for time placement) produces reliable, conflict-free schedules
+7. The desktop widget provides always-accessible interaction outside the browser, differentiating from browser-based chat tools like ChatGPT
 
 ---
 
@@ -30,7 +32,8 @@ This is NOT a production-ready product. This is a demo to validate:
 - Add, list, delete tasks
 - Calendar integration: Google Calendar + Outlook Calendar (read-only)
 - "Plan my day" — agentic AI builds a daily schedule from tasks + calendar using multi-step reasoning
-- Chat modal for mid-day agent interaction (report progress, add tasks, request rescheduling)
+- Agent interaction via web chat modal AND desktop widget (report progress, add tasks, request rescheduling)
+- Desktop widget (Electron or Tauri): standalone always-on-top window with system tray, current task display, quick-action buttons, text input — syncs with web app via shared backend
 - Daily timeline view with scheduled tasks and calendar events
 - Supabase backend: auth, database, photo storage
 - Hybrid AI architecture: LangChain agent (reasoning/intent) + deterministic constraint solver (time placement)
@@ -59,12 +62,26 @@ This is NOT a production-ready product. This is a demo to validate:
 - **Hybrid architecture:** The LangChain agent handles reasoning (priority, ordering, dependencies); a deterministic solver handles time placement (no LLM time-math hallucinations).
 - **Output:** A daily view with tasks placed in time. When tasks can't all fit, the agent proactively suggests what to defer or drop rather than silently overloading.
 
-**Chat modal for mid-day updates**
+**Desktop widget**
 
-- **Persistent chat icon** opens a modal/sliding panel for conversational interaction with the scheduling agent.
-- Users can report progress ("I finished the report early"), add tasks ("add groceries, 30 min"), report delays ("I'm running 20 minutes behind"), or ask for guidance ("what should I do next?").
+- Standalone Electron (or Tauri) wrapper — small floating window, always-on-top option
+- System tray icon; click to open/close
+- Current task display with time remaining
+- Next-up task preview
+- Quick-action buttons: mark done, skip, running late
+- Text input for adding tasks or messaging the agent
+- Compact schedule overview
+- Authenticated session stored locally; communicates with the Stride API backend
+- Widget and web app share the same backend — changes in either reflect immediately
+
+**Agent interaction (web + widget)**
+
+- The same agentic AI powers both the web chat modal and the desktop widget.
+- **Web chat modal:** Persistent chat icon opens a modal/sliding panel for fuller conversational interaction with the scheduling agent.
+- **Desktop widget:** The quick, always-accessible surface — type a message, tap a quick-action button, or glance at your current task without opening a browser.
+- Users can report progress ("I finished the report early"), add tasks ("add groceries, 30 min"), report delays ("I'm running 20 minutes behind"), or ask for guidance ("what should I do next?") from either surface.
 - The agent processes updates and adjusts the schedule with stability-first rescheduling — minimal changes over cascade reshuffles.
-- The "Build my day" button remains for the initial morning schedule; the chat modal is for throughout-the-day interaction.
+- The "Build my day" button remains for the initial morning schedule; the chat modal and widget are for throughout-the-day interaction.
 
 **Persistence**
 
@@ -83,12 +100,6 @@ These are important but not required for "we have a working app that builds my d
 
 - The agent **learns user patterns over time** (e.g. user consistently underestimates deep work by 20%, is more productive in mornings, always skips afternoon tasks).
 - Future schedules auto-adjust: duration padding, optimal slot placement, realistic capacity estimates.
-
-**Task Backlog**
-
-- Users can maintain a **backlog** of tasks that aren't scheduled for today.
-- When today's tasks are finished early, the AI can pull from the backlog to fill remaining time.
-- Tasks not scheduled on a given day stay in the backlog for future days.
 
 **Future Integrations**
 
@@ -133,6 +144,15 @@ These are important but not required for "we have a working app that builds my d
 
 This keeps the schedule alive throughout the day via conversation rather than discrete button presses.
 
+### Flow 3: Desktop Widget (Quick Access)
+
+1. Widget lives in system tray — click to open floating window
+2. See current task + time remaining at a glance
+3. Quick actions: tap "Done", "Skip", or "Running late"
+4. Type natural language: "add groceries, 30 min" or "what's next?"
+5. Agent processes and updates schedule — widget reflects changes immediately
+6. Changes sync to web app in real time
+
 ---
 
 ## Validation
@@ -143,6 +163,7 @@ This keeps the schedule alive throughout the day via conversation rather than di
 - **Task input:** We can add tasks (text and photos) and see them in a list.
 - **Build my day:** One action builds a daily calendar; we see tasks in time slots and calendar busy blocks.
 - **Usable on phone:** Layout and "Build my day" work on a phone; we'd actually use it.
+- **Desktop widget:** Runs standalone outside the browser and stays in sync with the web app.
 
 ### Checklist
 
@@ -154,6 +175,9 @@ This keeps the schedule alive throughout the day via conversation rather than di
 - [ ] Chat modal allows mid-day agent interaction (add task, report progress, request reschedule).
 - [ ] Agent rescheduling uses stability-first approach (minimal changes, not cascade reshuffles).
 - [ ] Outlook Calendar integration works alongside Google Calendar.
+- [ ] Desktop widget installs and runs outside the browser.
+- [ ] Widget shows current task and allows quick actions.
+- [ ] Widget syncs with web app (changes in one appear in the other).
 
 ---
 
@@ -165,6 +189,7 @@ This keeps the schedule alive throughout the day via conversation rather than di
 | **Input** | Tasks (text, photos, voice); add / list / delete | — |
 | **Output** | Agentic AI builds daily calendar from tasks + calendar (Google + Outlook) | — |
 | **Agent Chat** | Chat modal for mid-day updates (progress, new tasks, rescheduling) | — |
+| **Widget** | Standalone desktop widget (system tray, current task, quick actions, agent input) | — |
 | **Extra** | — | Goals; personalization loop; Todoist/Slack integrations |
 
-**In one line:** We have a Next.js web app (also a PWA) where you input tasks (text/photos/voice), an agentic AI builds your daily calendar, and a chat modal lets you interact with the agent throughout the day to keep your schedule on track.
+**In one line:** We have a Next.js web app (also a PWA) and a standalone desktop widget where you input tasks (text/photos/voice), an agentic AI builds your daily calendar, and a chat modal or widget lets you interact with the agent throughout the day — the widget provides always-accessible agent interaction outside the browser.

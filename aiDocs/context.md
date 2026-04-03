@@ -26,8 +26,15 @@ Built for knowledge workers with unstructured schedules — freelancers, develop
 | `aiDocs/coding-style.md` | Code conventions (TypeScript, Tailwind, naming) | Before writing code |
 | `aiDocs/changelog.md` | High-level change log | After pushing changes |
 | `ai/guides/reference/oatmeal-olive-instrument/` | Design system template (olive palette, Instrument Serif, Inter) | Before UI work |
-| `ai/guides/` | API references (OpenAI, Google Calendar, Supabase) | During implementation |
+| `ai/guides/final-rubric.md` | Final grading rubric — scoring criteria, required elements, evidence checklist | Before any submission prep |
+| `ai/guides/midterm-rubric.md` | Midterm grading rubric | For reference on midterm expectations |
+| `ai/guides/presentation.md` | Presentation planning and structure | Before building slides |
+| `ai/guides/logging-testing.md` | Logging and testing patterns guide | Before writing tests or logging |
+| `ai/guides/external/` | API references (OpenAI, Google Calendar, Supabase) | During implementation |
+| `ai/guides/reference/` | Design system (`oatmeal-olive-instrument/`), class notes, stride-agent docs, Tailwind components | Before UI or agent work |
 | `ai/roadmaps/` | High-level plan + phase plans/roadmaps (7-11 active); `complete/` for phases 0-6 | Before starting a phase |
+| `ai/notes/final-to-do-checklist.md` | Final to-do checklist cross-referenced against rubric and midterm feedback | For tracking remaining work |
+| `ai/notes/midterm-feedback.md` | Midterm feedback from Jason (92), Casey (100), Presentation (70) | For understanding gaps to address |
 | `ai/notes/feedback-discussion.md` | Cofounder pivot decisions (2026-04-01) | For context on product direction |
 
 ## App Structure (`app/` directory)
@@ -50,6 +57,10 @@ Built for knowledge workers with unstructured schedules — freelancers, develop
 ## Current Focus
 
 - Phases 0-6 complete (Foundation through Code Quality & Security).
-- Next: Phase 7 — Agentic AI & Multi-Calendar (LangChain agent, chat modal, Outlook Calendar, hybrid scheduling architecture).
-- Then: Phase 8 — Beta Launch.
+- Next: Phase 7 — Final Project Setup (CLAUDE.md, structured logging, tests, living docs aligned with rubric).
+- Then: Phase 8 — Desktop Widget (Electron/Tauri widget, system tray, quick-actions).
+- Then: Phase 9 — Agentic AI (LangChain agent, hybrid scheduling, chat interactions).
+- Then: Phase 10 — Integrations & Web Chatbot (Outlook Calendar, web chatbot).
+- Then: Phase 11 — Beta Launch (5-10 users, analytics, feedback).
+- Then: Phase 12 — Secondary Features (goals, personalization loop).
 - PRD/MVP/Architecture updated 2026-04-01 to reflect broadened target users, agentic AI, and multi-calendar support.
