@@ -185,9 +185,14 @@ Phases 0-6 are complete. See `ai/roadmaps/complete/` for detailed plan and roadm
 
 ## Phase 9: Agentic AI
 
-**Goal:** Replace single-shot OpenAI scheduling with a LangChain agent. Hybrid architecture: LLM for reasoning, deterministic solver for time placement. Agent powers both the web app and the desktop widget.
+**Goal:** Distribute the desktop widget for download. Replace single-shot OpenAI scheduling with a LangChain agent tailored to the widget chatbot. Hybrid architecture: LLM for reasoning, deterministic solver for time placement. Agent reused in Phase 10 for web chatbot.
 
 **Reference implementation:** `aiDocs/stride-agent/` — a standalone Next.js agent already built with LangChain/LangGraph ReAct pattern, GPT-4o, 4 tools (calculator, web search, RAG knowledge base, Google Calendar), SSE streaming (`/api/chat`), session-based conversation memory, and Pino structured logging. This phase integrates that agent pattern into the main Stride app with scheduling-specific tools.
+
+### 9.0 Widget Distribution & Download
+- Build macOS DMG with electron-builder, host on GitHub Releases
+- Homepage section promoting the widget with download CTA
+- Dashboard dismissible banner prompting widget download
 
 ### 9.1 LangChain Agent Infrastructure
 - Adapt the ReAct agent from `aiDocs/stride-agent/` (uses `createReactAgent` from LangGraph, GPT-4o at temperature 0)
@@ -206,13 +211,15 @@ Phases 0-6 are complete. See `ai/roadmaps/complete/` for detailed plan and roadm
 - SSE streaming endpoint for agent progress (thinking, tool calls, result)
 - Frontend and widget both show real-time agent status during schedule build
 
-### 9.4 Chat & Mid-Day Interactions
-- Natural language via widget or web app: progress updates, new tasks, rescheduling, guidance ("what's next?")
+### 9.4 Chat & Mid-Day Interactions (Widget Chatbot)
+- Primary target: widget chatbot — agent replaces `ChatController.processCommand()`
+- Wire `strideChat.sendMessage()` IPC to agent SSE endpoint; stream responses back via IPC
+- Natural language: progress updates, new tasks, rescheduling, guidance ("what's next?")
 - Agent modifies schedule with stability-first rules
 - Conversation persistence per user per day (`agent_conversations` table)
-- SSE streaming for real-time agent responses in both widget and web app
+- Web app chatbot deferred to Phase 10.2
 
-**Deliverable:** Agentic AI powers schedule building and mid-day interactions. Agent accessible from both the desktop widget and the web app. Hybrid architecture prevents LLM time-math hallucinations.
+**Deliverable:** Widget downloadable from homepage and dashboard. Agentic AI powers the widget chatbot and schedule building. Agent reused in Phase 10 for web chatbot.
 
 ---
 
@@ -325,11 +332,10 @@ These can be added post-beta if validated by users.
 
 ## Next Steps
 
-1. Phases 0–7 are complete (see `ai/roadmaps/complete/`)
-2. **Phase 8 in progress** (Desktop Widget) — shell, UI, sync done; modes, chat UI, login, auth fix implemented; testing remaining
-3. **Next: Phase 9** (Agentic AI) — LangChain agent replaces client-side command parsing in widget chat
-4. **Then Phase 10** (Integrations) — Outlook Calendar, web chatbot
-5. **Then Phase 11** (Beta Launch) — validate full product with real users
+1. Phases 0–8 are complete (see `ai/roadmaps/complete/`)
+2. **Next: Phase 9** (Agentic AI) — widget distribution, LangChain agent replaces client-side command parsing
+3. **Then Phase 10** (Integrations) — Outlook Calendar, web chatbot reuses Phase 9 agent
+4. **Then Phase 11** (Beta Launch) — validate full product with real users
 
 ---
 

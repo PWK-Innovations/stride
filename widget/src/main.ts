@@ -7,6 +7,27 @@ const logger = createLogger('main');
 
 type WidgetMode = 'compressed' | 'full';
 
+interface AuthStoreSchema {
+  token: string;
+  refreshToken: string;
+  apiBaseUrl: string;
+}
+
+interface SseEvent {
+  type: 'text' | 'tool' | 'done' | 'error';
+  content?: string;
+  name?: string;
+}
+
+const authStore = new Store<AuthStoreSchema>({
+  defaults: {
+    token: '',
+    refreshToken: '',
+    apiBaseUrl: 'http://localhost:3000',
+  },
+  encryptionKey: 'stride-widget-store',
+});
+
 interface MainStoreSchema {
   windowX: number;
   windowY: number;
@@ -249,6 +270,89 @@ ipcMain.handle('set-widget-mode', (_, mode: WidgetMode): void => {
     return;
   }
   setWidgetMode(mode);
+});
+
+ipcMain.handle('chat-send-message', async (_, message: string): Promise<string> => {
+  const token = authStore.get('token');
+  const baseUrl = authStore.get('apiBaseUrl');
+
+  if (!token) {
+    logger.warn('Chat message attempted without auth token');
+    mainWindow?.webContents.send('chat-stream-error', 'Not authenticated');
+    return 'Not authenticated. Please log in first.';
+  }
+
+  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+  try {
+    logger.info('Sending chat message to agent', { messageLength: message.length });
+
+    const response = await fetch(`${baseUrl}/api/agent/chat`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`,
+      },
+      body: JSON.stringify({ message, timezone }),
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      logger.error('Agent chat request failed', { status: response.status, error: errorText });
+      mainWindow?.webContents.send('chat-stream-error', errorText);
+      return `Error: ${response.status}`;
+    }
+
+    const reader = response.body?.getReader();
+    if (!reader) {
+      logger.error('No response body reader available');
+      mainWindow?.webContents.send('chat-stream-error', 'No response stream');
+      return 'No response stream';
+    }
+
+    const decoder = new TextDecoder();
+    let fullResponse = '';
+    let buffer = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop() || '';
+
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+
+        try {
+          const data = JSON.parse(line.slice(6)) as SseEvent;
+
+          if (data.type === 'text' && data.content) {
+            fullResponse += data.content;
+            mainWindow?.webContents.send('chat-stream-chunk', data.content);
+          } else if (data.type === 'tool' && data.name) {
+            mainWindow?.webContents.send('chat-stream-tool', data.name);
+          } else if (data.type === 'done') {
+            mainWindow?.webContents.send('chat-stream-done');
+          } else if (data.type === 'error' && data.content) {
+            logger.error('Agent returned error event', { error: data.content });
+            mainWindow?.webContents.send('chat-stream-error', data.content);
+          }
+        } catch {
+          // Skip malformed SSE lines
+        }
+      }
+    }
+
+    logger.info('Chat message completed', { responseLength: fullResponse.length });
+    return fullResponse;
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : 'Connection failed';
+    logger.error('Chat request failed', { error: msg });
+    mainWindow?.webContents.send('chat-stream-error', msg);
+    return `Connection error: ${msg}`;
+  }
 });
 
 app.whenReady().then(() => {

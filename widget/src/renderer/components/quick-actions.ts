@@ -42,7 +42,14 @@ async function handleDone(block: ScheduledBlock, container: HTMLElement): Promis
   if (btn) setButtonLoading(btn, true);
 
   try {
-    logger.info("Marking task done", { taskId: block.task_id });
+    logger.info("Marking task done", { taskId: block.task_id, blockId: block.id });
+
+    // Delete the scheduled block first
+    if (block.id) {
+      await window.strideApi.deleteBlock(block.id);
+    }
+
+    // Then delete the task
     const result = await window.strideApi.deleteTask(block.task_id);
     if (result.success) {
       showFeedback(container, true, "Task completed");
@@ -68,7 +75,14 @@ async function handleSkip(block: ScheduledBlock, container: HTMLElement): Promis
   if (btn) setButtonLoading(btn, true);
 
   try {
-    logger.info("Skipping task", { taskId: block.task_id });
+    logger.info("Skipping task", { taskId: block.task_id, blockId: block.id });
+
+    // Delete the scheduled block first
+    if (block.id) {
+      await window.strideApi.deleteBlock(block.id);
+    }
+
+    // Then delete the task
     const result = await window.strideApi.deleteTask(block.task_id);
     if (result.success) {
       showFeedback(container, true, "Task skipped");
@@ -127,6 +141,9 @@ export function renderQuickActions(
 ): void {
   container.innerHTML = "";
 
+  // Don't render buttons when there's no active Stride task
+  if (!currentBlock) return;
+
   const section = document.createElement("div");
   section.className = "section";
 
@@ -147,7 +164,7 @@ export function renderQuickActions(
 
   const lateBtn = document.createElement("button");
   lateBtn.className = "btn btn-secondary";
-  lateBtn.textContent = "Running Late";
+  lateBtn.textContent = "Need more time";
   lateBtn.dataset.action = "late";
   lateBtn.disabled = !currentBlock;
 

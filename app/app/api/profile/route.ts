@@ -22,7 +22,7 @@ export async function GET(): Promise<NextResponse> {
     .from("profiles")
     .select("google_access_token, google_token_expires_at")
     .eq("id", user.id)
-    .single();
+    .maybeSingle();
 
   if (profileError) {
     logger.error("Failed to fetch profile", { userId: user.id, error: profileError.message });

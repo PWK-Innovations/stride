@@ -1,0 +1,83 @@
+<svg width="760" height="520" viewBox="0 0 760 520" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="760" height="520" rx="16" fill="#1a1a1a" />
+
+  <!-- Widget frame centered -->
+  <g transform="translate(195, 20)">
+    <!-- Widget container -->
+    <rect width="370" height="480" rx="12" fill="#222222" stroke="#333" stroke-width="1" />
+
+    <!-- Header -->
+    <rect width="370" height="44" rx="12" fill="#262626" />
+    <rect y="32" width="370" height="12" fill="#262626" />
+    <text x="16" y="28" font-family="Inter, system-ui, sans-serif" font-size="16" font-weight="700" fill="#6B7355">Stride</text>
+    <!-- Header buttons -->
+    <circle cx="320" cy="22" r="6" stroke="#555" stroke-width="1.5" fill="none" />
+    <line x1="318" y1="22" x2="322" y2="22" stroke="#555" stroke-width="1.5" />
+    <circle cx="344" cy="22" r="6" stroke="#555" stroke-width="1.5" fill="none" />
+    <line x1="341" y1="19" x2="347" y2="25" stroke="#555" stroke-width="1.5" />
+    <line x1="347" y1="19" x2="341" y2="25" stroke="#555" stroke-width="1.5" />
+
+    <!-- Task bar -->
+    <rect x="0" y="44" width="370" height="42" fill="#1e1e1e" />
+    <text x="16" y="70" font-family="Inter, system-ui, sans-serif" font-size="14" font-weight="600" fill="#e8e4db">Review Q3 report</text>
+    <text x="290" y="70" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#6B7355">23 min left</text>
+
+    <!-- Quick actions -->
+    <g transform="translate(12, 96)">
+      <rect width="108" height="32" rx="6" fill="#6B7355" />
+      <text x="54" y="20" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="600" fill="#fff">Done</text>
+
+      <rect x="116" width="108" height="32" rx="6" fill="#2a2a2a" stroke="#444" stroke-width="1" />
+      <text x="170" y="20" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="500" fill="#ccc">Skip</text>
+
+      <rect x="232" width="118" height="32" rx="6" fill="#2a2a2a" stroke="#444" stroke-width="1" />
+      <text x="291" y="20" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="500" fill="#ccc">Need more time</text>
+    </g>
+
+    <!-- Chat area -->
+    <!-- Assistant message 1 -->
+    <g transform="translate(12, 148)">
+      <rect width="280" height="64" rx="10" fill="#2a2a2a" />
+      <text x="14" y="22" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#d4d0c8">Hi! I'm Stride. I can help manage</text>
+      <text x="14" y="38" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#d4d0c8">your schedule. Try asking "what's</text>
+      <text x="14" y="54" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#d4d0c8">next" or "add [task name]".</text>
+    </g>
+
+    <!-- User message -->
+    <g transform="translate(100, 226)">
+      <rect width="258" height="36" rx="10" fill="#6B7355" />
+      <text x="20" y="23" font-family="Inter, system-ui, sans-serif" font-size="12" font-weight="500" fill="#fff">Build my day</text>
+    </g>
+
+    <!-- Tool status -->
+    <g transform="translate(12, 276)">
+      <rect width="260" height="96" rx="10" fill="#2a2a2a" />
+      <text x="14" y="22" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#d4d0c8">Your schedule is set:</text>
+      <text x="14" y="44" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#9a9688">9:00 AM - Review Q3 report</text>
+      <text x="14" y="62" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#9a9688">10:00 AM - Team standup prep</text>
+      <text x="14" y="80" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#9a9688">11:00 AM - Write project proposal</text>
+    </g>
+
+    <!-- Suggestion chips -->
+    <g transform="translate(12, 386)">
+      <rect width="106" height="28" rx="14" fill="none" stroke="#444" stroke-width="1" />
+      <text x="53" y="18" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#9a9688">What's next?</text>
+
+      <rect x="114" width="96" height="28" rx="14" fill="none" stroke="#444" stroke-width="1" />
+      <text x="162" y="18" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#9a9688">Add a task</text>
+
+      <rect x="218" width="110" height="28" rx="14" fill="none" stroke="#444" stroke-width="1" />
+      <text x="273" y="18" text-anchor="middle" font-family="Inter, system-ui, sans-serif" font-size="11" fill="#9a9688">How's my day?</text>
+    </g>
+
+    <!-- Chat input -->
+    <g transform="translate(12, 434)">
+      <rect width="346" height="36" rx="18" fill="#2a2a2a" stroke="#444" stroke-width="1" />
+      <text x="16" y="23" font-family="Inter, system-ui, sans-serif" font-size="12" fill="#666">Ask Stride anything...</text>
+      <!-- Send arrow -->
+      <circle cx="324" cy="18" r="12" fill="#333" />
+      <path d="M319 18 L327 18 M324 14 L328 18 L324 22" stroke="#888" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round" />
+    </g>
+  </g>
+</svg>

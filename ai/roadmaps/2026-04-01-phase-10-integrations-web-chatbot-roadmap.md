@@ -42,6 +42,7 @@
 - [ ] Test mobile responsiveness
 - [ ] Verify conversation persistence shared with desktop widget
 - [ ] Add structured logging for chat interactions
+- [ ] Verify agent endpoint (built in Phase 9) works from web chatbot context
 - [ ] Test agent interaction end-to-end through web chatbot
 - [ ] Test schedule changes via chatbot reflect in timeline
 

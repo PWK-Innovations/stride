@@ -93,4 +93,8 @@ export class StrideApiClient {
   async deleteTask(id: string): Promise<SuccessResponse> {
     return this.request<SuccessResponse>('DELETE', `/api/tasks/${id}`);
   }
+
+  async deleteBlock(id: string): Promise<SuccessResponse> {
+    return this.request<SuccessResponse>('DELETE', `/api/schedule/${id}`);
+  }
 }

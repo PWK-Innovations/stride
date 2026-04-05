@@ -12,9 +12,20 @@ const timeFormatter = new Intl.DateTimeFormat(undefined, {
   minute: "2-digit",
 });
 
+const TOOL_DISPLAY_NAMES: Record<string, string> = {
+  getTaskList: "Fetching your tasks",
+  getCalendarEvents: "Checking your calendar",
+  createScheduledBlocks: "Building your schedule",
+  checkForConflicts: "Checking for conflicts",
+  updateTask: "Updating task",
+  createTask: "Creating task",
+};
+
 export class ChatController {
   private messages: ChatMessage[] = [];
   private listeners: UpdateCallback[] = [];
+  private streamListenersInitialized = false;
+  private activeToolStatus: string | null = null;
 
   getMessages(): ChatMessage[] {
     return [...this.messages];
@@ -45,6 +56,54 @@ export class ChatController {
     }
   }
 
+  initStreamListeners(): void {
+    if (this.streamListenersInitialized) return;
+    this.streamListenersInitialized = true;
+
+    if (!window.strideChat) {
+      logger.warn("strideChat bridge not available, stream listeners not initialized");
+      return;
+    }
+
+    window.strideChat.onStreamTool((toolName: string) => {
+      this.activeToolStatus = TOOL_DISPLAY_NAMES[toolName] || toolName;
+      const typingMsg = this.messages.find((m) => m.typing);
+      if (typingMsg) {
+        typingMsg.toolStatus = this.activeToolStatus;
+        this.notify();
+      }
+    });
+
+    window.strideChat.onStreamChunk((chunk: string) => {
+      const typingMsg = this.messages.find((m) => m.typing);
+      if (typingMsg) {
+        // Clear tool status once text starts arriving
+        if (typingMsg.toolStatus) {
+          typingMsg.toolStatus = undefined;
+        }
+        typingMsg.content += chunk;
+        this.notify();
+      }
+    });
+
+    window.strideChat.onStreamDone(() => {
+      const typingMsg = this.messages.find((m) => m.typing);
+      if (typingMsg) {
+        typingMsg.typing = false;
+        typingMsg.toolStatus = undefined;
+        this.activeToolStatus = null;
+        this.notify();
+      }
+    });
+
+    window.strideChat.onStreamError((error: string) => {
+      logger.error("Stream error received", { error });
+      this.replaceTypingWithResponse(`Error: ${error}`);
+    });
+
+    logger.info("Stream listeners initialized");
+  }
+
   async addUserMessage(text: string): Promise<void> {
     const trimmed = text.trim();
     if (!trimmed) return;
@@ -56,10 +115,17 @@ export class ChatController {
     this.notify();
 
     try {
-      const response = await this.processCommand(trimmed);
-      this.replaceTypingWithResponse(response);
+      if (window.strideChat) {
+        await window.strideChat.sendMessage(trimmed);
+        // Streaming events (onStreamChunk/onStreamDone) handle the message.
+        // sendMessage resolves after the stream completes, nothing else to do.
+      } else {
+        logger.warn("strideChat not available, falling back to local commands");
+        const response = await this.processCommandFallback(trimmed);
+        this.replaceTypingWithResponse(response);
+      }
     } catch (err) {
-      logger.error("Command processing failed", err);
+      logger.error("Agent message failed", err);
       this.replaceTypingWithResponse(
         "Something went wrong. Please try again."
       );
@@ -76,7 +142,11 @@ export class ChatController {
     this.notify();
   }
 
-  async processCommand(text: string): Promise<string> {
+  /**
+   * Offline fallback: client-side command parsing used when the agent
+   * endpoint is unreachable or the strideChat bridge is unavailable.
+   */
+  private async processCommandFallback(text: string): Promise<string> {
     const lower = text.toLowerCase().trim();
 
     if (lower.startsWith("add ")) {
@@ -110,7 +180,7 @@ export class ChatController {
       return "What task would you like to add? Say \"add [task name]\" and I'll create it.";
     }
 
-    logger.debug("Unrecognized command", { text: lower });
+    logger.debug("Unrecognized command (fallback)", { text: lower });
     return "I'm still learning! Try \"add [task]\", \"what's next\", \"schedule\", or \"help\".";
   }
 
@@ -120,7 +190,7 @@ export class ChatController {
     }
 
     try {
-      logger.info("Adding task via chat", { title: taskName });
+      logger.info("Adding task via chat (fallback)", { title: taskName });
       const { task } = await window.strideApi.createTask(
         taskName,
         DEFAULT_DURATION_MINUTES

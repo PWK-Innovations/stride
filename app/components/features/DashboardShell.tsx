@@ -145,7 +145,7 @@ export default function DashboardShell({
             <div className="flex items-center gap-x-4 lg:gap-x-6">
               {/* Profile dropdown */}
               <Menu as="div" className="relative">
-                <MenuButton className="relative flex items-center">
+                <MenuButton className="relative flex items-center" suppressHydrationWarning>
                   <span className="absolute -inset-1.5" />
                   <span className="sr-only">Open user menu</span>
                   <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-olive-600 text-sm font-medium text-white">

@@ -28,8 +28,15 @@ export interface TasksResponse {
   tasks: Task[];
 }
 
+export interface BusyWindow {
+  start: string;
+  end: string;
+  title?: string;
+}
+
 export interface ScheduleResponse {
   scheduled_blocks: ScheduledBlock[];
+  busy_windows?: BusyWindow[];
 }
 
 export interface CreateTaskResponse {

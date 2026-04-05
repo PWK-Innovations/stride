@@ -61,6 +61,8 @@ Google Calendar covers a large portion of users, but many professionals — espe
 
 Not all users will install the desktop widget — especially mobile users. A web chatbot gives every user access to the same agentic AI without a separate app. Demonstrates the agent architecture is interface-agnostic.
 
+Reuses the same agent SSE endpoint and conversation persistence built in Phase 9. The agent is already tailored for scheduling interactions via the widget — the web chatbot provides the same experience in-browser. The widget `strideChat` bridge pattern from Phase 9 serves as the reference implementation.
+
 ### What to Build
 
 - Sliding chat panel on the web app dashboard — collapsible side panel or bottom drawer
