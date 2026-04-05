@@ -177,3 +177,4 @@ High-level changes; add a line or two here when you commit and push.
 - **Timezone & API Fixes:** Tool responses use `formatTimeInZone` (fixes UTC-as-local display). Profile endpoint `.maybeSingle()` fix. `DELETE /api/schedule/:id` endpoint. Done action cleans up scheduled blocks. Working hours extended to 8 AM–10 PM.
 - **Testing:** 23 solver/reschedule unit tests, 6 agent chat integration tests. `npm run test:all` passes.
 - **Distribution:** DMG uploaded to GitHub Releases (`v0.1.0-widget`). Widget preview mockup updated.
+- **Phase 10.2: Web Chatbot.** Built `ChatPanel` component — floating card on desktop (rounded, offset from edges), full-screen overlay on mobile. SSE streaming with tool status indicators, suggestion chips, Enter-to-send, Escape-to-close. Loads conversation history via new `GET /api/agent/history` endpoint. Schedule auto-refreshes after agent interactions. All 15 roadmap tasks checked off.

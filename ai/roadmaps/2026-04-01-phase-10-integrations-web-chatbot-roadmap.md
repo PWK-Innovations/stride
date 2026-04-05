@@ -30,21 +30,21 @@
 
 ### 10.2 Web Chatbot
 
-- [ ] Design chat panel layout — side panel (desktop), full-screen overlay (mobile)
-- [ ] Build `ChatPanel` component with message list, input, send button
-- [ ] Connect to existing SSE streaming endpoint
-- [ ] Load conversation history from `agent_conversations` on panel open
-- [ ] Display real-time agent status indicators
-- [ ] Render user/agent messages with visual distinction
-- [ ] Implement Enter-to-send, Shift+Enter for newline
-- [ ] Add open/close toggle on dashboard
-- [ ] Follow olive design system
-- [ ] Test mobile responsiveness
-- [ ] Verify conversation persistence shared with desktop widget
-- [ ] Add structured logging for chat interactions
-- [ ] Verify agent endpoint (built in Phase 9) works from web chatbot context
-- [ ] Test agent interaction end-to-end through web chatbot
-- [ ] Test schedule changes via chatbot reflect in timeline
+- [x] Design chat panel layout — side panel (desktop), full-screen overlay (mobile)
+- [x] Build `ChatPanel` component with message list, input, send button
+- [x] Connect to existing SSE streaming endpoint
+- [x] Load conversation history from `agent_conversations` on panel open
+- [x] Display real-time agent status indicators
+- [x] Render user/agent messages with visual distinction
+- [x] Implement Enter-to-send, Shift+Enter for newline
+- [x] Add open/close toggle on dashboard
+- [x] Follow olive design system
+- [x] Test mobile responsiveness
+- [x] Verify conversation persistence shared with desktop widget
+- [x] Add structured logging for chat interactions
+- [x] Verify agent endpoint (built in Phase 9) works from web chatbot context
+- [x] Test agent interaction end-to-end through web chatbot
+- [x] Test schedule changes via chatbot reflect in timeline
 
 ### 10.3 Additional Integrations (If Validated)
 
