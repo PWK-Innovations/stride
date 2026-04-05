@@ -5,7 +5,7 @@ import { createLogger } from "@/lib/logger";
 import { fetchTodaysEvents } from "@/lib/google/fetchTodaysEvents";
 import { parseBusyWindows } from "@/lib/google/parseBusyWindows";
 import { refreshAccessToken } from "@/lib/google/refreshAccessToken";
-import { getDayBoundsInZone } from "@/lib/timezone";
+import { getDayBoundsInZone, formatTimeInZone } from "@/lib/timezone";
 
 const logger = createLogger("agent:tool:getCalendarEvents");
 
@@ -67,8 +67,8 @@ export function createGetCalendarEventsTool(
       const busyWindows = parseBusyWindows(events);
 
       const serialized: SerializedBusyWindow[] = busyWindows.map((w) => ({
-        start: w.start.toISOString(),
-        end: w.end.toISOString(),
+        start: formatTimeInZone(w.start, timezone),
+        end: formatTimeInZone(w.end, timezone),
         title: w.title,
       }));
 

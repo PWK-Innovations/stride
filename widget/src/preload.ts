@@ -70,6 +70,12 @@ contextBridge.exposeInMainWorld('strideApi', {
     return apiClient.deleteTask(id);
   },
 
+  deleteBlock: async (id: string): Promise<SuccessResponse> => {
+    logger.debug('deleteBlock called', { id });
+    syncToken();
+    return apiClient.deleteBlock(id);
+  },
+
   getToken: (): string => {
     logger.debug('getToken called');
     return store.get('token');
@@ -167,6 +173,13 @@ contextBridge.exposeInMainWorld('strideChat', {
     logger.debug('onStreamChunk listener registered');
     ipcRenderer.on('chat-stream-chunk', (_, chunk: string) => {
       callback(chunk);
+    });
+  },
+
+  onStreamTool: (callback: (toolName: string) => void): void => {
+    logger.debug('onStreamTool listener registered');
+    ipcRenderer.on('chat-stream-tool', (_, toolName: string) => {
+      callback(toolName);
     });
   },
 

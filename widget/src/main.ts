@@ -332,7 +332,7 @@ ipcMain.handle('chat-send-message', async (_, message: string): Promise<string> 
             fullResponse += data.content;
             mainWindow?.webContents.send('chat-stream-chunk', data.content);
           } else if (data.type === 'tool' && data.name) {
-            mainWindow?.webContents.send('chat-stream-chunk', `[Using ${data.name}...]\n`);
+            mainWindow?.webContents.send('chat-stream-tool', data.name);
           } else if (data.type === 'done') {
             mainWindow?.webContents.send('chat-stream-done');
           } else if (data.type === 'error' && data.content) {
@@ -345,7 +345,6 @@ ipcMain.handle('chat-send-message', async (_, message: string): Promise<string> 
       }
     }
 
-    mainWindow?.webContents.send('chat-response', fullResponse);
     logger.info('Chat message completed', { responseLength: fullResponse.length });
     return fullResponse;
   } catch (error: unknown) {

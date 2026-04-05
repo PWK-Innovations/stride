@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { getAuthenticatedUser } from "@/lib/supabase/api-auth";
 import { createLogger } from "@/lib/logger";
 
-const logger = createLogger("api:schedule:update");
+const logger = createLogger("api:schedule:block");
 
 export async function PATCH(
   request: Request,
@@ -61,5 +61,50 @@ export async function PATCH(
       { error: "Failed to update block" },
       { status: 500 },
     );
+  }
+}
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: Promise<{ id: string }> },
+): Promise<NextResponse> {
+  try {
+    const { id } = await params;
+
+    const auth = await getAuthenticatedUser(request);
+    if ("error" in auth) {
+      return NextResponse.json({ error: auth.error }, { status: 401 });
+    }
+    const { user, supabase } = auth;
+
+    const { data: block, error: fetchError } = await supabase
+      .from("scheduled_blocks")
+      .select("id, user_id")
+      .eq("id", id)
+      .single();
+
+    if (fetchError || !block) {
+      return NextResponse.json({ error: "Block not found" }, { status: 404 });
+    }
+
+    if (block.user_id !== user.id) {
+      return NextResponse.json({ error: "Not authorized" }, { status: 403 });
+    }
+
+    const { error: deleteError } = await supabase
+      .from("scheduled_blocks")
+      .delete()
+      .eq("id", id);
+
+    if (deleteError) {
+      logger.error("Failed to delete block", { userId: user.id, blockId: id, error: deleteError.message });
+      return NextResponse.json({ error: "Failed to delete block" }, { status: 500 });
+    }
+
+    logger.info("Block deleted", { userId: user.id, blockId: id });
+    return NextResponse.json({ success: true });
+  } catch (error: unknown) {
+    logger.error("Unexpected error deleting block", { error: error instanceof Error ? error.message : String(error) });
+    return NextResponse.json({ error: "Failed to delete block" }, { status: 500 });
   }
 }

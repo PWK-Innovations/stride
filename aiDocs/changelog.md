@@ -166,3 +166,14 @@ High-level changes; add a line or two here when you commit and push.
 - **9.3 Agent-Powered Build My Day:** Created SSE streaming endpoint at `/api/agent/chat` (POST, Bearer + cookie auth). Streams `text`, `tool`, `done`, `error` events via `agent.streamEvents()`. Wired `createScheduledBlocks` tool to use the deterministic solver (replaces OpenAI single-shot). Existing `schedule/build` endpoint preserved as fallback.
 - **9.4 Widget Chatbot Wiring:** Replaced `strideChat.sendMessage()` stub with IPC invoke to main process. Main process makes POST to agent SSE endpoint, parses stream, forwards chunks to renderer via IPC (`chat-stream-chunk`, `chat-stream-done`, `chat-stream-error`). `ChatController` becomes thin wrapper — agent primary path, local command parsing as offline fallback. Added streaming UI with typing cursor and incremental text rendering.
 - **Doc Updates:** Updated Phase 9 plan (added 9.0, updated 9.4 to target widget chatbot). Updated Phase 9 roadmap (added 9.0 checklist, updated 9.4 checklist). Updated Phase 10 plan/roadmap (10.2 clarifies reuse of Phase 9 agent). Updated high-level plan (added 9.0, Phases 0-8 complete, Phase 9 next).
+
+## 2026-04-04
+
+- **Phase 9 Complete: Agentic AI.**
+- **Chat & Natural Language:** `agent_conversations` table for per-user-per-day persistence. `createTask` tool with preferred time support. Natural language commands: add tasks, mark done, move to specific times, reschedule. "Move task" workflow avoids duplicate creation.
+- **Preferred Time Scheduling:** Solver supports `preferredStartTime` — tries preferred slot, falls back to first-fit. Dynamic system prompt with today's date and timezone for correct ISO generation.
+- **Agent Progress UI:** Web app streams agent steps (thinking → tool calls → result). Widget streams via `chat-stream-tool` IPC with spinner labels. Fallback to single-shot scheduling on agent failure.
+- **Widget Polish:** Quick action buttons (Done, Skip, Need more time) wired into active task bar. Calendar events shown as active task. Fixed poll flash-reloading — only task bar updates, chat preserved. Fixed 51 TypeScript errors with renderer type declarations.
+- **Timezone & API Fixes:** Tool responses use `formatTimeInZone` (fixes UTC-as-local display). Profile endpoint `.maybeSingle()` fix. `DELETE /api/schedule/:id` endpoint. Done action cleans up scheduled blocks. Working hours extended to 8 AM–10 PM.
+- **Testing:** 23 solver/reschedule unit tests, 6 agent chat integration tests. `npm run test:all` passes.
+- **Distribution:** DMG uploaded to GitHub Releases (`v0.1.0-widget`). Widget preview mockup updated.

@@ -56,6 +56,10 @@ export default function AppPage() {
   const [googleConnected, setGoogleConnected] = useState<boolean | null>(null);
   const [deletingTaskId, setDeletingTaskId] = useState<string | null>(null);
 
+  // Agent progress state
+  const [agentSteps, setAgentSteps] = useState<Array<{ type: 'tool' | 'text'; content: string }>>([]);
+  const [agentThinking, setAgentThinking] = useState(false);
+
   // Extraction state (shared between photo and audio)
   const [extracting, setExtracting] = useState(false);
   const [extractedTasks, setExtractedTasks] = useState<ExtractedTask[]>([]);
@@ -131,18 +135,23 @@ export default function AppPage() {
       const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
       const res = await fetch(`/api/schedule?timezone=${encodeURIComponent(tz)}`);
       const data = await res.json();
-      if (res.ok && data.scheduled_blocks?.length > 0) {
-        setSchedule(
-          data.scheduled_blocks.map((b: ScheduledBlock & { title?: string }) => ({
-            id: b.id,
-            task_id: b.task_id,
-            start_time: b.start_time,
-            end_time: b.end_time,
-            duration_minutes: Math.round(
-              (new Date(b.end_time).getTime() - new Date(b.start_time).getTime()) / 60000,
-            ),
-          })),
-        );
+      if (res.ok) {
+        if (data.scheduled_blocks?.length > 0) {
+          setSchedule(
+            data.scheduled_blocks.map((b: ScheduledBlock & { title?: string }) => ({
+              id: b.id,
+              task_id: b.task_id,
+              start_time: b.start_time,
+              end_time: b.end_time,
+              duration_minutes: Math.round(
+                (new Date(b.end_time).getTime() - new Date(b.start_time).getTime()) / 60000,
+              ),
+            })),
+          );
+        }
+        if (data.busy_windows?.length > 0) {
+          setBusyWindows(data.busy_windows);
+        }
       }
     } catch (error) {
       logger.error("Failed to fetch schedule", { error });
@@ -638,9 +647,9 @@ export default function AppPage() {
                     <h3 className="font-medium text-olive-900 dark:text-olive-50">
                       {task.title}
                     </h3>
-                    {task.notes && (
+                    {task.notes && !task.notes.match(/^\[preferred:[^\]]+\]$/) && (
                       <p className="mt-1 text-sm text-olive-600 dark:text-olive-400">
-                        {task.notes}
+                        {task.notes.replace(/\[preferred:[^\]]+\]\s*/g, '')}
                       </p>
                     )}
                     <p className="mt-1 text-xs text-olive-500 dark:text-olive-500">
@@ -727,6 +736,37 @@ export default function AppPage() {
             <SparklesIcon className="h-6 w-6" />
             {buildingSchedule ? 'Building your day...' : 'Build my day'}
           </button>
+        </div>
+      )}
+
+      {/* Agent Progress */}
+      {buildingSchedule && (
+        <div className="mt-4 rounded-lg border border-olive-200 bg-white p-4 shadow-sm dark:border-olive-800 dark:bg-olive-900">
+          <div className="space-y-2">
+            {agentThinking && (
+              <div className="flex items-center gap-2 text-sm text-olive-500 dark:text-olive-400">
+                <svg className="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                </svg>
+                Thinking...
+              </div>
+            )}
+            {agentSteps.map((step, i) => (
+              <div key={i} className="flex items-center gap-2 text-sm">
+                {step.type === "tool" ? (
+                  <>
+                    <svg className="h-4 w-4 text-green-500 dark:text-green-400" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="text-olive-700 dark:text-olive-300">{step.content}</span>
+                  </>
+                ) : (
+                  <span className="text-olive-500 dark:text-olive-400">{step.content}</span>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
@@ -825,52 +865,141 @@ export default function AppPage() {
     </>
   );
 
+  function toolDisplayName(name: string): string {
+    const names: Record<string, string> = {
+      getTaskList: "Fetching your tasks",
+      getCalendarEvents: "Checking your calendar",
+      createScheduledBlocks: "Building your schedule",
+      checkForConflicts: "Checking for conflicts",
+      updateTask: "Updating task",
+      createTask: "Creating task",
+    };
+    return names[name] || name;
+  }
+
   async function buildMyDay(retry = false) {
     setBuildingSchedule(true);
     setScheduleError(null);
+    setAgentSteps([]);
+    setAgentThinking(true);
+
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
     try {
-      const res = await fetch("/api/schedule/build", {
+      // Try agent endpoint first
+      const message = retry
+        ? "Rebuild my schedule with a different arrangement"
+        : "Build my day";
+
+      const res = await fetch("/api/agent/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-          currentTime: new Date().toISOString(),
-          retry,
-        }),
+        body: JSON.stringify({ message, timezone }),
       });
-      const data = await res.json();
 
-      if (!res.ok) {
-        setScheduleError(data.error || 'Failed to build schedule');
-        return;
+      if (!res.ok || !res.body) {
+        throw new Error("Agent endpoint failed");
       }
 
-      setSchedule(data.scheduled_blocks);
-      setOverflow(data.overflow);
-      setBusyWindows(data.busy_windows || []);
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
 
-      // Re-fetch to get block IDs from the database
-      fetchSchedule();
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
 
-      // Request notification permission and schedule notifications
-      const hasPermission = await requestNotificationPermission();
-      if (hasPermission && data.scheduled_blocks.length > 0) {
-        const blocksWithTitles = data.scheduled_blocks.map(
-          (block: ScheduledBlock) => {
-            const task = tasks.find((t) => t.id === block.task_id);
-            return {
-              ...block,
-              title: task?.title || 'Unknown task',
-            };
-          },
-        );
-        scheduleNotifications(blocksWithTitles);
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split("\n\n");
+        buffer = lines.pop() || "";
+
+        for (const line of lines) {
+          if (!line.startsWith("data: ")) continue;
+          const json = line.slice(6);
+          try {
+            const event = JSON.parse(json);
+            if (event.type === "tool") {
+              setAgentThinking(false);
+              setAgentSteps((prev) => [
+                ...prev,
+                { type: "tool", content: toolDisplayName(event.name) },
+              ]);
+            } else if (event.type === "text") {
+              setAgentThinking(false);
+            } else if (event.type === "error") {
+              throw new Error(event.content || "Agent error");
+            }
+          } catch (parseError) {
+            if (parseError instanceof Error && parseError.message !== "Agent error") {
+              continue;
+            }
+            throw parseError;
+          }
+        }
       }
-    } catch (error) {
-      logger.error("Failed to build schedule", { error });
-      setScheduleError('Something went wrong. Please try again.');
+
+      // Agent done — refresh schedule from DB
+      setAgentThinking(false);
+      await fetchSchedule();
+      await fetchTasks();
+
+      // Schedule notifications
+      const scheduleRes = await fetch(`/api/schedule?timezone=${encodeURIComponent(timezone)}`);
+      const scheduleData = await scheduleRes.json();
+      if (scheduleRes.ok && scheduleData.scheduled_blocks?.length > 0) {
+        const hasPermission = await requestNotificationPermission();
+        if (hasPermission) {
+          scheduleNotifications(scheduleData.scheduled_blocks);
+        }
+      }
+    } catch (agentError) {
+      // Fallback to single-shot scheduling
+      logger.warn("Agent failed, falling back to single-shot", { error: agentError });
+      setAgentSteps((prev) => [
+        ...prev,
+        { type: "text", content: "Switching to quick schedule..." },
+      ]);
+      setAgentThinking(false);
+
+      try {
+        const res = await fetch("/api/schedule/build", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            timezone,
+            currentTime: new Date().toISOString(),
+            retry,
+          }),
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          setScheduleError(data.error || "Failed to build schedule");
+          return;
+        }
+
+        setSchedule(data.scheduled_blocks);
+        setOverflow(data.overflow);
+        setBusyWindows(data.busy_windows || []);
+        fetchSchedule();
+
+        const hasPermission = await requestNotificationPermission();
+        if (hasPermission && data.scheduled_blocks.length > 0) {
+          const blocksWithTitles = data.scheduled_blocks.map(
+            (block: ScheduledBlock) => {
+              const task = tasks.find((t) => t.id === block.task_id);
+              return { ...block, title: task?.title || "Unknown task" };
+            },
+          );
+          scheduleNotifications(blocksWithTitles);
+        }
+      } catch (fallbackError) {
+        logger.error("Fallback schedule also failed", { error: fallbackError });
+        setScheduleError("Something went wrong. Please try again.");
+      }
     } finally {
       setBuildingSchedule(false);
+      setAgentThinking(false);
     }
   }
 }

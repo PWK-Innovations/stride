@@ -6,6 +6,7 @@ import { buildChatMessages, scrollToBottom } from "./components/chat-messages";
 import { buildSuggestionChips } from "./components/suggestion-chips";
 import { buildChatInput } from "./components/chat-input";
 import { buildLoginView } from "./components/login-view";
+import { renderQuickActions, setRefreshCallback } from "./components/quick-actions";
 import { ChatController } from "./chat-controller";
 
 const logger = createLogger("Renderer");
@@ -16,6 +17,7 @@ const TIMEZONE = Intl.DateTimeFormat().resolvedOptions().timeZone;
 let pollTimer: ReturnType<typeof setInterval> | null = null;
 let currentMode: WidgetMode = "full";
 let currentBlock: ScheduledBlock | null = null;
+let currentCalendarEvent: BusyWindow | null = null;
 let chatController: ChatController;
 
 function findCurrentBlock(blocks: ScheduledBlock[]): ScheduledBlock | null {
@@ -29,11 +31,29 @@ function findCurrentBlock(blocks: ScheduledBlock[]): ScheduledBlock | null {
   );
 }
 
+function findCurrentCalendarEvent(events: BusyWindow[]): BusyWindow | null {
+  const now = new Date();
+  return (
+    events.find((e) => {
+      const start = new Date(e.start);
+      const end = new Date(e.end);
+      return now >= start && now < end;
+    }) ?? null
+  );
+}
+
 function getTaskData(
   block: ScheduledBlock | null
 ): { title: string; endTime: string } | null {
-  if (!block) return null;
-  return { title: block.title, endTime: block.end_time };
+  // Stride task takes priority over calendar event
+  if (block) return { title: block.title, endTime: block.end_time };
+  if (currentCalendarEvent) {
+    return {
+      title: currentCalendarEvent.title || "Calendar event",
+      endTime: currentCalendarEvent.end,
+    };
+  }
+  return null;
 }
 
 function isAuthenticated(): boolean {
@@ -164,10 +184,17 @@ function renderFullMode(): void {
     <div class="full-container">
       ${buildFullHeader()}
       ${buildTaskBar(taskData)}
+      <div id="quick-actions-container"></div>
       <div id="chat-area-wrapper" class="chat-area-wrapper"></div>
       ${buildChatInput()}
     </div>
   `;
+
+  // Render quick actions for active Stride task (not calendar events)
+  const actionsContainer = document.getElementById("quick-actions-container");
+  if (actionsContainer) {
+    renderQuickActions(currentBlock, actionsContainer);
+  }
 
   renderChatArea();
   wireChatInputListeners();
@@ -217,8 +244,9 @@ function renderCurrentMode(): void {
 async function fetchScheduleData(): Promise<void> {
   try {
     logger.debug("Fetching schedule", { timezone: TIMEZONE });
-    const { scheduled_blocks: blocks } =
-      await window.strideApi.getSchedule(TIMEZONE);
+    const data = await window.strideApi.getSchedule(TIMEZONE);
+    const blocks = data.scheduled_blocks || [];
+    const busyWindows = data.busy_windows || [];
 
     const sortedBlocks = [...blocks].sort(
       (a, b) =>
@@ -226,19 +254,46 @@ async function fetchScheduleData(): Promise<void> {
     );
 
     currentBlock = findCurrentBlock(sortedBlocks);
+    currentCalendarEvent = findCurrentCalendarEvent(busyWindows);
 
     logger.info("Schedule data refreshed", {
       totalBlocks: sortedBlocks.length,
-      currentTask: currentBlock?.title ?? null,
+      calendarEvents: busyWindows.length,
+      currentTask: currentBlock?.title ?? currentCalendarEvent?.title ?? null,
     });
   } catch (err) {
     logger.error("Failed to fetch schedule", err);
   }
 }
 
+function updateTaskBar(): void {
+  const taskBarEl = document.querySelector(".task-bar");
+  if (!taskBarEl) return;
+
+  const taskData = getTaskData(currentBlock);
+  const tempDiv = document.createElement("div");
+  tempDiv.innerHTML = buildTaskBar(taskData);
+  const newTaskBar = tempDiv.firstElementChild;
+  if (newTaskBar) {
+    taskBarEl.replaceWith(newTaskBar);
+  }
+
+  // Also update quick actions
+  const actionsContainer = document.getElementById("quick-actions-container");
+  if (actionsContainer) {
+    renderQuickActions(currentBlock, actionsContainer);
+  }
+}
+
 async function fetchAndRender(): Promise<void> {
   await fetchScheduleData();
-  renderCurrentMode();
+
+  // Only update the task bar, don't rebuild the entire UI
+  if (currentMode === "full") {
+    updateTaskBar();
+  } else {
+    renderCompressedMode();
+  }
 }
 
 function startPolling(): void {
@@ -256,6 +311,8 @@ async function init(): Promise<void> {
       '<div style="padding:20px;color:#b04040;font-family:sans-serif;">Stride API bridge not found. Ensure the widget is launched via Electron.</div>';
     return;
   }
+
+  setRefreshCallback(fetchAndRender);
 
   chatController = new ChatController();
   chatController.onUpdate(() => {

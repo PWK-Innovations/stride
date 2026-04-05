@@ -14,6 +14,7 @@ export interface SolverTask {
   id: string;
   title: string;
   durationMinutes: number;
+  preferredStartTime?: Date;
 }
 
 export interface ScheduledBlock {
@@ -89,11 +90,46 @@ export function solveSchedule(input: SolverInput): SolverResult {
   const scheduledBlocks: ScheduledBlock[] = [];
   const overflow: string[] = [];
 
-  // 4. Place each task greedily
+  // 4. Place each task greedily (with optional preferred time)
   for (const task of tasks) {
     const durationMs = task.durationMinutes * 60_000;
 
-    const result = findFittingSlot(freeSlots, durationMs);
+    let result: { slot: TimeSlot; index: number } | null = null;
+    let blockStart: Date;
+
+    // Try preferred time first
+    if (task.preferredStartTime) {
+      const preferredMs = task.preferredStartTime.getTime();
+      const preferredEnd = preferredMs + durationMs;
+
+      for (let i = 0; i < freeSlots.length; i++) {
+        const slot = freeSlots[i];
+        if (
+          preferredMs >= slot.start.getTime() &&
+          preferredEnd <= slot.end.getTime()
+        ) {
+          result = { slot, index: i };
+          break;
+        }
+      }
+
+      if (result) {
+        logger.debug("Using preferred time", {
+          taskId: task.id,
+          preferredTime: task.preferredStartTime.toISOString(),
+        });
+      } else {
+        logger.debug("Preferred time unavailable, falling back to first-fit", {
+          taskId: task.id,
+          preferredTime: task.preferredStartTime.toISOString(),
+        });
+      }
+    }
+
+    // Fall back to first-fit if no preferred time or preferred slot unavailable
+    if (!result) {
+      result = findFittingSlot(freeSlots, durationMs);
+    }
 
     if (!result) {
       logger.warn("Task overflowed — no fitting slot", {
@@ -107,8 +143,21 @@ export function solveSchedule(input: SolverInput): SolverResult {
 
     const { slot, index } = result;
 
-    // Place at the start of the first fitting slot
-    const blockStart = slot.start;
+    // Place at preferred time if within slot, otherwise at slot start
+    if (task.preferredStartTime) {
+      const preferredMs = task.preferredStartTime.getTime();
+      if (
+        preferredMs >= slot.start.getTime() &&
+        preferredMs + durationMs <= slot.end.getTime()
+      ) {
+        blockStart = task.preferredStartTime;
+      } else {
+        blockStart = slot.start;
+      }
+    } else {
+      blockStart = slot.start;
+    }
+
     const blockEnd = new Date(blockStart.getTime() + durationMs);
 
     const block: ScheduledBlock = {

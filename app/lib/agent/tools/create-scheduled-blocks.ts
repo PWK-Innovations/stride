@@ -8,14 +8,14 @@ import type { BusyWindow } from "@/lib/agent/solver-utils";
 import { fetchTodaysEvents } from "@/lib/google/fetchTodaysEvents";
 import { parseBusyWindows } from "@/lib/google/parseBusyWindows";
 import { refreshAccessToken } from "@/lib/google/refreshAccessToken";
-import { getDayBoundsInZone, getUtcOffsetString, ensureOffset } from "@/lib/timezone";
+import { getDayBoundsInZone, getUtcOffsetString, ensureOffset, formatTimeInZone } from "@/lib/timezone";
 import type { Task } from "@/types/database";
 
 const logger = createLogger("agent:tool:createScheduledBlocks");
 
-/** Default working hours (9 AM to 6 PM) and break time (10 minutes). */
-const DEFAULT_WORKING_HOURS_START = 9;
-const DEFAULT_WORKING_HOURS_END = 18;
+/** Default working hours (8 AM to 10 PM) and break time (10 minutes). */
+const DEFAULT_WORKING_HOURS_START = 8;
+const DEFAULT_WORKING_HOURS_END = 22;
 const DEFAULT_BREAK_MINUTES = 10;
 
 export function createScheduledBlocksTool(
@@ -25,8 +25,8 @@ export function createScheduledBlocksTool(
 ) {
   return tool(
     async (input) => {
-      const { taskIds } = input;
-      logger.info("Creating scheduled blocks", { userId, taskIds, timezone });
+      const { taskIds, preferredTimes } = input;
+      logger.info("Creating scheduled blocks", { userId, taskIds, timezone, preferredTimes });
 
       // 1. Fetch task details for the given IDs
       const { data: tasks, error: taskError } = await supabase
@@ -95,11 +95,34 @@ export function createScheduledBlocksTool(
       }
 
       // 3. Convert tasks to solver format (order preserved from agent)
-      const solverTasks: SolverTask[] = orderedTasks.map((task) => ({
-        id: task.id,
-        title: task.title,
-        durationMinutes: task.duration_minutes,
-      }));
+      // Auto-extract preferred times from task notes [preferred:ISO_TIME]
+      const solverTasks: SolverTask[] = orderedTasks.map((task) => {
+        let preferredStartTime: Date | undefined;
+
+        // Check notes for embedded preferred time
+        const notesStr = task.notes as string | null;
+        if (notesStr) {
+          const match = notesStr.match(/\[preferred:([^\]]+)\]/);
+          if (match) {
+            preferredStartTime = new Date(match[1]);
+            if (isNaN(preferredStartTime.getTime())) {
+              preferredStartTime = undefined;
+            }
+          }
+        }
+
+        // Also check explicit preferredTimes parameter
+        if (!preferredStartTime && preferredTimes?.[task.id]) {
+          preferredStartTime = new Date(preferredTimes[task.id]);
+        }
+
+        return {
+          id: task.id,
+          title: task.title,
+          durationMinutes: task.duration_minutes,
+          preferredStartTime,
+        };
+      });
 
       // 4. Run deterministic solver
       const solverResult = solveSchedule({
@@ -143,12 +166,12 @@ export function createScheduledBlocksTool(
         }
       }
 
-      // 7. Build response with timezone-aware timestamps
+      // 7. Build response with human-readable local times for the agent
       const resultBlocks = solverResult.scheduledBlocks.map((block) => ({
         task_id: block.taskId,
         title: block.title,
-        start_time: ensureOffset(block.startTime.toISOString(), utcOffset),
-        end_time: ensureOffset(block.endTime.toISOString(), utcOffset),
+        start_time: formatTimeInZone(block.startTime, timezone),
+        end_time: formatTimeInZone(block.endTime, timezone),
       }));
 
       logger.info("Scheduled blocks created", {
@@ -164,11 +187,15 @@ export function createScheduledBlocksTool(
     {
       name: "createScheduledBlocks",
       description:
-        "Create scheduled time blocks from an ordered list of tasks. Takes task IDs, uses the deterministic solver to place them in free time slots avoiding calendar conflicts, and saves to the database. Returns the created schedule with start/end times.",
+        "Create scheduled time blocks from an ordered list of tasks. Takes task IDs and optional preferred times, uses the deterministic solver to place them in free time slots avoiding calendar conflicts, and saves to the database. Returns the created schedule with start/end times.",
       schema: z.object({
         taskIds: z
           .array(z.string())
           .describe("Ordered list of task IDs to schedule"),
+        preferredTimes: z
+          .record(z.string(), z.string())
+          .optional()
+          .describe("Optional map of task ID to preferred start time in ISO 8601 format (e.g. {\"task-id\": \"2026-04-03T18:00:00\"})"),
       }),
     },
   );

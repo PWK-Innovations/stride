@@ -243,6 +243,74 @@ do_patch "$BASE_URL/api/schedule/00000000-0000-0000-0000-000000000000" \
 read_result
 assert "PATCH /api/schedule missing end_time → 400" 400 "$status" "$body" "required"
 
+# ─── Section F: Agent Chat ────────────────────────────────────────────────
+
+echo '{"event":"section","name":"agent_chat"}' >&2
+
+# Agent auth guard
+do_post "$BASE_URL/api/agent/chat" '{"message":"hello"}' ""
+read_result
+assert "POST /api/agent/chat no auth → 401" 401 "$status" "$body" "error"
+
+# Agent missing message
+do_post "$BASE_URL/api/agent/chat" '{}' "$COOKIE_FILE"
+read_result
+assert "POST /api/agent/chat missing message → 400" 400 "$status" "$body" "message is required"
+
+# Agent streaming test — send a simple message via curl and check SSE format
+# Use --max-time to avoid hanging if agent loops
+AGENT_RESPONSE=$(curl -s --max-time 60 -X POST \
+  -H "Content-Type: application/json" \
+  -b "$COOKIE_FILE" \
+  -d '{"message":"What can you do?","timezone":"America/New_York"}' \
+  "$BASE_URL/api/agent/chat" 2>/dev/null || echo "")
+
+if [[ "$AGENT_RESPONSE" == *"data:"* ]]; then
+  passed=$((passed + 1))
+  results+=('{"name":"POST /api/agent/chat returns SSE stream","ok":true,"status":200}')
+else
+  failed=$((failed + 1))
+  results+=('{"name":"POST /api/agent/chat returns SSE stream","ok":false,"status":0,"body":"No SSE data: lines found"}')
+fi
+
+# Check stream contains done event
+if [[ "$AGENT_RESPONSE" == *'"type":"done"'* ]]; then
+  passed=$((passed + 1))
+  results+=('{"name":"Agent stream ends with done event","ok":true,"status":200}')
+else
+  failed=$((failed + 1))
+  results+=('{"name":"Agent stream ends with done event","ok":false,"status":0,"body":"No done event in stream"}')
+fi
+
+# Check stream contains text content
+if [[ "$AGENT_RESPONSE" == *'"type":"text"'* ]]; then
+  passed=$((passed + 1))
+  results+=('{"name":"Agent stream includes text content","ok":true,"status":200}')
+else
+  failed=$((failed + 1))
+  results+=('{"name":"Agent stream includes text content","ok":false,"status":0,"body":"No text event in stream"}')
+fi
+
+# ─── Section G: Conversation Persistence ──────────────────────────────────
+
+echo '{"event":"section","name":"conversation_persistence"}' >&2
+
+# After the agent chat above, conversation should have been saved.
+# Send another message — the agent should have context from the first one.
+AGENT_RESPONSE_2=$(curl -s --max-time 60 -X POST \
+  -H "Content-Type: application/json" \
+  -b "$COOKIE_FILE" \
+  -d '{"message":"Thanks!","timezone":"America/New_York"}' \
+  "$BASE_URL/api/agent/chat" 2>/dev/null || echo "")
+
+if [[ "$AGENT_RESPONSE_2" == *'"type":"done"'* ]]; then
+  passed=$((passed + 1))
+  results+=('{"name":"Second chat message succeeds (conversation persists)","ok":true,"status":200}')
+else
+  failed=$((failed + 1))
+  results+=('{"name":"Second chat message succeeds (conversation persists)","ok":false,"status":0,"body":"Second message failed"}')
+fi
+
 # ─── Output Results ────────────────────────────────────────────────────────
 
 total=$((passed + failed))

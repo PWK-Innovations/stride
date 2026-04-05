@@ -12,6 +12,17 @@ export function createUpdateTaskTool(supabase: SupabaseClient, userId: string) {
       logger.info("Updating task", { userId, taskId, action });
 
       if (action === "done") {
+        // Delete the scheduled block for this task
+        const { error: blockError } = await supabase
+          .from("scheduled_blocks")
+          .delete()
+          .eq("task_id", taskId)
+          .eq("user_id", userId);
+
+        if (blockError) {
+          logger.error("Failed to delete scheduled block for done task", { error: blockError.message });
+        }
+
         const { error } = await supabase
           .from("tasks")
           .delete()

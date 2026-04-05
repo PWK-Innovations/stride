@@ -11,7 +11,8 @@
     "test:openai": "npx tsx scripts/test-openai.ts",
     "test:google": "npx tsx scripts/test-google.ts",
     "test:schedule": "npx tsx scripts/test-schedule.ts",
-    "test:all": "npm run test:supabase && npm run test:openai && npm run test:google && npm run test:schedule"
+    "test:agent": "npx tsx scripts/test-agent.ts",
+    "test:all": "npm run test:supabase && npm run test:openai && npm run test:google && npm run test:schedule && npm run test:agent"
   },
   "dependencies": {
     "@headlessui/react": "^2.2.9",

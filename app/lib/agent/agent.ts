@@ -1,12 +1,13 @@
 import { createReactAgent } from "@langchain/langgraph/prebuilt";
 import { SystemMessage } from "@langchain/core/messages";
 import { schedulingModel } from "./model";
-import { SCHEDULING_SYSTEM_PROMPT } from "./system-prompt";
+import { getSchedulingSystemPrompt } from "./system-prompt";
 import { createGetTaskListTool } from "./tools/get-task-list";
 import { createGetCalendarEventsTool } from "./tools/get-calendar-events";
 import { createScheduledBlocksTool } from "./tools/create-scheduled-blocks";
 import { createCheckConflictsTool } from "./tools/check-conflicts";
 import { createUpdateTaskTool } from "./tools/update-task";
+import { createCreateTaskTool } from "./tools/create-task";
 import { createLogger } from "@/lib/logger";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -26,12 +27,13 @@ export function createSchedulingAgent(
     createScheduledBlocksTool(supabase, userId, timezone),
     createCheckConflictsTool(supabase, userId, timezone),
     createUpdateTaskTool(supabase, userId),
+    createCreateTaskTool(supabase, userId),
   ];
 
   const agent = createReactAgent({
     llm: schedulingModel,
     tools,
-    messageModifier: new SystemMessage(SCHEDULING_SYSTEM_PROMPT),
+    messageModifier: new SystemMessage(getSchedulingSystemPrompt(timezone)),
   });
 
   logger.info("Scheduling agent created", { userId, toolCount: tools.length });

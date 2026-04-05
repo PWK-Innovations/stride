@@ -22,7 +22,22 @@ function buildTypingIndicator(): string {
   `;
 }
 
+function buildToolStatus(status: string): string {
+  return `
+    <div class="message message-assistant message-fade-in">
+      <div class="tool-status">
+        <span class="tool-spinner"></span>
+        ${escapeHtml(status)}...
+      </div>
+    </div>
+  `;
+}
+
 function buildMessage(message: ChatMessage): string {
+  if (message.typing && !message.content && message.toolStatus) {
+    return buildToolStatus(message.toolStatus);
+  }
+
   if (message.typing && !message.content) {
     return buildTypingIndicator();
   }

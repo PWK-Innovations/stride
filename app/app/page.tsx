@@ -326,7 +326,7 @@ export default function Page() {
                 src="/widget-preview.svg"
                 alt="Stride desktop widget preview"
                 width={760}
-                height={480}
+                height={520}
                 className="h-auto w-full"
               />
             </div>

@@ -12,10 +12,20 @@ const timeFormatter = new Intl.DateTimeFormat(undefined, {
   minute: "2-digit",
 });
 
+const TOOL_DISPLAY_NAMES: Record<string, string> = {
+  getTaskList: "Fetching your tasks",
+  getCalendarEvents: "Checking your calendar",
+  createScheduledBlocks: "Building your schedule",
+  checkForConflicts: "Checking for conflicts",
+  updateTask: "Updating task",
+  createTask: "Creating task",
+};
+
 export class ChatController {
   private messages: ChatMessage[] = [];
   private listeners: UpdateCallback[] = [];
   private streamListenersInitialized = false;
+  private activeToolStatus: string | null = null;
 
   getMessages(): ChatMessage[] {
     return [...this.messages];
@@ -55,9 +65,22 @@ export class ChatController {
       return;
     }
 
+    window.strideChat.onStreamTool((toolName: string) => {
+      this.activeToolStatus = TOOL_DISPLAY_NAMES[toolName] || toolName;
+      const typingMsg = this.messages.find((m) => m.typing);
+      if (typingMsg) {
+        typingMsg.toolStatus = this.activeToolStatus;
+        this.notify();
+      }
+    });
+
     window.strideChat.onStreamChunk((chunk: string) => {
       const typingMsg = this.messages.find((m) => m.typing);
       if (typingMsg) {
+        // Clear tool status once text starts arriving
+        if (typingMsg.toolStatus) {
+          typingMsg.toolStatus = undefined;
+        }
         typingMsg.content += chunk;
         this.notify();
       }
@@ -67,6 +90,8 @@ export class ChatController {
       const typingMsg = this.messages.find((m) => m.typing);
       if (typingMsg) {
         typingMsg.typing = false;
+        typingMsg.toolStatus = undefined;
+        this.activeToolStatus = null;
         this.notify();
       }
     });
@@ -91,11 +116,9 @@ export class ChatController {
 
     try {
       if (window.strideChat) {
-        const response = await window.strideChat.sendMessage(trimmed);
-        // Streaming events update the typing message incrementally.
-        // The final response from sendMessage replaces whatever was accumulated,
-        // ensuring the complete text is always rendered.
-        this.replaceTypingWithResponse(response);
+        await window.strideChat.sendMessage(trimmed);
+        // Streaming events (onStreamChunk/onStreamDone) handle the message.
+        // sendMessage resolves after the stream completes, nothing else to do.
       } else {
         logger.warn("strideChat not available, falling back to local commands");
         const response = await this.processCommandFallback(trimmed);
