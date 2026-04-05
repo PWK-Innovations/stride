@@ -5,9 +5,7 @@ import { createLogger } from "@/lib/logger";
 import { solveSchedule } from "@/lib/agent/solver";
 import type { SolverTask } from "@/lib/agent/solver";
 import type { BusyWindow } from "@/lib/agent/solver-utils";
-import { fetchTodaysEvents } from "@/lib/google/fetchTodaysEvents";
-import { parseBusyWindows } from "@/lib/google/parseBusyWindows";
-import { refreshAccessToken } from "@/lib/google/refreshAccessToken";
+import { fetchAllBusyWindows } from "@/lib/calendar/fetchAllBusyWindows";
 import { getDayBoundsInZone, getUtcOffsetString, ensureOffset, formatTimeInZone } from "@/lib/timezone";
 import type { Task } from "@/types/database";
 
@@ -54,45 +52,14 @@ export function createScheduledBlocksTool(
         }
       }
 
-      // 2. Fetch busy windows from calendar
-      let busyWindows: BusyWindow[] = [];
-
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("google_access_token, google_refresh_token, google_token_expires_at")
-        .eq("id", userId)
-        .single();
-
-      if (profile?.google_access_token && profile?.google_refresh_token) {
-        let accessToken = profile.google_access_token as string;
-        const expiresAt = new Date(profile.google_token_expires_at as string);
-        const now = new Date();
-
-        if (now >= expiresAt) {
-          const tokens = await refreshAccessToken(profile.google_refresh_token as string);
-          accessToken = tokens.access_token;
-
-          const newExpiresAt = new Date(now.getTime() + tokens.expires_in * 1000);
-          await supabase
-            .from("profiles")
-            .update({
-              google_access_token: accessToken,
-              google_token_expires_at: newExpiresAt.toISOString(),
-            })
-            .eq("id", userId);
-        }
-
-        const { startOfDay, endOfDay } = getDayBoundsInZone(timezone);
-        const events = await fetchTodaysEvents(accessToken, startOfDay, endOfDay);
-        const parsed = parseBusyWindows(events);
-
-        // Convert Google BusyWindow (Date objects) to solver BusyWindow format
-        busyWindows = parsed.map((w) => ({
-          start: w.start,
-          end: w.end,
-          title: w.title,
-        }));
-      }
+      // 2. Fetch busy windows from all connected calendars
+      const { startOfDay, endOfDay } = getDayBoundsInZone(timezone);
+      const allWindows = await fetchAllBusyWindows(supabase, userId, startOfDay, endOfDay);
+      const busyWindows: BusyWindow[] = allWindows.map((w) => ({
+        start: w.start,
+        end: w.end,
+        title: w.title,
+      }));
 
       // 3. Convert tasks to solver format (order preserved from agent)
       // Auto-extract preferred times from task notes [preferred:ISO_TIME]
@@ -137,7 +104,6 @@ export function createScheduledBlocksTool(
       const utcOffset = getUtcOffsetString(timezone);
 
       // 5. Delete existing scheduled blocks for today
-      const { startOfDay, endOfDay } = getDayBoundsInZone(timezone);
       await supabase
         .from("scheduled_blocks")
         .delete()

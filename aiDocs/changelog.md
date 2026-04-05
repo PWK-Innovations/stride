@@ -178,3 +178,9 @@ High-level changes; add a line or two here when you commit and push.
 - **Testing:** 23 solver/reschedule unit tests, 6 agent chat integration tests. `npm run test:all` passes.
 - **Distribution:** DMG uploaded to GitHub Releases (`v0.1.0-widget`). Widget preview mockup updated.
 - **Phase 10.2: Web Chatbot.** Built `ChatPanel` component — floating card on desktop (rounded, offset from edges), full-screen overlay on mobile. SSE streaming with tool status indicators, suggestion chips, Enter-to-send, Escape-to-close. Loads conversation history via new `GET /api/agent/history` endpoint. Schedule auto-refreshes after agent interactions. All 15 roadmap tasks checked off.
+
+## 2026-04-05
+
+- **Phase 10 Complete: Integrations & Web Chatbot.**
+- **10.1 Outlook Calendar:** Microsoft OAuth flow (`/api/auth/microsoft` + callback). Token refresh via Microsoft identity platform. Outlook events fetched via Microsoft Graph API (`/me/calendarview`). Created `calendar_tokens` table for multi-provider storage with RLS. Migrated Google tokens from `profiles` to `calendar_tokens`. Unified calendar fetcher (`lib/calendar/fetchAllBusyWindows.ts`) merges all providers into single busy-windows list. Agent tools and schedule API switched to unified fetcher. Multi-provider calendar settings UI on dashboard.
+- **10.3 Skipped:** No user demand for Todoist or Slack integrations — documented and deferred.
