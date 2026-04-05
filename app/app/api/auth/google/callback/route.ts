@@ -48,19 +48,23 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Store tokens in profiles table
+    // Store tokens in calendar_tokens table
     const expiresAt = new Date(Date.now() + tokens.expires_in * 1000);
-    const { error: updateError } = await supabase
-      .from('profiles')
-      .update({
-        google_access_token: tokens.access_token,
-        google_refresh_token: tokens.refresh_token,
-        google_token_expires_at: expiresAt.toISOString(),
-      })
-      .eq('id', user.id);
+    const { error: upsertError } = await supabase
+      .from('calendar_tokens')
+      .upsert(
+        {
+          user_id: user.id,
+          provider: 'google',
+          access_token: tokens.access_token,
+          refresh_token: tokens.refresh_token,
+          token_expires_at: expiresAt.toISOString(),
+        },
+        { onConflict: 'user_id,provider' },
+      );
 
-    if (updateError) {
-      throw updateError;
+    if (upsertError) {
+      throw upsertError;
     }
 
     return NextResponse.redirect(new URL('/app', request.url));

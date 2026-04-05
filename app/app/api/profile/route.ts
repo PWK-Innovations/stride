@@ -18,21 +18,23 @@ export async function GET(): Promise<NextResponse> {
     );
   }
 
-  const { data: profile, error: profileError } = await supabase
-    .from("profiles")
-    .select("google_access_token, google_token_expires_at")
-    .eq("id", user.id)
-    .maybeSingle();
+  const { data: tokens, error: tokensError } = await supabase
+    .from("calendar_tokens")
+    .select("provider")
+    .eq("user_id", user.id);
 
-  if (profileError) {
-    logger.error("Failed to fetch profile", { userId: user.id, error: profileError.message });
+  if (tokensError) {
+    logger.error("Failed to fetch calendar tokens", { userId: user.id, error: tokensError.message });
     return NextResponse.json(
       { error: "Failed to fetch profile" },
       { status: 500 },
     );
   }
 
-  const googleConnected = Boolean(profile?.google_access_token);
+  const providers = (tokens || []).map((t) => t.provider);
 
-  return NextResponse.json({ googleConnected });
+  return NextResponse.json({
+    googleConnected: providers.includes("google"),
+    outlookConnected: providers.includes("outlook"),
+  });
 }

@@ -1,9 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthenticatedUser } from "@/lib/supabase/api-auth";
 import { getDayBoundsInZone } from "@/lib/timezone";
-import { fetchTodaysEvents } from "@/lib/google/fetchTodaysEvents";
-import { parseBusyWindows } from "@/lib/google/parseBusyWindows";
-import { refreshAccessToken } from "@/lib/google/refreshAccessToken";
+import { fetchAllBusyWindows } from "@/lib/calendar/fetchAllBusyWindows";
 import { createLogger } from "@/lib/logger";
 
 const logger = createLogger("api:schedule:get");
@@ -36,41 +34,14 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       );
     }
 
-    // Fetch busy windows from Google Calendar if connected
+    // Fetch busy windows from all connected calendar providers
     let busyWindows: Array<{ start: Date; end: Date; title?: string }> = [];
-
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("google_access_token, google_refresh_token, google_token_expires_at")
-      .eq("id", user.id)
-      .maybeSingle();
-
-    if (profile?.google_access_token && profile?.google_refresh_token) {
-      try {
-        let accessToken = profile.google_access_token as string;
-        const expiresAt = new Date(profile.google_token_expires_at as string);
-        const now = new Date();
-
-        if (now >= expiresAt) {
-          const tokens = await refreshAccessToken(profile.google_refresh_token as string);
-          accessToken = tokens.access_token;
-          const newExpiresAt = new Date(now.getTime() + tokens.expires_in * 1000);
-          await supabase
-            .from("profiles")
-            .update({
-              google_access_token: accessToken,
-              google_token_expires_at: newExpiresAt.toISOString(),
-            })
-            .eq("id", user.id);
-        }
-
-        const events = await fetchTodaysEvents(accessToken, startOfDay, endOfDay);
-        busyWindows = parseBusyWindows(events);
-      } catch (calError: unknown) {
-        logger.warn("Failed to fetch calendar events", {
-          error: calError instanceof Error ? calError.message : String(calError),
-        });
-      }
+    try {
+      busyWindows = await fetchAllBusyWindows(supabase, user.id, startOfDay, endOfDay);
+    } catch (calError: unknown) {
+      logger.warn("Failed to fetch calendar events", {
+        error: calError instanceof Error ? calError.message : String(calError),
+      });
     }
 
     return NextResponse.json({

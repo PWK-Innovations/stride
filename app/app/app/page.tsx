@@ -10,6 +10,7 @@ import { DailyTimeline } from '@/components/features/DailyTimeline';
 import { ExtractedTasksReview } from '@/components/features/ExtractedTasksReview';
 import { PhotoModal } from '@/components/features/PhotoModal';
 import { ConfirmDialog } from '@/components/features/ConfirmDialog';
+import { ChatPanel } from '@/components/features/ChatPanel';
 import { uploadPhoto } from '@/lib/supabase/uploadPhoto';
 import { createClient } from '@/lib/supabase/client';
 import { useAudioRecorder } from '@/lib/audio/useAudioRecorder';
@@ -54,11 +55,15 @@ export default function AppPage() {
   const [overflow, setOverflow] = useState<string[]>([]);
   const [busyWindows, setBusyWindows] = useState<Array<{ start: string; end: string; title?: string }>>([]);
   const [googleConnected, setGoogleConnected] = useState<boolean | null>(null);
+  const [outlookConnected, setOutlookConnected] = useState<boolean | null>(null);
   const [deletingTaskId, setDeletingTaskId] = useState<string | null>(null);
 
   // Agent progress state
   const [agentSteps, setAgentSteps] = useState<Array<{ type: 'tool' | 'text'; content: string }>>([]);
   const [agentThinking, setAgentThinking] = useState(false);
+
+  // Chat panel state
+  const [chatOpen, setChatOpen] = useState(false);
 
   // Extraction state (shared between photo and audio)
   const [extracting, setExtracting] = useState(false);
@@ -110,6 +115,7 @@ export default function AppPage() {
       const data = await res.json();
       if (res.ok) {
         setGoogleConnected(data.googleConnected);
+        setOutlookConnected(data.outlookConnected);
       }
     } catch (error) {
       logger.error("Failed to fetch Google status", { error });
@@ -367,7 +373,9 @@ export default function AppPage() {
     {
       key: "Escape",
       handler: () => {
-        if (deletingTaskId) {
+        if (chatOpen) {
+          setChatOpen(false);
+        } else if (deletingTaskId) {
           setDeletingTaskId(null);
         } else if (modalPhotoUrl) {
           setModalPhotoUrl(null);
@@ -669,44 +677,53 @@ export default function AppPage() {
         )}
       </div>
 
-      {/* Google Calendar Connection */}
+      {/* Calendar Connections */}
       <div className="mb-8 rounded-lg border border-olive-200 bg-white p-4 shadow-sm dark:border-olive-800 dark:bg-olive-900">
-        {googleConnected === null ? (
-          <p className="text-sm text-olive-500 dark:text-olive-400">
-            Checking Google Calendar status...
-          </p>
-        ) : googleConnected ? (
-          <div className="flex items-center gap-2">
-            <svg
-              className="h-5 w-5 text-green-600 dark:text-green-400"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={2}
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
-              />
-            </svg>
-            <span className="text-sm font-medium text-green-700 dark:text-green-300">
-              Google Calendar connected
-            </span>
-          </div>
-        ) : (
+        <h3 className="mb-3 text-sm font-semibold text-olive-900 dark:text-olive-50">
+          Calendar connections
+        </h3>
+        <div className="space-y-3">
+          {/* Google */}
           <div className="flex items-center justify-between">
-            <p className="text-sm text-olive-600 dark:text-olive-400">
-              Connect your Google Calendar to schedule around existing events.
-            </p>
-            <a
-              href="/api/auth/google"
-              className="inline-flex items-center gap-2 rounded-md bg-olive-600 px-4 py-2 text-sm font-medium text-white hover:bg-olive-700 focus:outline-none focus:ring-2 focus:ring-olive-500 focus:ring-offset-2 dark:bg-olive-500 dark:hover:bg-olive-600"
-            >
-              Connect Google Calendar
-            </a>
+            {googleConnected === null ? (
+              <span className="text-sm text-olive-500 dark:text-olive-400">Checking Google...</span>
+            ) : googleConnected ? (
+              <div className="flex items-center gap-2">
+                <svg className="h-4 w-4 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span className="text-sm font-medium text-green-700 dark:text-green-300">Google Calendar</span>
+              </div>
+            ) : (
+              <a
+                href="/api/auth/google"
+                className="inline-flex items-center gap-2 rounded-md border border-olive-300 px-3 py-1.5 text-sm font-medium text-olive-700 hover:bg-olive-50 dark:border-olive-600 dark:text-olive-300 dark:hover:bg-olive-800"
+              >
+                Connect Google Calendar
+              </a>
+            )}
           </div>
-        )}
+          {/* Outlook */}
+          <div className="flex items-center justify-between">
+            {outlookConnected === null ? (
+              <span className="text-sm text-olive-500 dark:text-olive-400">Checking Outlook...</span>
+            ) : outlookConnected ? (
+              <div className="flex items-center gap-2">
+                <svg className="h-4 w-4 text-green-600 dark:text-green-400" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span className="text-sm font-medium text-green-700 dark:text-green-300">Outlook Calendar</span>
+              </div>
+            ) : (
+              <a
+                href="/api/auth/microsoft"
+                className="inline-flex items-center gap-2 rounded-md border border-olive-300 px-3 py-1.5 text-sm font-medium text-olive-700 hover:bg-olive-50 dark:border-olive-600 dark:text-olive-300 dark:hover:bg-olive-800"
+              >
+                Connect Outlook Calendar
+              </a>
+            )}
+          </div>
+        </div>
       </div>
 
       {/* Schedule Error Banner */}
@@ -861,6 +878,27 @@ export default function AppPage() {
         confirmLabel="Delete"
         onConfirm={confirmDeleteTask}
         onCancel={() => setDeletingTaskId(null)}
+      />
+
+      {/* Chat toggle button */}
+      <button
+        onClick={() => setChatOpen(true)}
+        className={`fixed bottom-6 right-6 z-[55] flex h-12 w-12 items-center justify-center rounded-full bg-olive-600 text-white shadow-lg hover:bg-olive-700 focus:outline-none focus:ring-2 focus:ring-olive-500 focus:ring-offset-2 dark:bg-olive-500 dark:hover:bg-olive-600 ${chatOpen ? 'hidden' : ''}`}
+        aria-label="Open chat"
+      >
+        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" />
+        </svg>
+      </button>
+
+      {/* Chat panel */}
+      <ChatPanel
+        open={chatOpen}
+        onClose={() => setChatOpen(false)}
+        onScheduleChange={() => {
+          fetchSchedule();
+          fetchTasks();
+        }}
       />
     </>
   );

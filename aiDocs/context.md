@@ -32,7 +32,7 @@ Built for knowledge workers with unstructured schedules — freelancers, develop
 | `ai/guides/logging-testing.md` | Logging and testing patterns guide | Before writing tests or logging |
 | `ai/guides/external/` | API references (OpenAI, Google Calendar, Supabase) | During implementation |
 | `ai/guides/reference/` | Design system (`oatmeal-olive-instrument/`), class notes, stride-agent docs, Tailwind components | Before UI or agent work |
-| `ai/roadmaps/` | High-level plan + phase plans/roadmaps (10-12 active); `complete/` for phases 0-9 | Before starting a phase |
+| `ai/roadmaps/` | High-level plan + phase plans/roadmaps (11-12 active); `complete/` for phases 0-10 | Before starting a phase |
 | `ai/notes/final-to-do-checklist.md` | Final to-do checklist cross-referenced against rubric and midterm feedback | For tracking remaining work |
 | `ai/notes/midterm-feedback.md` | Midterm feedback from Jason (92), Casey (100), Presentation (70) | For understanding gaps to address |
 | `ai/notes/feedback-discussion.md` | Cofounder pivot decisions (2026-04-01) | For context on product direction |
@@ -40,7 +40,7 @@ Built for knowledge workers with unstructured schedules — freelancers, develop
 ## App Structure (`app/` directory)
 
 - `app/app/` — Protected dashboard (task input, timeline, chat modal)
-- `app/api/` — API routes: `tasks/`, `schedule/`, `auth/google/`, `profile/`, `agent/`, `test/`
+- `app/api/` — API routes: `tasks/`, `schedule/`, `auth/google/`, `auth/microsoft/`, `profile/`, `agent/`, `test/`
 - `components/` — `elements/` (atomic UI), `features/` (DailyTimeline, DashboardShell, etc.), `sections/` (marketing), `icons/`
 - `lib/` — `supabase/`, `openai/`, `google/`, `outlook/` (Phase 10), `agent/` (Phase 9), `calendar/` (Phase 10), `audio/`, `notifications/`, `hooks/`, `errors/`, `logger.ts`, `timezone.ts`
 - `types/database.ts` — Shared interfaces (Profile, Task, ScheduledBlock)
@@ -56,8 +56,7 @@ Built for knowledge workers with unstructured schedules — freelancers, develop
 
 ## Current Focus
 
-- Phases 0-9 complete (Foundation through Agentic AI).
-- Next: Phase 10 — Integrations & Web Chatbot (Outlook Calendar, web chatbot).
-- Then: Phase 11 — Beta Launch (5-10 users, analytics, feedback).
+- Phases 0-10 complete (Foundation through Integrations & Web Chatbot).
+- Next: Phase 11 — Beta Launch (5-10 users, analytics, feedback).
 - Then: Phase 12 — Secondary Features (goals, personalization loop).
 - PRD/MVP/Architecture updated 2026-04-01 to reflect broadened target users, agentic AI, and multi-calendar support.
