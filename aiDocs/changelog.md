@@ -184,3 +184,13 @@ High-level changes; add a line or two here when you commit and push.
 - **Phase 10 Complete: Integrations & Web Chatbot.**
 - **10.1 Outlook Calendar:** Microsoft OAuth flow (`/api/auth/microsoft` + callback). Token refresh via Microsoft identity platform. Outlook events fetched via Microsoft Graph API (`/me/calendarview`). Created `calendar_tokens` table for multi-provider storage with RLS. Migrated Google tokens from `profiles` to `calendar_tokens`. Unified calendar fetcher (`lib/calendar/fetchAllBusyWindows.ts`) merges all providers into single busy-windows list. Agent tools and schedule API switched to unified fetcher. Multi-provider calendar settings UI on dashboard.
 - **10.3 Skipped:** No user demand for Todoist or Slack integrations — documented and deferred.
+
+## 2026-04-06
+
+- **Phase 10.5 Complete: Bug Fixes.**
+- **Scheduling Engine:** Solver now clamps day start to current time (no past-time scheduling). Conflict checker and schedule API use overlapping range query (`start_time < endOfDay AND end_time > startOfDay`).
+- **Chat Agent:** Created `getScheduledBlocks` tool — agent reads actual schedule from DB instead of hallucinating times. Added `update_duration` action to `updateTask` tool. Hardened system prompt: must report tool-returned times only, never from conversation context. Fixed SSE stream buffer dropping last chunk.
+- **Data Integrity:** Task deletion now cascade-deletes scheduled blocks. Schedule move endpoint validates time ranges, checks conflicts (409 on overlap), and supports `cascade: true` to push subsequent blocks forward ("Need more time" workflow).
+- **Resilience:** Calendar fetch failures handled gracefully with warning instead of silent empty. Widget API base URL uses `process.env.STRIDE_API_URL` with production fallback. Widget CSP allows both localhost and production.
+- **Tests:** Added `nowOverride` to solver/reschedule for deterministic testing. All 23 tests pass.
+- **Roadmaps:** Phase 10.5 plan + roadmap moved to `ai/roadmaps/complete/`.

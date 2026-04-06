@@ -119,6 +119,7 @@ async function handleRunningLate(
     const result = await window.strideApi.updateBlock(block.id, {
       start_time: block.start_time,
       end_time: extendedEnd.toISOString(),
+      cascade: true,
     });
 
     if (result.success) {

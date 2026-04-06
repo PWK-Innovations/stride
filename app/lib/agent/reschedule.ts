@@ -18,6 +18,8 @@ export interface RescheduleInput {
   breakMinutes: number;
   timezone: string;
   maxMovableTasks: number;
+  /** Override "now" for testing. When omitted, uses real current time. */
+  nowOverride?: Date;
 }
 
 /**
@@ -40,6 +42,7 @@ export function reschedule(input: RescheduleInput): SolverResult {
     breakMinutes,
     timezone,
     maxMovableTasks,
+    nowOverride,
   } = input;
 
   const removedSet = new Set(removedTaskIds);
@@ -129,6 +132,7 @@ export function reschedule(input: RescheduleInput): SolverResult {
     breakMinutes,
     timezone,
     anchoredBlocks: allAnchored,
+    nowOverride,
   });
 
   // 7. Combine anchored blocks with newly placed blocks

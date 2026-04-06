@@ -24,7 +24,7 @@ const store = new Store<StoreSchema>({
   defaults: {
     token: '',
     refreshToken: '',
-    apiBaseUrl: 'http://localhost:3000',
+    apiBaseUrl: process.env.STRIDE_API_URL || 'https://stride-amber.vercel.app',
   },
   encryptionKey: 'stride-widget-store',
 });
@@ -58,7 +58,7 @@ contextBridge.exposeInMainWorld('strideApi', {
     return apiClient.createTask(title, durationMinutes);
   },
 
-  updateBlock: async (id: string, data: { start_time: string; end_time: string }): Promise<SuccessResponse> => {
+  updateBlock: async (id: string, data: { start_time: string; end_time: string; cascade?: boolean }): Promise<SuccessResponse> => {
     logger.debug('updateBlock called', { id });
     syncToken();
     return apiClient.updateBlock(id, data);
