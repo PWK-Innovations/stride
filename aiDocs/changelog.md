@@ -184,3 +184,7 @@ High-level changes; add a line or two here when you commit and push.
 - **Phase 10 Complete: Integrations & Web Chatbot.**
 - **10.1 Outlook Calendar:** Microsoft OAuth flow (`/api/auth/microsoft` + callback). Token refresh via Microsoft identity platform. Outlook events fetched via Microsoft Graph API (`/me/calendarview`). Created `calendar_tokens` table for multi-provider storage with RLS. Migrated Google tokens from `profiles` to `calendar_tokens`. Unified calendar fetcher (`lib/calendar/fetchAllBusyWindows.ts`) merges all providers into single busy-windows list. Agent tools and schedule API switched to unified fetcher. Multi-provider calendar settings UI on dashboard.
 - **10.3 Skipped:** No user demand for Todoist or Slack integrations — documented and deferred.
+
+## 2026-04-06
+
+- **Phase 10.5: Bug Fixes.** Created plan and roadmap for stabilization pass between Phase 10 and Phase 11. 13 bugs identified across 5 areas: scheduling engine (solver schedules in the past, incomplete conflict query), chat agent (no tool to read existing blocks, SSE buffer drop), data integrity (orphaned blocks on task delete, no move validation), timezone (DailyTimeline uses browser tz), resilience (silent calendar failures, widget hardcoded to localhost). Plan at `ai/roadmaps/2026-04-06-phase-10.5-bug-fixes-plan.md`.
