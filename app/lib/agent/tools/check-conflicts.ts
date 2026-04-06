@@ -33,8 +33,8 @@ export function createCheckConflictsTool(
         .from("scheduled_blocks")
         .select("title, start_time, end_time")
         .eq("user_id", userId)
-        .gte("start_time", startOfDay.toISOString())
-        .lte("start_time", endOfDay.toISOString());
+        .lt("start_time", endOfDay.toISOString())
+        .gt("end_time", startOfDay.toISOString());
 
       if (blocksError) {
         logger.error("Failed to fetch scheduled blocks", { error: blocksError.message });

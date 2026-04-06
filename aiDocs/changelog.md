@@ -187,4 +187,10 @@ High-level changes; add a line or two here when you commit and push.
 
 ## 2026-04-06
 
-- **Phase 10.5: Bug Fixes.** Created plan and roadmap for stabilization pass between Phase 10 and Phase 11. 13 bugs identified across 5 areas: scheduling engine (solver schedules in the past, incomplete conflict query), chat agent (no tool to read existing blocks, SSE buffer drop), data integrity (orphaned blocks on task delete, no move validation), timezone (DailyTimeline uses browser tz), resilience (silent calendar failures, widget hardcoded to localhost). Plan at `ai/roadmaps/2026-04-06-phase-10.5-bug-fixes-plan.md`.
+- **Phase 10.5 Complete: Bug Fixes.**
+- **Scheduling Engine:** Solver now clamps day start to current time (no past-time scheduling). Conflict checker and schedule API use overlapping range query (`start_time < endOfDay AND end_time > startOfDay`).
+- **Chat Agent:** Created `getScheduledBlocks` tool — agent reads actual schedule from DB instead of hallucinating times. Added `update_duration` action to `updateTask` tool. Hardened system prompt: must report tool-returned times only, never from conversation context. Fixed SSE stream buffer dropping last chunk.
+- **Data Integrity:** Task deletion now cascade-deletes scheduled blocks. Schedule move endpoint validates time ranges, checks conflicts (409 on overlap), and supports `cascade: true` to push subsequent blocks forward ("Need more time" workflow).
+- **Resilience:** Calendar fetch failures handled gracefully with warning instead of silent empty. Widget API base URL uses `process.env.STRIDE_API_URL` with production fallback. Widget CSP allows both localhost and production.
+- **Tests:** Added `nowOverride` to solver/reschedule for deterministic testing. All 23 tests pass.
+- **Roadmaps:** Phase 10.5 plan + roadmap moved to `ai/roadmaps/complete/`.

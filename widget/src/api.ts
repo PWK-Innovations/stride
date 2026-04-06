@@ -13,7 +13,7 @@ export class StrideApiClient {
   private baseUrl: string;
   private token: string;
 
-  constructor(baseUrl = 'http://localhost:3000', token = '') {
+  constructor(baseUrl = process.env.STRIDE_API_URL || 'https://stride-amber.vercel.app', token = '') {
     this.baseUrl = baseUrl;
     this.token = token;
   }
@@ -86,7 +86,7 @@ export class StrideApiClient {
     });
   }
 
-  async updateBlock(id: string, data: { start_time: string; end_time: string }): Promise<SuccessResponse> {
+  async updateBlock(id: string, data: { start_time: string; end_time: string; cascade?: boolean }): Promise<SuccessResponse> {
     return this.request<SuccessResponse>('PATCH', `/api/schedule/${id}`, data);
   }
 

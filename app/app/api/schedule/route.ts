@@ -22,8 +22,8 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       .from("scheduled_blocks")
       .select("*")
       .eq("user_id", user.id)
-      .gte("start_time", startOfDay.toISOString())
-      .lte("start_time", endOfDay.toISOString())
+      .lt("start_time", endOfDay.toISOString())
+      .gt("end_time", startOfDay.toISOString())
       .order("start_time", { ascending: true });
 
     if (error) {

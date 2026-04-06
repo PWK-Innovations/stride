@@ -105,11 +105,15 @@ export function ChatPanel({ open, onClose, onScheduleChange }: ChatPanelProps) {
 
       while (true) {
         const { done, value } = await reader.read();
-        if (done) break;
+        if (!done) {
+          buffer += decoder.decode(value, { stream: true });
+        } else {
+          // Flush remaining decoder bytes
+          buffer += decoder.decode();
+        }
 
-        buffer += decoder.decode(value, { stream: true });
         const lines = buffer.split('\n\n');
-        buffer = lines.pop() || '';
+        buffer = done ? '' : (lines.pop() || '');
 
         for (const line of lines) {
           if (!line.startsWith('data: ')) continue;
@@ -142,6 +146,8 @@ export function ChatPanel({ open, onClose, onScheduleChange }: ChatPanelProps) {
             if (parseError instanceof Error && parseError.message === 'Agent error') throw parseError;
           }
         }
+
+        if (done) break;
       }
 
       // Clear tool status on done

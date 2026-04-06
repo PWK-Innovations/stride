@@ -39,7 +39,7 @@ interface StrideApi {
   getTasks(): Promise<{ tasks: Task[] }>;
   getSchedule(timezone: string): Promise<{ scheduled_blocks: ScheduledBlock[]; busy_windows?: BusyWindow[] }>;
   createTask(title: string, durationMinutes: number): Promise<{ task: Task }>;
-  updateBlock(id: string, data: { start_time: string; end_time: string }): Promise<{ success: boolean }>;
+  updateBlock(id: string, data: { start_time: string; end_time: string; cascade?: boolean }): Promise<{ success: boolean }>;
   deleteTask(id: string): Promise<{ success: boolean }>;
   deleteBlock(id: string): Promise<{ success: boolean }>;
   getToken(): string;

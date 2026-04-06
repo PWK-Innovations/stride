@@ -24,6 +24,13 @@ function assert(condition: boolean, name: string, detail?: string): void {
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
+/** Simulate running tests at 8 AM local time so the full working window is available. */
+const TEST_NOW = (() => {
+  const d = new Date();
+  d.setHours(8, 0, 0, 0);
+  return d;
+})();
+
 function makeDate(hour: number, minute = 0): Date {
   const d = new Date();
   d.setHours(hour, minute, 0, 0);
@@ -75,6 +82,7 @@ function testSolverBasicPlacement(): void {
     workingHoursEnd: 18,
     breakMinutes: 10,
     timezone: "America/New_York",
+    nowOverride: TEST_NOW,
   });
 
   assert(
@@ -101,6 +109,7 @@ function testSolverNoOverlaps(): void {
     workingHoursEnd: 18,
     breakMinutes: 10,
     timezone: "America/New_York",
+    nowOverride: TEST_NOW,
   });
 
   assert(
@@ -122,6 +131,7 @@ function testSolverRespectsBreaks(): void {
     workingHoursEnd: 18,
     breakMinutes: 10,
     timezone: "America/New_York",
+    nowOverride: TEST_NOW,
   });
 
   assert(result.scheduledBlocks.length === 2, "Solver places both tasks for break test");
@@ -156,6 +166,7 @@ function testSolverAvoidsBusyWindows(): void {
     workingHoursEnd: 18,
     breakMinutes: 10,
     timezone: "America/New_York",
+    nowOverride: TEST_NOW,
   });
 
   const anyOverlap = result.scheduledBlocks.some((block) =>
@@ -184,6 +195,7 @@ function testSolverOverflow(): void {
     workingHoursEnd: 18,
     breakMinutes: 10,
     timezone: "America/New_York",
+    nowOverride: TEST_NOW,
   });
 
   assert(result.overflow.length > 0, "Solver overflows when tasks exceed capacity");
@@ -216,6 +228,7 @@ function testSolverWorkingHours(): void {
     workingHoursEnd: 18,
     breakMinutes: 10,
     timezone: "America/New_York",
+    nowOverride: TEST_NOW,
   });
 
   if (result.scheduledBlocks.length === 1) {
@@ -251,6 +264,7 @@ function testSolverPreferredTime(): void {
     workingHoursEnd: 18,
     breakMinutes: 10,
     timezone: "America/New_York",
+    nowOverride: TEST_NOW,
   });
 
   assert(result.scheduledBlocks.length === 2, "Solver places both tasks with preferred time");
@@ -288,6 +302,7 @@ function testSolverPreferredTimeBusy(): void {
     workingHoursEnd: 18,
     breakMinutes: 10,
     timezone: "America/New_York",
+    nowOverride: TEST_NOW,
   });
 
   assert(result.scheduledBlocks.length === 1, "Solver places task when preferred time is busy");
@@ -329,6 +344,7 @@ function testRescheduleAnchorsCompleted(): void {
     breakMinutes: 10,
     timezone: "America/New_York",
     maxMovableTasks: 5,
+    nowOverride: TEST_NOW,
   });
 
   const doneBlock = result.scheduledBlocks.find((b) => b.taskId === "done1");
@@ -360,6 +376,7 @@ function testRescheduleMinimalMoves(): void {
     breakMinutes: 10,
     timezone: "America/New_York",
     maxMovableTasks: 3,
+    nowOverride: TEST_NOW,
   });
 
   assert(
@@ -399,6 +416,7 @@ function testRescheduleAnchorsInProgress(): void {
     breakMinutes: 10,
     timezone: "America/New_York",
     maxMovableTasks: 5,
+    nowOverride: TEST_NOW,
   });
 
   const activeBlock = result.scheduledBlocks.find(
@@ -434,6 +452,7 @@ function testRescheduleWithNewTask(): void {
     breakMinutes: 10,
     timezone: "America/New_York",
     maxMovableTasks: 5,
+    nowOverride: TEST_NOW,
   });
 
   const newBlock = result.scheduledBlocks.find((b) => b.taskId === "new1");

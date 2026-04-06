@@ -32,6 +32,8 @@ export interface SolverInput {
   breakMinutes: number;
   timezone: string;
   anchoredBlocks?: ScheduledBlock[];
+  /** Override "now" for testing. When omitted, uses real current time. */
+  nowOverride?: Date;
 }
 
 export interface SolverResult {
@@ -55,6 +57,7 @@ export function solveSchedule(input: SolverInput): SolverResult {
     breakMinutes,
     timezone,
     anchoredBlocks = [],
+    nowOverride,
   } = input;
 
   logger.info("Solving schedule", {
@@ -66,12 +69,22 @@ export function solveSchedule(input: SolverInput): SolverResult {
     timezone,
   });
 
-  // 1. Get today's working hours in UTC
-  const { start: dayStart, end: dayEnd } = getWorkingHoursBounds(
+  // 1. Get today's working hours in UTC, clamped to current time
+  const { start: rawDayStart, end: dayEnd } = getWorkingHoursBounds(
     timezone,
     workingHoursStart,
     workingHoursEnd,
   );
+
+  const now = nowOverride ?? new Date();
+  const dayStart = now > rawDayStart ? now : rawDayStart;
+
+  if (now > rawDayStart) {
+    logger.debug("Clamped day start to current time", {
+      originalStart: rawDayStart.toISOString(),
+      clampedStart: now.toISOString(),
+    });
+  }
 
   // 2. Build combined busy windows from calendar events + anchored blocks
   const allBusyWindows: BusyWindow[] = [

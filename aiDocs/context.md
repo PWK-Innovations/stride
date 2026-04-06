@@ -32,7 +32,7 @@ Built for knowledge workers with unstructured schedules — freelancers, develop
 | `ai/guides/logging-testing.md` | Logging and testing patterns guide | Before writing tests or logging |
 | `ai/guides/external/` | API references (OpenAI, Google Calendar, Supabase) | During implementation |
 | `ai/guides/reference/` | Design system (`oatmeal-olive-instrument/`), class notes, stride-agent docs, Tailwind components | Before UI or agent work |
-| `ai/roadmaps/` | High-level plan + phase plans/roadmaps (10.5, 11-12 active); `complete/` for phases 0-10 | Before starting a phase |
+| `ai/roadmaps/` | High-level plan + phase plans/roadmaps (11-12 active); `complete/` for phases 0-10.5 | Before starting a phase |
 | `ai/notes/final-to-do-checklist.md` | Final to-do checklist cross-referenced against rubric and midterm feedback | For tracking remaining work |
 | `ai/notes/midterm-feedback.md` | Midterm feedback from Jason (92), Casey (100), Presentation (70) | For understanding gaps to address |
 | `ai/notes/feedback-discussion.md` | Cofounder pivot decisions (2026-04-01) | For context on product direction |
@@ -56,8 +56,7 @@ Built for knowledge workers with unstructured schedules — freelancers, develop
 
 ## Current Focus
 
-- Phases 0-10 complete (Foundation through Integrations & Web Chatbot).
-- Active: Phase 10.5 — Bug Fixes (scheduling engine, chat agent, timezone, data integrity).
+- Phases 0-10.5 complete (Foundation through Bug Fixes).
 - Next: Phase 11 — Beta Launch (5-10 users, analytics, feedback).
 - Then: Phase 12 — Secondary Features (goals, personalization loop).
 - PRD/MVP/Architecture updated 2026-04-01 to reflect broadened target users, agentic AI, and multi-calendar support.
