@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import * as Sentry from "@sentry/nextjs";
 import { getAuthenticatedUser } from "@/lib/supabase/api-auth";
 import { createSchedulingAgent, AGENT_RECURSION_LIMIT } from "@/lib/agent/agent";
 import { loadConversation, saveMessage } from "@/lib/agent/memory";
@@ -103,6 +104,10 @@ export async function POST(req: NextRequest) {
         } catch (error: unknown) {
           const errorMessage =
             error instanceof Error ? error.message : "Stream error";
+          Sentry.captureException(error, {
+            tags: { component: "agent", phase: "stream" },
+            extra: { userId: user.id },
+          });
           logger.error("Agent stream error", {
             error: errorMessage,
             userId: user.id,
@@ -127,6 +132,9 @@ export async function POST(req: NextRequest) {
   } catch (error: unknown) {
     const errorMessage =
       error instanceof Error ? error.message : "Internal server error";
+    Sentry.captureException(error, {
+      tags: { component: "agent", phase: "request" },
+    });
     logger.error("Agent chat error", { error: errorMessage });
     return new Response(JSON.stringify({ error: errorMessage }), {
       status: 500,

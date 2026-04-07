@@ -67,7 +67,7 @@ export async function GET(request: NextRequest) {
     }
 
     logger.info('Outlook OAuth connected', { userId: user.id });
-    return NextResponse.redirect(new URL('/app', request.url));
+    return NextResponse.redirect(new URL('/app?connected=outlook', request.url));
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : String(error);
     logger.error('Microsoft OAuth callback failed', { error: message });

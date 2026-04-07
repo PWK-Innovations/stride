@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Dialog,
@@ -19,6 +19,8 @@ import {
 } from '@heroicons/react/24/outline';
 import { ChevronDownIcon } from '@heroicons/react/20/solid';
 import { signOut } from '@/lib/supabase/auth';
+import { initAnalytics, identifyUser } from '@/lib/analytics';
+import { OnboardingModal } from '@/components/features/OnboardingModal';
 
 const navigation = [
   { name: 'Dashboard', href: '/app', icon: HomeIcon, current: true },
@@ -27,12 +29,27 @@ const navigation = [
 export default function DashboardShell({
   children,
   userEmail,
+  userId,
+  completedOnboarding,
 }: {
   children: React.ReactNode;
   userEmail: string;
+  userId: string;
+  completedOnboarding: boolean;
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    initAnalytics();
+    if (userId) {
+      identifyUser(userId, userEmail);
+    }
+    if (!completedOnboarding) {
+      setShowOnboarding(true);
+    }
+  }, [userId, userEmail, completedOnboarding]);
 
   async function handleSignOut() {
     await signOut();
@@ -180,6 +197,11 @@ export default function DashboardShell({
           <div className="px-4 sm:px-6 lg:px-8">{children}</div>
         </main>
       </div>
+
+      <OnboardingModal
+        open={showOnboarding}
+        onComplete={() => setShowOnboarding(false)}
+      />
     </div>
   );
 }

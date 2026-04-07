@@ -11,8 +11,14 @@ export default async function AppLayout({
     data: { user },
   } = await supabase.auth.getUser();
 
+  const completedOnboarding = user?.user_metadata?.completed_onboarding === true;
+
   return (
-    <DashboardShell userEmail={user?.email ?? ''}>
+    <DashboardShell
+      userEmail={user?.email ?? ''}
+      userId={user?.id ?? ''}
+      completedOnboarding={completedOnboarding}
+    >
       {children}
     </DashboardShell>
   );

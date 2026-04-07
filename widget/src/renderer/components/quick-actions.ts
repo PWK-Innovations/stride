@@ -1,4 +1,5 @@
 import { createLogger } from "../logger";
+import { trackEvent } from "../analytics";
 
 const logger = createLogger("QuickActions");
 
@@ -42,6 +43,7 @@ async function handleDone(block: ScheduledBlock, container: HTMLElement): Promis
   if (btn) setButtonLoading(btn, true);
 
   try {
+    trackEvent("quick_action_used", { action: "done" });
     logger.info("Marking task done", { taskId: block.task_id, blockId: block.id });
 
     // Delete the scheduled block first
@@ -75,6 +77,7 @@ async function handleSkip(block: ScheduledBlock, container: HTMLElement): Promis
   if (btn) setButtonLoading(btn, true);
 
   try {
+    trackEvent("quick_action_used", { action: "skip" });
     logger.info("Skipping task", { taskId: block.task_id, blockId: block.id });
 
     // Delete the scheduled block first
@@ -111,6 +114,7 @@ async function handleRunningLate(
     const currentEnd = new Date(block.end_time);
     const extendedEnd = new Date(currentEnd.getTime() + 15 * 60_000);
 
+    trackEvent("quick_action_used", { action: "need_more_time" });
     logger.info("Extending block by 15 min", {
       blockId: block.id,
       newEndTime: extendedEnd.toISOString(),

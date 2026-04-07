@@ -14,6 +14,7 @@ Built for knowledge workers with unstructured schedules — freelancers, develop
 - **Backend**: Supabase (Auth, PostgreSQL, Storage)
 - **AI**: LangChain agent + OpenAI GPT-4o-mini + deterministic constraint solver
 - **Calendars**: Google Calendar API + Outlook Calendar (Microsoft Graph API)
+- **Observability**: PostHog (analytics), Sentry (error tracking)
 - **Hosting**: Vercel (PWA, browser notifications)
 
 ## Key Files
@@ -36,6 +37,7 @@ Built for knowledge workers with unstructured schedules — freelancers, develop
 | `ai/notes/final-to-do-checklist.md` | Final to-do checklist cross-referenced against rubric and midterm feedback | For tracking remaining work |
 | `ai/notes/midterm-feedback.md` | Midterm feedback from Jason (92), Casey (100), Presentation (70) | For understanding gaps to address |
 | `ai/notes/feedback-discussion.md` | Cofounder pivot decisions (2026-04-01) | For context on product direction |
+| `ai/notes/customer-feedback.md` | Customer feedback notes from beta | For understanding user needs |
 
 ## App Structure (`app/` directory)
 
@@ -45,18 +47,20 @@ Built for knowledge workers with unstructured schedules — freelancers, develop
 - `lib/` — `supabase/`, `openai/`, `google/`, `outlook/` (Phase 10), `agent/` (Phase 9), `calendar/` (Phase 10), `audio/`, `notifications/`, `hooks/`, `errors/`, `logger.ts`, `timezone.ts`
 - `types/database.ts` — Shared interfaces (Profile, Task, ScheduledBlock)
 - `middleware.ts` — Route protection (Supabase SSR)
+- `instrumentation.ts`, `instrumentation-client.ts`, `sentry.*.config.ts` — Sentry initialization (server, client, edge)
 
 ## Important Notes
 
 - **Secrets**: Never commit API keys. Use env vars (see `.env.example`).
 - **Scope**: Today-only scheduling. Check `mvp.md` before adding features.
-- **Logging**: Use `lib/logger.ts` — no raw `console.*` calls.
+- **Logging**: Use `lib/logger.ts` — no raw `console.*` calls. `logger.error()` auto-reports to Sentry.
+- **Analytics**: Use `lib/analytics.ts` (`trackEvent`) for user event tracking. Widget analytics in `widget/src/renderer/analytics.ts`.
 - **Changelog**: Update `aiDocs/changelog.md` before every commit. No exceptions. Make additions concise - no fluff.
 - **Plans/Roadmaps**: Save in `ai/roadmaps/` with date prefix. Plans use lists, roadmaps use checkboxes. Move to `complete/` when done.
 
 ## Current Focus
 
-- Phases 0-10.5 complete (Foundation through Bug Fixes).
-- Next: Phase 11 — Beta Launch (5-10 users, analytics, error logging, onboarding, feedback collection).
-- Then: Phase 12 — Customer Feedback Features (audio chat, AI time estimation, widget upgrades).
+- Phases 0-11 complete (Foundation through Beta Launch).
+- Phase 11 delivered: PostHog analytics (web + widget), Sentry error tracking, onboarding modal, beta user feedback collected.
+- Next: Phase 12 — Customer Feedback Features (audio chat, AI time estimation, widget upgrades).
 - PRD/MVP/Architecture updated 2026-04-01 to reflect broadened target users, agentic AI, and multi-calendar support. Phase 12 restructured 2026-04-07 for customer feedback features (audio chat, AI time estimation, widget upgrades); goals/personalization deferred.

@@ -18,6 +18,7 @@ interface StoreSchema {
   token: string;
   refreshToken: string;
   apiBaseUrl: string;
+  posthogKey: string;
 }
 
 const store = new Store<StoreSchema>({
@@ -25,6 +26,7 @@ const store = new Store<StoreSchema>({
     token: '',
     refreshToken: '',
     apiBaseUrl: process.env.STRIDE_API_URL || 'https://stride-amber.vercel.app',
+    posthogKey: process.env.NEXT_PUBLIC_POSTHOG_KEY || 'phc_AAXeb2bHiANgFFZvJe2iDYUX3wzhAChDa8gwTMQGDdBy',
   },
   encryptionKey: 'stride-widget-store',
 });
@@ -198,4 +200,8 @@ contextBridge.exposeInMainWorld('strideChat', {
   },
 });
 
-logger.info('Preload bridges exposed', { bridges: ['strideApi', 'strideWidget', 'strideChat'] });
+contextBridge.exposeInMainWorld('strideConfig', {
+  posthogKey: store.get('posthogKey'),
+});
+
+logger.info('Preload bridges exposed', { bridges: ['strideApi', 'strideWidget', 'strideChat', 'strideConfig'] });

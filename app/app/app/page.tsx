@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { PlusIcon } from '@/components/icons/plus-icon';
 import { TrashIcon } from '@/components/icons/trash-icon';
 import { SparklesIcon } from '@/components/icons/sparkles-icon';
@@ -21,6 +22,7 @@ import {
 } from '@/lib/notifications/scheduleNotifications';
 
 import { createLogger } from '@/lib/logger';
+import { trackEvent } from '@/lib/analytics';
 import type { ExtractedTask } from '@/types/database';
 
 const logger = createLogger("app:dashboard");
@@ -43,6 +45,8 @@ interface ScheduledBlock {
 }
 
 export default function AppPage() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loadingTasks, setLoadingTasks] = useState(true);
   const [title, setTitle] = useState('');
@@ -108,6 +112,14 @@ export default function AppPage() {
       setWidgetBannerDismissed(false);
     }
   }, []);
+
+  useEffect(() => {
+    const connected = searchParams.get("connected");
+    if (connected === "google" || connected === "outlook") {
+      trackEvent("calendar_connected", { provider: connected });
+      router.replace("/app", { scroll: false });
+    }
+  }, [searchParams, router]);
 
   const fetchGoogleStatus = async () => {
     try {
@@ -177,6 +189,7 @@ export default function AppPage() {
       });
 
       if (res.ok) {
+        trackEvent("task_created", { type: "text" });
         setTitle('');
         setNotes('');
         setDuration(30);
@@ -235,6 +248,7 @@ export default function AppPage() {
       }
 
       setExtractedTasks(data.tasks);
+      trackEvent("task_created", { type: "photo" });
     } catch (error) {
       logger.error("Failed to extract tasks from photo", { error });
       setExtractionError('Failed to analyze photo. Please try again.');
@@ -334,6 +348,7 @@ export default function AppPage() {
 
       setTranscription(data.transcription || null);
       setExtractedTasks(data.tasks);
+      trackEvent("task_created", { type: "voice" });
     } catch (error) {
       logger.error("Failed to extract tasks from audio", { error });
       setExtractionError("Failed to analyze audio. Please try again.");
@@ -916,6 +931,7 @@ export default function AppPage() {
   }
 
   async function buildMyDay(retry = false) {
+    trackEvent("day_built", { retry });
     setBuildingSchedule(true);
     setScheduleError(null);
     setAgentSteps([]);
