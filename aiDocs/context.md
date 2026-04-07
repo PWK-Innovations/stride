@@ -57,6 +57,6 @@ Built for knowledge workers with unstructured schedules — freelancers, develop
 ## Current Focus
 
 - Phases 0-10.5 complete (Foundation through Bug Fixes).
-- Next: Phase 11 — Beta Launch (5-10 users, analytics, feedback).
-- Then: Phase 12 — Secondary Features (goals, personalization loop).
-- PRD/MVP/Architecture updated 2026-04-01 to reflect broadened target users, agentic AI, and multi-calendar support.
+- Next: Phase 11 — Beta Launch (5-10 users, analytics, error logging, onboarding, feedback collection).
+- Then: Phase 12 — Customer Feedback Features (audio chat, AI time estimation, widget upgrades).
+- PRD/MVP/Architecture updated 2026-04-01 to reflect broadened target users, agentic AI, and multi-calendar support. Phase 12 restructured 2026-04-07 for customer feedback features (audio chat, AI time estimation, widget upgrades); goals/personalization deferred.

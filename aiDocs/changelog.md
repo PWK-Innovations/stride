@@ -195,3 +195,7 @@ High-level changes; add a line or two here when you commit and push.
 - **Tests:** Added `nowOverride` to solver/reschedule for deterministic testing. All 23 tests pass.
 - **Test-Log-Fix Loop (Phase 10.5):** Ran `npm run test:agent` — agent chat integration tests revealed three bugs traced through structured logs: (1) agent hallucinating schedule times — logs showed `logger.warn("agent returned times not matching any scheduled block")` — created `getScheduledBlocks` tool so agent reads real data from DB, (2) solver scheduling tasks in the past — `logger.error("solver placed block before current time")` — added `nowOverride` clamp to solver, (3) SSE stream dropping final chunk — `logger.warn("stream ended with buffered content")` — fixed buffer flush on stream close. Re-ran all 23 solver tests + 6 chat integration tests — all green.
 - **Roadmaps:** Phase 10.5 plan + roadmap moved to `ai/roadmaps/complete/`.
+
+## 2026-04-07
+
+- **Phase Restructure:** Rewrote Phase 12 based on customer feedback. Phase 11 stays as Beta Launch (unchanged). Phase 12 is now "Customer Feedback Features" (audio chat, AI time estimation, widget upgrades) — goals, personalization loop, and refinements deferred to future phases. Updated Phase 12 plan/roadmap docs, `context.md`, and `prd.md` (added Phase 12 features to P2, removed Todoist/Slack).

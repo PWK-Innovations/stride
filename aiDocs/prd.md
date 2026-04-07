@@ -60,10 +60,12 @@ In summary, our daily planning system addresses two connected problems: how peop
 
 **P2: Enhanced User Experience**
 
+- Audio chat: voice input for agent interaction in both web chat panel and desktop widget (reuses Whisper transcription pipeline from Phase 4)
+- AI time estimation: GPT-estimated task durations for audio, photo, and chat-created tasks — editable by user before confirmation (manual entry unaffected)
+- Widget upgrades: task completion → "start next task?" prompt, "need more time" quick-add options (+15/+30/+60 min), scrollable daily schedule in expanded mode, chat overlay on schedule
 - Goal incorporation into scheduling logic
 - Personalization loop: the agent learns user patterns over time (e.g., user consistently underestimates deep work by 20%, is more productive in mornings, always skips afternoon tasks) and auto-adjusts future schedules accordingly — duration padding, optimal slot placement, realistic capacity estimates
 - Proactive focus guidance ("You have 45 minutes before your next meeting — good time to tackle X")
-- Future integrations: Todoist task import, Slack notifications and slash commands
 
 ## 5. User Stories
 
