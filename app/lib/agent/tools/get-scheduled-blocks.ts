@@ -18,7 +18,7 @@ export function createGetScheduledBlocksTool(
       const { startOfDay, endOfDay } = getDayBoundsInZone(timezone);
       const { data: blocks, error } = await supabase
         .from("scheduled_blocks")
-        .select("task_id, title, start_time, end_time, source")
+        .select("id, task_id, title, start_time, end_time, source")
         .eq("user_id", userId)
         .lt("start_time", endOfDay.toISOString())
         .gt("end_time", startOfDay.toISOString())
@@ -35,6 +35,7 @@ export function createGetScheduledBlocksTool(
       }
 
       const formatted = blocks.map((block) => ({
+        blockId: block.id,
         taskId: block.task_id,
         title: block.title,
         startTime: formatTimeInZone(new Date(block.start_time), timezone),

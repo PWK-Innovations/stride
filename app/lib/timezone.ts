@@ -174,6 +174,17 @@ export function getUtcOffsetString(timezone: string): string {
 }
 
 /**
+ * Parse an ISO datetime string, treating naive strings (no Z or offset)
+ * as being in the given timezone. This prevents the server from
+ * misinterpreting "17:00:00" as UTC when the user meant local time.
+ */
+export function parseTimeInZone(timestamp: string, timezone: string): Date {
+  const offset = getUtcOffsetString(timezone);
+  const withOffset = ensureOffset(timestamp, offset);
+  return new Date(withOffset);
+}
+
+/**
  * If `timestamp` is a naive ISO string (no `Z` or offset), append the
  * given fallback offset so Postgres treats it correctly.
  *

@@ -6,7 +6,6 @@ const CHIPS = [
   "What's next?",
   "Add a task",
   "How's my day?",
-  "What can you do?",
 ];
 
 export function buildSuggestionChips(): string {

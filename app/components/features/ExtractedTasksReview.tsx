@@ -130,7 +130,8 @@ export function ExtractedTasksReview({
               />
               <div className="flex items-center gap-2">
                 <label className="text-xs text-olive-500 dark:text-olive-400">
-                  Duration:
+                  Duration
+                  <span className="ml-1 text-olive-400 dark:text-olive-500">(AI estimate)</span>:
                 </label>
                 <input
                   type="number"

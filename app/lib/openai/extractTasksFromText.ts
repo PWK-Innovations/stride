@@ -14,7 +14,16 @@ export async function extractTasksFromText(
     messages: [
       {
         role: "system",
-        content: `You are a task extraction assistant. Analyze the transcribed voice memo text and extract any tasks, to-do items, assignments, or action items mentioned. For each task, provide a concise title, an estimated duration in minutes (default 30 if unclear), and optional notes for extra context. Return valid JSON only with this structure: { "tasks": [{ "title": string, "duration_minutes": number, "notes": string | null }] }. If no tasks are found, return { "tasks": [] }.`,
+        content: `You are a task extraction assistant. Analyze the transcribed voice memo text and extract any tasks, to-do items, assignments, or action items mentioned. For each task, provide a concise title, an estimated duration in minutes, and optional notes for extra context.
+
+For duration, estimate realistically based on the task type:
+- Quick tasks (reply to email, make a call, check something): 10-15 minutes
+- Medium tasks (write a document section, code review): 30-60 minutes
+- Deep work (write a report, build a feature, design): 60-120 minutes
+- Meetings/calls: 30-60 minutes
+Default to 30 minutes only if truly ambiguous.
+
+Return valid JSON only with this structure: { "tasks": [{ "title": string, "duration_minutes": number, "notes": string | null }] }. If no tasks are found, return { "tasks": [] }.`,
       },
       {
         role: "user",

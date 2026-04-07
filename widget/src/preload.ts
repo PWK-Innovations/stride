@@ -164,6 +164,11 @@ contextBridge.exposeInMainWorld('strideChat', {
     return ipcRenderer.invoke('chat-send-message', message) as Promise<string>;
   },
 
+  sendAudio: async (audioData: ArrayBuffer, mimeType: string): Promise<string> => {
+    logger.debug('sendAudio called', { bytes: audioData.byteLength, mimeType });
+    return ipcRenderer.invoke('chat-send-audio', audioData, mimeType) as Promise<string>;
+  },
+
   onResponse: (callback: (response: string) => void): void => {
     logger.debug('onResponse listener registered');
     ipcRenderer.on('chat-response', (_, response: string) => {
@@ -196,6 +201,13 @@ contextBridge.exposeInMainWorld('strideChat', {
     logger.debug('onStreamError listener registered');
     ipcRenderer.on('chat-stream-error', (_, error: string) => {
       callback(error);
+    });
+  },
+
+  onStreamTranscription: (callback: (text: string) => void): void => {
+    logger.debug('onStreamTranscription listener registered');
+    ipcRenderer.on('chat-stream-transcription', (_, text: string) => {
+      callback(text);
     });
   },
 });
