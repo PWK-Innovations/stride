@@ -184,3 +184,7 @@ High-level changes; add a line or two here when you commit and push.
 - **Phase 10 Complete: Integrations & Web Chatbot.**
 - **10.1 Outlook Calendar:** Microsoft OAuth flow (`/api/auth/microsoft` + callback). Token refresh via Microsoft identity platform. Outlook events fetched via Microsoft Graph API (`/me/calendarview`). Created `calendar_tokens` table for multi-provider storage with RLS. Migrated Google tokens from `profiles` to `calendar_tokens`. Unified calendar fetcher (`lib/calendar/fetchAllBusyWindows.ts`) merges all providers into single busy-windows list. Agent tools and schedule API switched to unified fetcher. Multi-provider calendar settings UI on dashboard.
 - **10.3 Skipped:** No user demand for Todoist or Slack integrations — documented and deferred.
+
+## 2026-04-07
+
+- **Phase Restructure:** Rewrote Phase 12 based on customer feedback. Phase 11 stays as Beta Launch (unchanged). Phase 12 is now "Customer Feedback Features" (audio chat, AI time estimation, widget upgrades) — goals, personalization loop, and refinements deferred to future phases. Updated Phase 12 plan/roadmap docs, `context.md`, and `prd.md` (added Phase 12 features to P2, removed Todoist/Slack).
