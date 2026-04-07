@@ -33,7 +33,7 @@ Built for knowledge workers with unstructured schedules — freelancers, develop
 | `ai/guides/logging-testing.md` | Logging and testing patterns guide | Before writing tests or logging |
 | `ai/guides/external/` | API references (OpenAI, Google Calendar, Supabase) | During implementation |
 | `ai/guides/reference/` | Design system (`oatmeal-olive-instrument/`), class notes, stride-agent docs, Tailwind components | Before UI or agent work |
-| `ai/roadmaps/` | High-level plan + phase plans/roadmaps (11-12 active); `complete/` for phases 0-10.5 | Before starting a phase |
+| `ai/roadmaps/` | High-level plan; `complete/` for phases 0-12 | Before starting a phase |
 | `ai/notes/final-to-do-checklist.md` | Final to-do checklist cross-referenced against rubric and midterm feedback | For tracking remaining work |
 | `ai/notes/midterm-feedback.md` | Midterm feedback from Jason (92), Casey (100), Presentation (70) | For understanding gaps to address |
 | `ai/notes/feedback-discussion.md` | Cofounder pivot decisions (2026-04-01) | For context on product direction |
@@ -42,9 +42,9 @@ Built for knowledge workers with unstructured schedules — freelancers, develop
 ## App Structure (`app/` directory)
 
 - `app/app/` — Protected dashboard (task input, timeline, chat modal)
-- `app/api/` — API routes: `tasks/`, `schedule/`, `auth/google/`, `auth/microsoft/`, `profile/`, `agent/`, `test/`
+- `app/api/` — API routes: `tasks/`, `schedule/`, `auth/google/`, `auth/microsoft/`, `profile/`, `agent/` (chat, chat-audio, history), `test/`
 - `components/` — `elements/` (atomic UI), `features/` (DailyTimeline, DashboardShell, etc.), `sections/` (marketing), `icons/`
-- `lib/` — `supabase/`, `openai/`, `google/`, `outlook/` (Phase 10), `agent/` (Phase 9), `calendar/` (Phase 10), `audio/`, `notifications/`, `hooks/`, `errors/`, `logger.ts`, `timezone.ts`
+- `lib/` — `supabase/`, `openai/`, `google/`, `outlook/` (Phase 10), `agent/` (Phase 9, tools: schedule-task, move-block, create-task, etc.), `calendar/` (Phase 10), `audio/`, `notifications/`, `hooks/`, `errors/`, `logger.ts`, `timezone.ts`
 - `types/database.ts` — Shared interfaces (Profile, Task, ScheduledBlock)
 - `middleware.ts` — Route protection (Supabase SSR)
 - `instrumentation.ts`, `instrumentation-client.ts`, `sentry.*.config.ts` — Sentry initialization (server, client, edge)
@@ -60,7 +60,6 @@ Built for knowledge workers with unstructured schedules — freelancers, develop
 
 ## Current Focus
 
-- Phases 0-11 complete (Foundation through Beta Launch).
-- Phase 11 delivered: PostHog analytics (web + widget), Sentry error tracking, onboarding modal, beta user feedback collected.
-- Next: Phase 12 — Customer Feedback Features (audio chat, AI time estimation, widget upgrades).
-- PRD/MVP/Architecture updated 2026-04-01 to reflect broadened target users, agentic AI, and multi-calendar support. Phase 12 restructured 2026-04-07 for customer feedback features (audio chat, AI time estimation, widget upgrades); goals/personalization deferred.
+- Phases 0-12 complete (Foundation through Customer Feedback Features).
+- Phase 12 delivered: Audio chat (web + widget), AI time estimation, widget upgrades (task completion flow, expandable time menu, scrollable schedule with drag-to-reschedule, chat overlay). New agent tools (scheduleTask, moveBlock) for non-destructive schedule edits. Timezone-aware time parsing.
+- No next phase defined — future work based on continued user feedback. Goals, personalization loop, and refinements deferred.
