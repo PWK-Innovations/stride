@@ -13,6 +13,7 @@ export async function loadConversation(
   supabase: SupabaseClient,
   userId: string,
   date: string,
+  maxMessages?: number,
 ): Promise<BaseMessage[]> {
   logger.info("Loading conversation", { userId, date });
 
@@ -29,14 +30,40 @@ export async function loadConversation(
   }
 
   const messages = data.messages as StoredMessage[];
-  const baseMessages: BaseMessage[] = messages.map((msg) => {
+
+  // Keep only recent messages to prevent stale schedule data from confusing the agent.
+  // Old assistant responses may reference tasks/times that no longer exist.
+  const MAX_HISTORY_MESSAGES = maxMessages ?? 10;
+  const trimmed = messages.length > MAX_HISTORY_MESSAGES
+    ? messages.slice(-MAX_HISTORY_MESSAGES)
+    : messages;
+
+  const baseMessages: BaseMessage[] = trimmed.map((msg) => {
     if (msg.role === "user") {
       return new HumanMessage(msg.content);
     }
-    return new AIMessage(msg.content);
+    // Strip schedule data from assistant history to prevent stale time references.
+    // The agent must always call getScheduledBlocks for current times.
+    let cleaned = msg.content;
+    // Strip numbered schedule lists: "1. **Task** - 3:20 PM..."
+    cleaned = cleaned.replace(
+      /(\d+\.\s+\*\*.*?\*\*\s*[-–]\s*\d{1,2}:\d{2}\s*(AM|PM).*\n?)+/gi,
+      "[schedule omitted]\n",
+    );
+    // Strip inline schedule references: "scheduled from **5:00 PM to 5:30 PM**"
+    cleaned = cleaned.replace(
+      /scheduled\s+from\s+\*{0,2}\d{1,2}:\d{2}\s*(AM|PM)\*{0,2}\s*(to|-|–)\s*\*{0,2}\d{1,2}:\d{2}\s*(AM|PM)\*{0,2}/gi,
+      "[time omitted]",
+    );
+    return new AIMessage(cleaned);
   });
 
-  logger.info("Conversation loaded", { userId, date, messageCount: baseMessages.length });
+  logger.info("Conversation loaded", {
+    userId,
+    date,
+    totalMessages: messages.length,
+    loadedMessages: baseMessages.length,
+  });
   return baseMessages;
 }
 

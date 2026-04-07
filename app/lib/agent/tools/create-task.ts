@@ -5,18 +5,33 @@ import { createLogger } from "@/lib/logger";
 
 const logger = createLogger("agent:tool:createTask");
 
+function estimateDuration(title: string): number {
+  const lower = title.toLowerCase();
+
+  const quickPatterns = ["email", "reply", "call", "check", "respond", "text", "message"];
+  const meetingPatterns = ["meeting", "standup", "sync", "huddle", "catchup", "catch-up", "1:1", "one-on-one"];
+  const deepPatterns = ["write", "report", "design", "build", "develop", "implement", "create", "draft", "prepare", "research", "analyze"];
+
+  if (quickPatterns.some((p) => lower.includes(p))) return 15;
+  if (meetingPatterns.some((p) => lower.includes(p))) return 30;
+  if (deepPatterns.some((p) => lower.includes(p))) return 60;
+
+  return 30;
+}
+
 export function createCreateTaskTool(supabase: SupabaseClient, userId: string) {
   return tool(
     async (input) => {
-      const { title, duration_minutes, notes, preferred_time } = input;
-      logger.info("Creating task", { userId, title, duration_minutes, preferred_time });
+      const { title, notes } = input;
+      const duration_minutes = input.duration_minutes ?? estimateDuration(title);
 
-      // Embed preferred time in notes so the scheduler picks it up automatically
-      let taskNotes = notes ?? null;
-      if (preferred_time) {
-        const prefix = `[preferred:${preferred_time}]`;
-        taskNotes = taskNotes ? `${prefix} ${taskNotes}` : prefix;
+      if (!input.duration_minutes) {
+        logger.info("Estimated duration for task", { title, estimatedMinutes: duration_minutes });
       }
+
+      logger.info("Creating task", { userId, title, duration_minutes });
+
+      const taskNotes = notes ?? null;
 
       const { data, error } = await supabase
         .from("tasks")
@@ -49,15 +64,12 @@ export function createCreateTaskTool(supabase: SupabaseClient, userId: string) {
         title: z.string().describe("The task title"),
         duration_minutes: z
           .number()
-          .describe("Estimated duration in minutes. Default to 30 if the user doesn't specify."),
+          .optional()
+          .describe("Estimated duration in minutes. Omit to let the system estimate based on the task type."),
         notes: z
           .string()
           .optional()
           .describe("Optional notes or details about the task"),
-        preferred_time: z
-          .string()
-          .optional()
-          .describe("Preferred start time in ISO 8601 format (e.g. '2026-04-03T18:00:00'). Use when the user specifies a time like 'at 6 pm'."),
       }),
     },
   );

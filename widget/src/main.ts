@@ -14,7 +14,7 @@ interface AuthStoreSchema {
 }
 
 interface SseEvent {
-  type: 'text' | 'tool' | 'done' | 'error';
+  type: 'text' | 'tool' | 'done' | 'error' | 'transcription';
   content?: string;
   name?: string;
 }
@@ -272,6 +272,54 @@ ipcMain.handle('set-widget-mode', (_, mode: WidgetMode): void => {
   setWidgetMode(mode);
 });
 
+async function parseSseStream(response: Response): Promise<string> {
+  const reader = response.body?.getReader();
+  if (!reader) {
+    logger.error('No response body reader available');
+    mainWindow?.webContents.send('chat-stream-error', 'No response stream');
+    return 'No response stream';
+  }
+
+  const decoder = new TextDecoder();
+  let fullResponse = '';
+  let buffer = '';
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+
+    buffer += decoder.decode(value, { stream: true });
+    const lines = buffer.split('\n');
+    buffer = lines.pop() || '';
+
+    for (const line of lines) {
+      if (!line.startsWith('data: ')) continue;
+
+      try {
+        const data = JSON.parse(line.slice(6)) as SseEvent;
+
+        if (data.type === 'text' && data.content) {
+          fullResponse += data.content;
+          mainWindow?.webContents.send('chat-stream-chunk', data.content);
+        } else if (data.type === 'tool' && data.name) {
+          mainWindow?.webContents.send('chat-stream-tool', data.name);
+        } else if (data.type === 'transcription' && data.content) {
+          mainWindow?.webContents.send('chat-stream-transcription', data.content);
+        } else if (data.type === 'done') {
+          mainWindow?.webContents.send('chat-stream-done');
+        } else if (data.type === 'error' && data.content) {
+          logger.error('Agent returned error event', { error: data.content });
+          mainWindow?.webContents.send('chat-stream-error', data.content);
+        }
+      } catch {
+        // Skip malformed SSE lines
+      }
+    }
+  }
+
+  return fullResponse;
+}
+
 ipcMain.handle('chat-send-message', async (_, message: string): Promise<string> => {
   const token = authStore.get('token');
   const baseUrl = authStore.get('apiBaseUrl');
@@ -303,53 +351,59 @@ ipcMain.handle('chat-send-message', async (_, message: string): Promise<string> 
       return `Error: ${response.status}`;
     }
 
-    const reader = response.body?.getReader();
-    if (!reader) {
-      logger.error('No response body reader available');
-      mainWindow?.webContents.send('chat-stream-error', 'No response stream');
-      return 'No response stream';
-    }
-
-    const decoder = new TextDecoder();
-    let fullResponse = '';
-    let buffer = '';
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split('\n');
-      buffer = lines.pop() || '';
-
-      for (const line of lines) {
-        if (!line.startsWith('data: ')) continue;
-
-        try {
-          const data = JSON.parse(line.slice(6)) as SseEvent;
-
-          if (data.type === 'text' && data.content) {
-            fullResponse += data.content;
-            mainWindow?.webContents.send('chat-stream-chunk', data.content);
-          } else if (data.type === 'tool' && data.name) {
-            mainWindow?.webContents.send('chat-stream-tool', data.name);
-          } else if (data.type === 'done') {
-            mainWindow?.webContents.send('chat-stream-done');
-          } else if (data.type === 'error' && data.content) {
-            logger.error('Agent returned error event', { error: data.content });
-            mainWindow?.webContents.send('chat-stream-error', data.content);
-          }
-        } catch {
-          // Skip malformed SSE lines
-        }
-      }
-    }
-
+    const fullResponse = await parseSseStream(response);
     logger.info('Chat message completed', { responseLength: fullResponse.length });
     return fullResponse;
   } catch (error: unknown) {
     const msg = error instanceof Error ? error.message : 'Connection failed';
     logger.error('Chat request failed', { error: msg });
+    mainWindow?.webContents.send('chat-stream-error', msg);
+    return `Connection error: ${msg}`;
+  }
+});
+
+ipcMain.handle('chat-send-audio', async (_, audioData: ArrayBuffer, mimeType: string): Promise<string> => {
+  const token = authStore.get('token');
+  const baseUrl = authStore.get('apiBaseUrl');
+
+  if (!token) {
+    logger.warn('Audio chat attempted without auth token');
+    mainWindow?.webContents.send('chat-stream-error', 'Not authenticated');
+    return 'Not authenticated. Please log in first.';
+  }
+
+  const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+  const extension = mimeType.includes('webm') ? 'webm' : 'mp4';
+
+  try {
+    logger.info('Sending audio chat to agent', { audioBytes: audioData.byteLength, mimeType });
+
+    const blob = new Blob([audioData], { type: mimeType });
+    const formData = new FormData();
+    formData.append('audio', blob, `recording.${extension}`);
+    formData.append('timezone', timezone);
+
+    const response = await fetch(`${baseUrl}/api/agent/chat-audio`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+      },
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      logger.error('Audio chat request failed', { status: response.status, error: errorText });
+      mainWindow?.webContents.send('chat-stream-error', errorText);
+      return `Error: ${response.status}`;
+    }
+
+    const fullResponse = await parseSseStream(response);
+    logger.info('Audio chat completed', { responseLength: fullResponse.length });
+    return fullResponse;
+  } catch (error: unknown) {
+    const msg = error instanceof Error ? error.message : 'Connection failed';
+    logger.error('Audio chat request failed', { error: msg });
     mainWindow?.webContents.send('chat-stream-error', msg);
     return `Connection error: ${msg}`;
   }

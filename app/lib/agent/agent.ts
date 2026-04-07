@@ -8,6 +8,8 @@ import { createScheduledBlocksTool } from "./tools/create-scheduled-blocks";
 import { createCheckConflictsTool } from "./tools/check-conflicts";
 import { createUpdateTaskTool } from "./tools/update-task";
 import { createCreateTaskTool } from "./tools/create-task";
+import { createScheduleTaskTool } from "./tools/schedule-task";
+import { createMoveBlockTool } from "./tools/move-block";
 import { createGetScheduledBlocksTool } from "./tools/get-scheduled-blocks";
 import { createLogger } from "@/lib/logger";
 import type { SupabaseClient } from "@supabase/supabase-js";
@@ -15,7 +17,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 const logger = createLogger("agent");
 
 /** Max number of agent reasoning iterations before stopping. */
-export const AGENT_RECURSION_LIMIT = 10;
+export const AGENT_RECURSION_LIMIT = 15;
 
 export function createSchedulingAgent(
   supabase: SupabaseClient,
@@ -30,6 +32,8 @@ export function createSchedulingAgent(
     createCheckConflictsTool(supabase, userId, timezone),
     createUpdateTaskTool(supabase, userId),
     createCreateTaskTool(supabase, userId),
+    createScheduleTaskTool(supabase, userId, timezone),
+    createMoveBlockTool(supabase, userId, timezone),
   ];
 
   const agent = createReactAgent({

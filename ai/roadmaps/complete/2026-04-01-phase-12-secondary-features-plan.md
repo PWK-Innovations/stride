@@ -101,7 +101,6 @@ Customer feedback identified several widget UX gaps: completing a task should fl
 - In full/expanded mode, show a scrollable daily schedule view similar to `DailyTimeline` on the web
 - Time slots with scheduled tasks, calendar events, and free time visible
 - Current time indicator
-- Tappable tasks to see details
 
 **Chat Overlay:**
 - Move chat to the bottom of the expanded widget

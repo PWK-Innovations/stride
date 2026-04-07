@@ -6,7 +6,7 @@ import { solveSchedule } from "@/lib/agent/solver";
 import type { SolverTask } from "@/lib/agent/solver";
 import type { BusyWindow } from "@/lib/agent/solver-utils";
 import { fetchAllBusyWindows } from "@/lib/calendar/fetchAllBusyWindows";
-import { getDayBoundsInZone, getUtcOffsetString, ensureOffset, formatTimeInZone } from "@/lib/timezone";
+import { getDayBoundsInZone, getUtcOffsetString, ensureOffset, formatTimeInZone, parseTimeInZone } from "@/lib/timezone";
 import type { Task } from "@/types/database";
 
 const logger = createLogger("agent:tool:createScheduledBlocks");
@@ -71,25 +71,15 @@ export function createScheduledBlocksTool(
       }));
 
       // 3. Convert tasks to solver format (order preserved from agent)
-      // Auto-extract preferred times from task notes [preferred:ISO_TIME]
       const solverTasks: SolverTask[] = orderedTasks.map((task) => {
         let preferredStartTime: Date | undefined;
 
-        // Check notes for embedded preferred time
-        const notesStr = task.notes as string | null;
-        if (notesStr) {
-          const match = notesStr.match(/\[preferred:([^\]]+)\]/);
-          if (match) {
-            preferredStartTime = new Date(match[1]);
-            if (isNaN(preferredStartTime.getTime())) {
-              preferredStartTime = undefined;
-            }
+        // Use explicit preferredTimes parameter only (not stale notes)
+        if (preferredTimes?.[task.id]) {
+          preferredStartTime = parseTimeInZone(preferredTimes[task.id], timezone);
+          if (isNaN(preferredStartTime.getTime())) {
+            preferredStartTime = undefined;
           }
-        }
-
-        // Also check explicit preferredTimes parameter
-        if (!preferredStartTime && preferredTimes?.[task.id]) {
-          preferredStartTime = new Date(preferredTimes[task.id]);
         }
 
         return {
@@ -166,7 +156,7 @@ export function createScheduledBlocksTool(
     {
       name: "createScheduledBlocks",
       description:
-        "Create scheduled time blocks from an ordered list of tasks. Takes task IDs and optional preferred times, uses the deterministic solver to place them in free time slots avoiding calendar conflicts, and saves to the database. Returns the created schedule with start/end times.",
+        "Build a FULL schedule from scratch. DELETES ALL existing scheduled blocks first, then places the given tasks. Only use for 'plan my day' or full reschedules. DO NOT use when adding a single task — use scheduleTask instead, which preserves existing blocks.",
       schema: z.object({
         taskIds: z
           .array(z.string())

@@ -6,9 +6,30 @@ const logger = createLogger("QuickActions");
 type RefreshCallback = () => Promise<void>;
 
 let onRefresh: RefreshCallback | null = null;
+let allBlocks: ScheduledBlock[] = [];
+let timeMenuExpanded = false;
+let clickOutsideHandler: ((e: MouseEvent) => void) | null = null;
+let nextTaskPromptTimer: ReturnType<typeof setTimeout> | null = null;
+let nextTaskPromptVisible = false;
 
 export function setRefreshCallback(callback: RefreshCallback): void {
   onRefresh = callback;
+}
+
+export function setScheduleBlocks(blocks: ScheduledBlock[]): void {
+  allBlocks = blocks;
+}
+
+export function isNextTaskPromptVisible(): boolean {
+  return nextTaskPromptVisible;
+}
+
+function findNextBlock(currentBlock: ScheduledBlock): ScheduledBlock | null {
+  const currentStart = new Date(currentBlock.start_time).getTime();
+  const upcoming = allBlocks
+    .filter((b) => new Date(b.start_time).getTime() > currentStart)
+    .sort((a, b) => new Date(a.start_time).getTime() - new Date(b.start_time).getTime());
+  return upcoming[0] ?? null;
 }
 
 function showFeedback(container: HTMLElement, success: boolean, message: string): void {
@@ -33,6 +54,88 @@ function setButtonLoading(button: HTMLButtonElement, loading: boolean): void {
   }
 }
 
+function showNextTaskPrompt(nextBlock: ScheduledBlock, container: HTMLElement): void {
+  trackEvent("widget_task_completed_next_prompt");
+  logger.info("Showing next task prompt", { nextTask: nextBlock.title });
+
+  container.innerHTML = "";
+
+  const promptDiv = document.createElement("div");
+  promptDiv.className = "next-task-prompt";
+
+  const label = document.createElement("div");
+  label.className = "next-task-prompt-label";
+  label.textContent = `Start "${nextBlock.title}" now?`;
+
+  const btnRow = document.createElement("div");
+  btnRow.className = "quick-actions";
+
+  const yesBtn = document.createElement("button");
+  yesBtn.className = "btn btn-primary";
+  yesBtn.textContent = "Yes";
+
+  const noBtn = document.createElement("button");
+  noBtn.className = "btn btn-secondary";
+  noBtn.textContent = "No";
+
+  yesBtn.addEventListener("click", async () => {
+    trackEvent("widget_task_completed_next_accepted");
+    logger.info("Next task accepted", { blockId: nextBlock.id });
+    nextTaskPromptVisible = false;
+    if (nextTaskPromptTimer) { clearTimeout(nextTaskPromptTimer); nextTaskPromptTimer = null; }
+    setButtonLoading(yesBtn, true);
+
+    try {
+      const now = new Date();
+      const originalDuration =
+        new Date(nextBlock.end_time).getTime() - new Date(nextBlock.start_time).getTime();
+      const newEnd = new Date(now.getTime() + originalDuration);
+
+      const result = await window.strideApi.updateBlock(nextBlock.id, {
+        start_time: now.toISOString(),
+        end_time: newEnd.toISOString(),
+        cascade: true,
+      });
+
+      if (result.success) {
+        showFeedback(container, true, "Started now");
+      } else {
+        showFeedback(container, false, "Failed to start task");
+      }
+    } catch (err) {
+      logger.error("Failed to start next task", err);
+      showFeedback(container, false, "Error starting task");
+    } finally {
+      setButtonLoading(yesBtn, false);
+      if (onRefresh) await onRefresh();
+    }
+  });
+
+  noBtn.addEventListener("click", async () => {
+    trackEvent("widget_task_completed_next_declined");
+    logger.info("Next task declined");
+    nextTaskPromptVisible = false;
+    if (nextTaskPromptTimer) { clearTimeout(nextTaskPromptTimer); nextTaskPromptTimer = null; }
+    if (onRefresh) await onRefresh();
+  });
+
+  btnRow.appendChild(yesBtn);
+  btnRow.appendChild(noBtn);
+  promptDiv.appendChild(label);
+  promptDiv.appendChild(btnRow);
+  container.appendChild(promptDiv);
+
+  nextTaskPromptVisible = true;
+
+  // Auto-dismiss after 30 seconds
+  if (nextTaskPromptTimer) clearTimeout(nextTaskPromptTimer);
+  nextTaskPromptTimer = setTimeout(async () => {
+    nextTaskPromptTimer = null;
+    nextTaskPromptVisible = false;
+    if (onRefresh) await onRefresh();
+  }, 30_000);
+}
+
 async function handleDone(block: ScheduledBlock, container: HTMLElement): Promise<void> {
   if (!block.task_id) {
     showFeedback(container, false, "No task to complete");
@@ -46,6 +149,8 @@ async function handleDone(block: ScheduledBlock, container: HTMLElement): Promis
     trackEvent("quick_action_used", { action: "done" });
     logger.info("Marking task done", { taskId: block.task_id, blockId: block.id });
 
+    const nextBlock = findNextBlock(block);
+
     // Delete the scheduled block first
     if (block.id) {
       await window.strideApi.deleteBlock(block.id);
@@ -55,9 +160,16 @@ async function handleDone(block: ScheduledBlock, container: HTMLElement): Promis
     const result = await window.strideApi.deleteTask(block.task_id);
     if (result.success) {
       showFeedback(container, true, "Task completed");
-      if (onRefresh) await onRefresh();
+
+      if (nextBlock) {
+        // Short delay so feedback shows before prompt replaces the UI
+        setTimeout(() => showNextTaskPrompt(nextBlock, container), 800);
+      } else {
+        if (onRefresh) await onRefresh();
+      }
     } else {
       showFeedback(container, false, "Failed to complete task");
+      if (onRefresh) await onRefresh();
     }
   } catch (err) {
     logger.error("Failed to mark task done", err);
@@ -101,22 +213,19 @@ async function handleSkip(block: ScheduledBlock, container: HTMLElement): Promis
   }
 }
 
-async function handleRunningLate(
+async function handleExtendTime(
   block: ScheduledBlock,
+  minutes: number,
   container: HTMLElement
 ): Promise<void> {
-  const btn = container.querySelector(
-    "[data-action='late']"
-  ) as HTMLButtonElement | null;
-  if (btn) setButtonLoading(btn, true);
-
   try {
     const currentEnd = new Date(block.end_time);
-    const extendedEnd = new Date(currentEnd.getTime() + 15 * 60_000);
+    const extendedEnd = new Date(currentEnd.getTime() + minutes * 60_000);
 
-    trackEvent("quick_action_used", { action: "need_more_time" });
-    logger.info("Extending block by 15 min", {
+    trackEvent("widget_time_added", { minutes });
+    logger.info("Extending block time", {
       blockId: block.id,
+      minutes,
       newEndTime: extendedEnd.toISOString(),
     });
 
@@ -127,7 +236,7 @@ async function handleRunningLate(
     });
 
     if (result.success) {
-      showFeedback(container, true, "+15 min added");
+      showFeedback(container, true, `+${minutes} min added`);
       if (onRefresh) await onRefresh();
     } else {
       showFeedback(container, false, "Failed to extend time");
@@ -135,9 +244,70 @@ async function handleRunningLate(
   } catch (err) {
     logger.error("Failed to extend block", err);
     showFeedback(container, false, "Error extending time");
-  } finally {
-    if (btn) setButtonLoading(btn, false);
   }
+}
+
+function collapseTimeMenu(container: HTMLElement): void {
+  timeMenuExpanded = false;
+
+  if (clickOutsideHandler) {
+    document.removeEventListener("click", clickOutsideHandler, true);
+    clickOutsideHandler = null;
+  }
+
+  const expandedMenu = container.querySelector(".time-menu-expanded");
+  if (expandedMenu) expandedMenu.remove();
+
+  const lateBtn = container.querySelector("[data-action='late']") as HTMLElement | null;
+  if (lateBtn) lateBtn.style.display = "";
+}
+
+function expandTimeMenu(block: ScheduledBlock, container: HTMLElement): void {
+  if (timeMenuExpanded) {
+    collapseTimeMenu(container);
+    return;
+  }
+
+  timeMenuExpanded = true;
+
+  const lateBtn = container.querySelector("[data-action='late']") as HTMLElement | null;
+  if (lateBtn) lateBtn.style.display = "none";
+
+  const actionsRow = container.querySelector(".quick-actions") as HTMLElement | null;
+  if (!actionsRow) return;
+
+  const menuDiv = document.createElement("div");
+  menuDiv.className = "time-menu-expanded";
+
+  const options = [15, 30, 60];
+  for (const mins of options) {
+    const btn = document.createElement("button");
+    btn.className = "btn btn-secondary time-option-btn";
+    btn.textContent = `+${mins} min`;
+    btn.addEventListener("click", async (e) => {
+      e.stopPropagation();
+      collapseTimeMenu(container);
+      await handleExtendTime(block, mins, container);
+    });
+    menuDiv.appendChild(btn);
+  }
+
+  actionsRow.appendChild(menuDiv);
+
+  // Click-outside handler to dismiss
+  clickOutsideHandler = (e: MouseEvent) => {
+    const target = e.target as HTMLElement;
+    if (!menuDiv.contains(target)) {
+      collapseTimeMenu(container);
+    }
+  };
+
+  // Defer attaching so the current click doesn't immediately close it
+  requestAnimationFrame(() => {
+    if (clickOutsideHandler) {
+      document.addEventListener("click", clickOutsideHandler, true);
+    }
+  });
 }
 
 export function renderQuickActions(
@@ -145,6 +315,12 @@ export function renderQuickActions(
   container: HTMLElement
 ): void {
   container.innerHTML = "";
+  timeMenuExpanded = false;
+
+  if (clickOutsideHandler) {
+    document.removeEventListener("click", clickOutsideHandler, true);
+    clickOutsideHandler = null;
+  }
 
   // Don't render buttons when there's no active Stride task
   if (!currentBlock) return;
@@ -176,7 +352,10 @@ export function renderQuickActions(
   if (currentBlock) {
     doneBtn.addEventListener("click", () => handleDone(currentBlock, section));
     skipBtn.addEventListener("click", () => handleSkip(currentBlock, section));
-    lateBtn.addEventListener("click", () => handleRunningLate(currentBlock, section));
+    lateBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      expandTimeMenu(currentBlock, section);
+    });
   }
 
   actionsRow.appendChild(doneBtn);

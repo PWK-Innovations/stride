@@ -1,6 +1,6 @@
 {
   "name": "stride-widget",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Stride desktop widget — floating task viewer and quick-actions",
   "main": "dist/main.js",
   "scripts": {

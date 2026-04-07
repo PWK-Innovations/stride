@@ -2,7 +2,7 @@ import { tool } from "@langchain/core/tools";
 import { z } from "zod";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createLogger } from "@/lib/logger";
-import { getDayBoundsInZone } from "@/lib/timezone";
+import { getDayBoundsInZone, parseTimeInZone } from "@/lib/timezone";
 
 const logger = createLogger("agent:tool:checkForConflicts");
 
@@ -23,8 +23,8 @@ export function createCheckConflictsTool(
       const { startTime, endTime } = input;
       logger.info("Checking for conflicts", { userId, startTime, endTime });
 
-      const proposedStart = new Date(startTime);
-      const proposedEnd = new Date(endTime);
+      const proposedStart = parseTimeInZone(startTime, timezone);
+      const proposedEnd = parseTimeInZone(endTime, timezone);
       const conflicts: Conflict[] = [];
 
       // Check against existing scheduled blocks for today

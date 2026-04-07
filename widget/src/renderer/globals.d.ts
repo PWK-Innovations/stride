@@ -60,11 +60,13 @@ interface StrideWidget {
 
 interface StrideChat {
   sendMessage(message: string): Promise<string>;
+  sendAudio(audioData: ArrayBuffer, mimeType: string): Promise<string>;
   onResponse(callback: (response: string) => void): void;
   onStreamChunk(callback: (chunk: string) => void): void;
   onStreamTool(callback: (toolName: string) => void): void;
   onStreamDone(callback: () => void): void;
   onStreamError(callback: (error: string) => void): void;
+  onStreamTranscription(callback: (text: string) => void): void;
 }
 
 interface StrideConfig {

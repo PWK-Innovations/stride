@@ -6,6 +6,7 @@ const TIMEZONE = Intl.DateTimeFormat().resolvedOptions().timeZone;
 const DEFAULT_DURATION_MINUTES = 30;
 
 type UpdateCallback = () => void;
+type StreamCompleteCallback = () => void;
 
 const timeFormatter = new Intl.DateTimeFormat(undefined, {
   hour: "numeric",
@@ -14,8 +15,11 @@ const timeFormatter = new Intl.DateTimeFormat(undefined, {
 
 const TOOL_DISPLAY_NAMES: Record<string, string> = {
   getTaskList: "Fetching your tasks",
+  getScheduledBlocks: "Checking your schedule",
   getCalendarEvents: "Checking your calendar",
   createScheduledBlocks: "Building your schedule",
+  scheduleTask: "Scheduling task",
+  moveBlock: "Moving task",
   checkForConflicts: "Checking for conflicts",
   updateTask: "Updating task",
   createTask: "Creating task",
@@ -24,6 +28,7 @@ const TOOL_DISPLAY_NAMES: Record<string, string> = {
 export class ChatController {
   private messages: ChatMessage[] = [];
   private listeners: UpdateCallback[] = [];
+  private streamCompleteListeners: StreamCompleteCallback[] = [];
   private streamListenersInitialized = false;
   private activeToolStatus: string | null = null;
 
@@ -48,6 +53,16 @@ export class ChatController {
 
   onUpdate(callback: UpdateCallback): void {
     this.listeners.push(callback);
+  }
+
+  onStreamComplete(callback: StreamCompleteCallback): void {
+    this.streamCompleteListeners.push(callback);
+  }
+
+  private notifyStreamComplete(): void {
+    for (const listener of this.streamCompleteListeners) {
+      listener();
+    }
   }
 
   private notify(): void {
@@ -94,11 +109,23 @@ export class ChatController {
         this.activeToolStatus = null;
         this.notify();
       }
+      this.notifyStreamComplete();
     });
 
     window.strideChat.onStreamError((error: string) => {
       logger.error("Stream error received", { error });
       this.replaceTypingWithResponse(`Error: ${error}`);
+    });
+
+    window.strideChat.onStreamTranscription((text: string) => {
+      logger.info("Transcription received", { text });
+      const transcriptionIndex = this.messages.findIndex(
+        (m) => m.role === "user" && m.content === "🎙️ Recording..."
+      );
+      if (transcriptionIndex !== -1) {
+        this.messages[transcriptionIndex].content = text;
+        this.notify();
+      }
     });
 
     logger.info("Stream listeners initialized");
@@ -128,6 +155,30 @@ export class ChatController {
       logger.error("Agent message failed", err);
       this.replaceTypingWithResponse(
         "Something went wrong. Please try again."
+      );
+    }
+  }
+
+  async addAudioMessage(audioData: ArrayBuffer, mimeType: string): Promise<void> {
+    this.messages.push({ role: "user", content: "🎙️ Recording..." });
+    this.notify();
+
+    this.messages.push({ role: "assistant", content: "", typing: true });
+    this.notify();
+
+    try {
+      if (window.strideChat) {
+        await window.strideChat.sendAudio(audioData, mimeType);
+      } else {
+        logger.warn("strideChat not available for audio");
+        this.replaceTypingWithResponse(
+          "Voice input is not available right now. Please type your message."
+        );
+      }
+    } catch (err) {
+      logger.error("Audio message failed", err);
+      this.replaceTypingWithResponse(
+        "Something went wrong with voice input. Please try again."
       );
     }
   }

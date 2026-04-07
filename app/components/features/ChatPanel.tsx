@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { createLogger } from '@/lib/logger';
 import { trackEvent } from '@/lib/analytics';
+import { useAudioRecorder } from '@/lib/audio/useAudioRecorder';
 
 const logger = createLogger('chat:panel');
 
@@ -14,8 +15,11 @@ interface ChatMessage {
 
 const TOOL_DISPLAY_NAMES: Record<string, string> = {
   getTaskList: 'Fetching your tasks',
+  getScheduledBlocks: 'Checking your schedule',
   getCalendarEvents: 'Checking your calendar',
   createScheduledBlocks: 'Building your schedule',
+  scheduleTask: 'Scheduling task',
+  moveBlock: 'Moving task',
   checkForConflicts: 'Checking for conflicts',
   updateTask: 'Updating task',
   createTask: 'Creating task',
@@ -27,13 +31,22 @@ interface ChatPanelProps {
   onScheduleChange?: () => void;
 }
 
+function formatDuration(seconds: number): string {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return `${m}:${s.toString().padStart(2, '0')}`;
+}
+
 export function ChatPanel({ open, onClose, onScheduleChange }: ChatPanelProps) {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
   const [historyLoaded, setHistoryLoaded] = useState(false);
+  const [transcribing, setTranscribing] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+
+  const recorder = useAudioRecorder();
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -51,6 +64,15 @@ export function ChatPanel({ open, onClose, onScheduleChange }: ChatPanelProps) {
   useEffect(() => {
     scrollToBottom();
   }, [messages, scrollToBottom]);
+
+  // Auto-send when audioBlob becomes available
+  useEffect(() => {
+    if (recorder.audioBlob) {
+      sendAudio(recorder.audioBlob, recorder.duration);
+      recorder.reset();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [recorder.audioBlob]);
 
   async function loadHistory() {
     try {
@@ -73,44 +95,17 @@ export function ChatPanel({ open, onClose, onScheduleChange }: ChatPanelProps) {
     }
   }
 
-  async function sendMessage() {
-    const text = input.trim();
-    if (!text || sending) return;
+  function handleSSEStream(reader: ReadableStreamDefaultReader<Uint8Array>) {
+    const decoder = new TextDecoder();
+    let buffer = '';
+    let fullText = '';
 
-    trackEvent("chat_message_sent", { messageLength: text.length });
-    setInput('');
-    setSending(true);
-
-    const userMsg: ChatMessage = { role: 'user', content: text };
-    setMessages((prev) => [...prev, userMsg]);
-
-    const assistantMsg: ChatMessage = { role: 'assistant', content: '', toolStatus: 'Thinking' };
-    setMessages((prev) => [...prev, assistantMsg]);
-
-    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-
-    try {
-      const res = await fetch('/api/agent/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text, timezone }),
-      });
-
-      if (!res.ok || !res.body) {
-        throw new Error('Agent request failed');
-      }
-
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = '';
-      let fullText = '';
-
+    async function processStream() {
       while (true) {
         const { done, value } = await reader.read();
         if (!done) {
           buffer += decoder.decode(value, { stream: true });
         } else {
-          // Flush remaining decoder bytes
           buffer += decoder.decode();
         }
 
@@ -121,7 +116,15 @@ export function ChatPanel({ open, onClose, onScheduleChange }: ChatPanelProps) {
           if (!line.startsWith('data: ')) continue;
           try {
             const event = JSON.parse(line.slice(6));
-            if (event.type === 'tool') {
+            if (event.type === 'transcription') {
+              // Show transcription as user message
+              const userMsg: ChatMessage = { role: 'user', content: event.content };
+              setMessages((prev) => [...prev, userMsg]);
+              // Add assistant placeholder
+              const assistantMsg: ChatMessage = { role: 'assistant', content: '', toolStatus: 'Thinking' };
+              setMessages((prev) => [...prev, assistantMsg]);
+              setTranscribing(false);
+            } else if (event.type === 'tool') {
               const label = TOOL_DISPLAY_NAMES[event.name] || event.name;
               setMessages((prev) => {
                 const updated = [...prev];
@@ -151,6 +154,39 @@ export function ChatPanel({ open, onClose, onScheduleChange }: ChatPanelProps) {
 
         if (done) break;
       }
+    }
+
+    return processStream();
+  }
+
+  async function sendMessage() {
+    const text = input.trim();
+    if (!text || sending) return;
+
+    trackEvent("chat_message_sent", { messageLength: text.length });
+    setInput('');
+    setSending(true);
+
+    const userMsg: ChatMessage = { role: 'user', content: text };
+    setMessages((prev) => [...prev, userMsg]);
+
+    const assistantMsg: ChatMessage = { role: 'assistant', content: '', toolStatus: 'Thinking' };
+    setMessages((prev) => [...prev, assistantMsg]);
+
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+    try {
+      const res = await fetch('/api/agent/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text, timezone }),
+      });
+
+      if (!res.ok || !res.body) {
+        throw new Error('Agent request failed');
+      }
+
+      await handleSSEStream(res.body.getReader());
 
       // Clear tool status on done
       setMessages((prev) => {
@@ -162,7 +198,6 @@ export function ChatPanel({ open, onClose, onScheduleChange }: ChatPanelProps) {
         return updated;
       });
 
-      // Schedule may have changed
       if (onScheduleChange) onScheduleChange();
     } catch (error) {
       logger.error('Chat send failed', { error });
@@ -182,6 +217,76 @@ export function ChatPanel({ open, onClose, onScheduleChange }: ChatPanelProps) {
     }
   }
 
+  async function sendAudio(blob: Blob, durationSeconds: number) {
+    if (sending) return;
+
+    trackEvent("voice_chat_sent", { duration_seconds: durationSeconds });
+    setSending(true);
+    setTranscribing(true);
+
+    const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const formData = new FormData();
+    formData.append('audio', blob, 'recording.webm');
+    formData.append('timezone', timezone);
+
+    try {
+      const res = await fetch('/api/agent/chat-audio', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!res.ok || !res.body) {
+        const errorData = await res.json().catch(() => ({ error: 'Audio chat failed' }));
+        throw new Error(errorData.error || 'Audio chat failed');
+      }
+
+      await handleSSEStream(res.body.getReader());
+
+      // Clear tool status on done
+      setMessages((prev) => {
+        const updated = [...prev];
+        const last = updated[updated.length - 1];
+        if (last?.role === 'assistant') {
+          updated[updated.length - 1] = { ...last, toolStatus: undefined };
+        }
+        return updated;
+      });
+
+      if (onScheduleChange) onScheduleChange();
+    } catch (error) {
+      logger.error('Audio chat send failed', { error });
+      trackEvent("voice_chat_error");
+      setTranscribing(false);
+      setMessages((prev) => {
+        const updated = [...prev];
+        const last = updated[updated.length - 1];
+        if (last?.role === 'assistant') {
+          return updated.map((m, i) =>
+            i === updated.length - 1
+              ? { role: 'assistant' as const, content: 'Something went wrong with voice input. Please try again.' }
+              : m,
+          );
+        }
+        return [
+          ...prev,
+          { role: 'assistant', content: 'Something went wrong with voice input. Please try again.' },
+        ];
+      });
+    } finally {
+      setSending(false);
+      setTranscribing(false);
+    }
+  }
+
+  function handleMicClick() {
+    if (recorder.isRecording) {
+      recorder.stop();
+    } else {
+      trackEvent("voice_chat_started");
+      recorder.start();
+    }
+  }
+
   function handleKeyDown(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
@@ -190,6 +295,9 @@ export function ChatPanel({ open, onClose, onScheduleChange }: ChatPanelProps) {
   }
 
   if (!open) return null;
+
+  const micDisabled = sending || transcribing;
+  const isRecording = recorder.isRecording;
 
   return (
     <>
@@ -269,26 +377,64 @@ export function ChatPanel({ open, onClose, onScheduleChange }: ChatPanelProps) {
 
         {/* Input */}
         <div className="border-t border-olive-200 p-4 dark:border-olive-800">
-          <div className="flex items-end gap-2">
-            <textarea
-              ref={inputRef}
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder="Ask Stride anything..."
-              rows={1}
-              className="flex-1 resize-none rounded-lg border border-olive-300 bg-white px-3 py-2 text-sm text-olive-900 placeholder-olive-400 focus:border-olive-500 focus:outline-none focus:ring-1 focus:ring-olive-500 dark:border-olive-700 dark:bg-olive-900 dark:text-olive-100"
-            />
-            <button
-              onClick={sendMessage}
-              disabled={sending || !input.trim()}
-              className="rounded-lg bg-olive-600 p-2 text-white hover:bg-olive-700 disabled:opacity-50 dark:bg-olive-500 dark:hover:bg-olive-600"
-            >
-              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+          {isRecording ? (
+            <div className="flex items-center justify-center gap-3 rounded-lg border border-red-300 bg-red-50 px-3 py-3 dark:border-red-800 dark:bg-red-950">
+              <span className="h-3 w-3 animate-pulse rounded-full bg-red-500" />
+              <span className="text-sm font-medium text-red-600 dark:text-red-400">
+                {formatDuration(recorder.duration)}
+              </span>
+              <button
+                onClick={handleMicClick}
+                className="rounded-md bg-red-500 p-1.5 text-white hover:bg-red-600"
+              >
+                <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                  <rect x="6" y="6" width="12" height="12" rx="2" />
+                </svg>
+              </button>
+            </div>
+          ) : transcribing ? (
+            <div className="flex items-center justify-center gap-2 rounded-lg border border-olive-300 px-3 py-3 dark:border-olive-700">
+              <svg className="h-4 w-4 animate-spin text-olive-500" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
               </svg>
-            </button>
-          </div>
+              <span className="text-sm text-olive-500 dark:text-olive-400">Transcribing...</span>
+            </div>
+          ) : (
+            <div className="flex items-end gap-2">
+              <textarea
+                ref={inputRef}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Ask Stride anything..."
+                rows={1}
+                className="flex-1 resize-none rounded-lg border border-olive-300 bg-white px-3 py-2 text-sm text-olive-900 placeholder-olive-400 focus:border-olive-500 focus:outline-none focus:ring-1 focus:ring-olive-500 dark:border-olive-700 dark:bg-olive-900 dark:text-olive-100"
+              />
+              <button
+                onClick={handleMicClick}
+                disabled={micDisabled}
+                className="rounded-lg border border-olive-300 p-2 text-olive-600 hover:bg-olive-50 disabled:opacity-50 dark:border-olive-700 dark:text-olive-400 dark:hover:bg-olive-900"
+                title="Voice input"
+              >
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.75a6 6 0 006-6v-1.5m-6 7.5a6 6 0 01-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 01-3-3V4.5a3 3 0 116 0v8.25a3 3 0 01-3 3z" />
+                </svg>
+              </button>
+              <button
+                onClick={sendMessage}
+                disabled={sending || !input.trim()}
+                className="rounded-lg bg-olive-600 p-2 text-white hover:bg-olive-700 disabled:opacity-50 dark:bg-olive-500 dark:hover:bg-olive-600"
+              >
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+                </svg>
+              </button>
+            </div>
+          )}
+          {recorder.error && (
+            <p className="mt-2 text-xs text-red-500">{recorder.error}</p>
+          )}
         </div>
       </div>
     </>
