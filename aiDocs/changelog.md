@@ -185,6 +185,17 @@ High-level changes; add a line or two here when you commit and push.
 - **10.1 Outlook Calendar:** Microsoft OAuth flow (`/api/auth/microsoft` + callback). Token refresh via Microsoft identity platform. Outlook events fetched via Microsoft Graph API (`/me/calendarview`). Created `calendar_tokens` table for multi-provider storage with RLS. Migrated Google tokens from `profiles` to `calendar_tokens`. Unified calendar fetcher (`lib/calendar/fetchAllBusyWindows.ts`) merges all providers into single busy-windows list. Agent tools and schedule API switched to unified fetcher. Multi-provider calendar settings UI on dashboard.
 - **10.3 Skipped:** No user demand for Todoist or Slack integrations — documented and deferred.
 
+## 2026-04-06
+
+- **Phase 10.5 Complete: Bug Fixes.**
+- **Scheduling Engine:** Solver now clamps day start to current time (no past-time scheduling). Conflict checker and schedule API use overlapping range query (`start_time < endOfDay AND end_time > startOfDay`).
+- **Chat Agent:** Created `getScheduledBlocks` tool — agent reads actual schedule from DB instead of hallucinating times. Added `update_duration` action to `updateTask` tool. Hardened system prompt: must report tool-returned times only, never from conversation context. Fixed SSE stream buffer dropping last chunk.
+- **Data Integrity:** Task deletion now cascade-deletes scheduled blocks. Schedule move endpoint validates time ranges, checks conflicts (409 on overlap), and supports `cascade: true` to push subsequent blocks forward ("Need more time" workflow).
+- **Resilience:** Calendar fetch failures handled gracefully with warning instead of silent empty. Widget API base URL uses `process.env.STRIDE_API_URL` with production fallback. Widget CSP allows both localhost and production.
+- **Tests:** Added `nowOverride` to solver/reschedule for deterministic testing. All 23 tests pass.
+- **Test-Log-Fix Loop (Phase 10.5):** Ran `npm run test:agent` — agent chat integration tests revealed three bugs traced through structured logs: (1) agent hallucinating schedule times — logs showed `logger.warn("agent returned times not matching any scheduled block")` — created `getScheduledBlocks` tool so agent reads real data from DB, (2) solver scheduling tasks in the past — `logger.error("solver placed block before current time")` — added `nowOverride` clamp to solver, (3) SSE stream dropping final chunk — `logger.warn("stream ended with buffered content")` — fixed buffer flush on stream close. Re-ran all 23 solver tests + 6 chat integration tests — all green.
+- **Roadmaps:** Phase 10.5 plan + roadmap moved to `ai/roadmaps/complete/`.
+
 ## 2026-04-07
 
 - **Phase Restructure:** Rewrote Phase 12 based on customer feedback. Phase 11 stays as Beta Launch (unchanged). Phase 12 is now "Customer Feedback Features" (audio chat, AI time estimation, widget upgrades) — goals, personalization loop, and refinements deferred to future phases. Updated Phase 12 plan/roadmap docs, `context.md`, and `prd.md` (added Phase 12 features to P2, removed Todoist/Slack).

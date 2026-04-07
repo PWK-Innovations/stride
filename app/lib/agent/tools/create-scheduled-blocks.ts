@@ -54,7 +54,16 @@ export function createScheduledBlocksTool(
 
       // 2. Fetch busy windows from all connected calendars
       const { startOfDay, endOfDay } = getDayBoundsInZone(timezone);
-      const allWindows = await fetchAllBusyWindows(supabase, userId, startOfDay, endOfDay);
+      let calendarWarning: string | undefined;
+      let allWindows: Array<{ start: Date; end: Date; title?: string }> = [];
+      try {
+        allWindows = await fetchAllBusyWindows(supabase, userId, startOfDay, endOfDay);
+      } catch (calError: unknown) {
+        calendarWarning = "Could not fetch calendar events — scheduling without calendar data.";
+        logger.warn("Calendar fetch failed, proceeding without busy windows", {
+          error: calError instanceof Error ? calError.message : String(calError),
+        });
+      }
       const busyWindows: BusyWindow[] = allWindows.map((w) => ({
         start: w.start,
         end: w.end,
@@ -145,10 +154,14 @@ export function createScheduledBlocksTool(
         overflow: solverResult.overflow.length,
       });
 
-      return JSON.stringify({
+      const result: Record<string, unknown> = {
         scheduled_blocks: resultBlocks,
         overflow: solverResult.overflow,
-      });
+      };
+      if (calendarWarning) {
+        result.warning = calendarWarning;
+      }
+      return JSON.stringify(result);
     },
     {
       name: "createScheduledBlocks",

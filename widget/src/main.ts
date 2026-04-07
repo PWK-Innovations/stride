@@ -23,7 +23,7 @@ const authStore = new Store<AuthStoreSchema>({
   defaults: {
     token: '',
     refreshToken: '',
-    apiBaseUrl: 'http://localhost:3000',
+    apiBaseUrl: process.env.STRIDE_API_URL || 'https://stride-amber.vercel.app',
   },
   encryptionKey: 'stride-widget-store',
 });

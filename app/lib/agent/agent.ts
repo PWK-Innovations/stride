@@ -8,6 +8,7 @@ import { createScheduledBlocksTool } from "./tools/create-scheduled-blocks";
 import { createCheckConflictsTool } from "./tools/check-conflicts";
 import { createUpdateTaskTool } from "./tools/update-task";
 import { createCreateTaskTool } from "./tools/create-task";
+import { createGetScheduledBlocksTool } from "./tools/get-scheduled-blocks";
 import { createLogger } from "@/lib/logger";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
@@ -23,6 +24,7 @@ export function createSchedulingAgent(
 ) {
   const tools = [
     createGetTaskListTool(supabase, userId),
+    createGetScheduledBlocksTool(supabase, userId, timezone),
     createGetCalendarEventsTool(supabase, userId, timezone),
     createScheduledBlocksTool(supabase, userId, timezone),
     createCheckConflictsTool(supabase, userId, timezone),
