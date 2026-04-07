@@ -67,7 +67,7 @@ export async function GET(request: NextRequest) {
       throw upsertError;
     }
 
-    return NextResponse.redirect(new URL('/app', request.url));
+    return NextResponse.redirect(new URL('/app?connected=google', request.url));
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : String(error);
     logger.error('Google OAuth callback failed', { error: message });

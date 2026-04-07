@@ -12,7 +12,8 @@
     "bundle:renderer": "esbuild src/renderer/renderer.ts --bundle --outfile=dist/renderer.js --platform=browser --target=es2020 --sourcemap"
   },
   "dependencies": {
-    "electron-store": "^8.2.0"
+    "electron-store": "^8.2.0",
+    "posthog-js": "^1.365.0"
   },
   "devDependencies": {
     "electron": "^33.0.0",
@@ -25,7 +26,9 @@
     "productName": "Stride Widget",
     "mac": {
       "category": "public.app-category.productivity",
-      "target": ["dmg"]
+      "target": [
+        "dmg"
+      ]
     },
     "files": [
       "dist/**/*",

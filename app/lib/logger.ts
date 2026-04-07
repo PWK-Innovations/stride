@@ -36,6 +36,27 @@ function formatLog(entry: LogEntry): string {
   return JSON.stringify(entry);
 }
 
+function reportToSentry(error: unknown, context: string, message: string): void {
+  import("@sentry/nextjs")
+    .then((Sentry) => {
+      if (error instanceof Error) {
+        Sentry.captureException(error, {
+          tags: { context },
+          extra: { message },
+        });
+      } else {
+        Sentry.captureMessage(`${context}: ${message}`, {
+          level: "error",
+          tags: { context },
+          extra: { data: error },
+        });
+      }
+    })
+    .catch(() => {
+      // Sentry not available — silently ignore
+    });
+}
+
 function log(level: LogLevel, context: string, message: string, data?: unknown): void {
   if (!shouldLog(level)) return;
 
@@ -51,6 +72,7 @@ function log(level: LogLevel, context: string, message: string, data?: unknown):
 
   if (level === "error") {
     console.error(output);
+    reportToSentry(data, context, message);
   } else if (level === "warn") {
     console.warn(output);
   } else {

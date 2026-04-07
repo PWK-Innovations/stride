@@ -1,4 +1,5 @@
 import { createLogger } from "./logger";
+import { initAnalytics, identifyUser } from "./analytics";
 import { buildCompressedLayout } from "./components/compressed-view";
 import { buildFullHeader } from "./components/full-header";
 import { buildTaskBar } from "./components/task-bar";
@@ -304,6 +305,8 @@ function startPolling(): void {
 
 async function init(): Promise<void> {
   logger.info("Initializing Stride widget renderer");
+
+  initAnalytics();
 
   if (!window.strideApi) {
     logger.error("strideApi not available - preload bridge missing");

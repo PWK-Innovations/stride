@@ -67,8 +67,13 @@ interface StrideChat {
   onStreamError(callback: (error: string) => void): void;
 }
 
+interface StrideConfig {
+  posthogKey: string;
+}
+
 interface Window {
   strideApi: StrideApi;
   strideWidget: StrideWidget;
   strideChat: StrideChat;
+  strideConfig: StrideConfig;
 }

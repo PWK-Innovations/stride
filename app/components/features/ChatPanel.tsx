@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { createLogger } from '@/lib/logger';
+import { trackEvent } from '@/lib/analytics';
 
 const logger = createLogger('chat:panel');
 
@@ -76,6 +77,7 @@ export function ChatPanel({ open, onClose, onScheduleChange }: ChatPanelProps) {
     const text = input.trim();
     if (!text || sending) return;
 
+    trackEvent("chat_message_sent", { messageLength: text.length });
     setInput('');
     setSending(true);
 
