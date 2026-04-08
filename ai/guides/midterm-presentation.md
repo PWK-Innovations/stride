@@ -1,4 +1,4 @@
-# Stride — Final Presentation Guide
+# Stride — Midterm Presentation
 
 ## Midterm Recap (Do NOT re-present — use as foundation)
 
